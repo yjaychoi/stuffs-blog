@@ -42,23 +42,28 @@ This section is mandatory and overrides stylistic ambiguity.
 1. One centered main column.
 2. Simple top nav row with only essential links.
 3. Text-first content blocks (tags, year groups, post links).
-4. Minimal accent usage (single accent color for links and CTA borders).
+4. Minimal accent usage (maximum two accent roles) and every accent must come from the Monokai palette subset.
 
 ### Maximum UI surface area
 
-1. Header contains: `Home`, `Blog`, `RSS`, `Subscribe`, language toggle, theme toggle.
-2. No secondary nav bars.
-3. No persistent sidebars on mobile.
-4. No card-heavy grids for the post index.
-5. No oversized hero section on index page.
+1. Header control set must include: `Home`, `Blog`, `RSS`, `Subscribe`, language toggle, theme toggle.
+2. Desktop (`>=1024px`): show `Home`, `Blog`, `RSS`, and `Subscribe` inline. Language and theme toggles must be reachable either inline or via one compact utility button.
+3. Tablet (`640-1023px`): show title (`Home`), `Blog`, and `RSS` inline; `Subscribe`, language toggle, and theme toggle may collapse into one utility button when space is limited.
+4. Mobile (`420-639px`): show title (`Home`), `Blog`, `RSS`, and one utility button; utility panel contains `Subscribe`, language toggle, and theme toggle.
+5. Narrow mobile (`<420px`): show title (`Home`) and one utility button; utility panel contains `Blog`, `RSS`, `Subscribe`, language toggle, and theme toggle.
+6. No secondary content nav bars. The utility panel is allowed only for header controls.
+7. No persistent sidebars on mobile.
+8. No card-heavy grids for the post index.
+9. No oversized hero section on index page.
 
 ### Forbidden elements
 
 1. Social feed embeds.
 2. Animated background effects.
-3. Multi-color accent systems.
-4. Floating action buttons.
-5. Non-essential badges/chips except tags and optional small language marker.
+3. Accent systems with more than two accent roles.
+4. Any accent color outside the Monokai subset.
+5. Floating action buttons.
+6. Non-essential badges/chips except tags and optional small language marker.
 
 ---
 
@@ -68,10 +73,12 @@ This section is mandatory and overrides stylistic ambiguity.
 
 1. `/` home/about + frequent tags + recent posts.
 2. `/blog/` full reverse-chronological list.
-3. `/blog/YYYY/MM/DD/slug/` post detail.
-4. `/tags/` tag index.
-5. `/subscribe/` Kit subscription page.
-6. `/404.html` not found page.
+3. `/blog/YYYY/MM/DD/slug/` default post detail route.
+4. `/ko/blog/YYYY/MM/DD/slug/` required route pattern for posts authored with `lang: ko`.
+5. `/tags/` tag index.
+6. `/subscribe/` Kit subscription page.
+7. `/feed.xml` RSS feed.
+8. `/404.html` not found page.
 
 ### Navigation (global)
 
@@ -95,11 +102,13 @@ This section is mandatory and overrides stylistic ambiguity.
 
 1. Framework: `i18next` (client-side).
 2. Init file: `assets/js/i18n.js`.
-3. Resource files:
+3. Resource files (single source of truth):
    1. `assets/i18n/en.json`
    2. `assets/i18n/ko.json`
-4. Templates use translation keys via `data-i18n` attributes.
-5. Visible UI strings must not be hardcoded in layouts/includes.
+4. Templates use translation keys via `data-i18n` attributes and include server-rendered fallback text.
+5. Fallback text is `en` by default and must keep non-post UI readable when JS is disabled.
+6. UI translation source of truth is only `assets/i18n/*.json`; `_data/locales/*` must not define UI copy.
+7. Layout/include fallback literals are allowed only as progressive-enhancement defaults paired with `data-i18n` keys.
 
 ## 4.2 Locale resolution
 
@@ -112,6 +121,7 @@ This section is mandatory and overrides stylistic ambiguity.
    1. current page text
    2. stored preference
 3. Locale switch must not reload to a different route.
+4. Internal links must use canonical route URLs without `?lang`.
 
 ## 4.3 Post language model (optional multilingual support)
 
@@ -143,12 +153,21 @@ translation_key: mysql-vector-search-edition
 2. `translation_key` is optional.
 3. If multiple posts share a `translation_key`, they are translation variants.
 4. If no variant exists, post is treated as single-language with no errors.
+5. `translation_key` format is lowercase kebab-case (`[a-z0-9-]+`).
+6. For one `translation_key`, at most one `en` post and at most one `ko` post are allowed.
+7. Duplicate language variants for the same `translation_key` fail CI.
+8. Permalink language rule:
+   1. `lang: en` uses default non-prefixed blog route (`/blog/...`) unless explicitly changed.
+   2. `lang: ko` must use `/ko/blog/...`.
+   3. Any manual `permalink` override must preserve the language prefix rule above.
+9. Variant permalinks must be unique; CI fails on output URL collisions.
 
 ## 4.4 Variant linking behavior
 
 1. On post page:
-   1. If variant exists in other language, show a single alternate-language link.
-   2. If no variant, show nothing.
+   1. If exactly one variant exists in other language, show one alternate-language link.
+   2. If no variant exists, show nothing.
+   3. If multiple candidate variants exist, fail CI and do not deploy.
 2. On index pages:
    1. Show each authored post as its own entry.
    2. Include a compact language marker (`EN` or `KO`) in metadata.
@@ -189,25 +208,44 @@ translation_key: mysql-vector-search-edition
 
 Both themes must preserve minimalist look and readability.
 
+### Monokai subset palette contract (required)
+
+1. Blog color tokens must be selected only from this Monokai subset:
+   1. `#272822` (base dark)
+   2. `#f8f8f2` (base light)
+   3. `#75715e` (muted/comment)
+   4. `#f92672` (accent pink)
+   5. `#fd971f` (accent orange)
+   6. `#e6db74` (yellow)
+   7. `#a6e22e` (green)
+   8. `#66d9ef` (cyan)
+   9. `#ae81ff` (purple)
+2. If alpha is needed, use transparency over one of the colors above; do not introduce new base hex colors.
+3. Accent role mapping:
+   1. `--accent` = primary emphasis (active nav, highlighted metadata).
+   2. `--accent-alt` = secondary emphasis (CTA borders, subtle highlights).
+
 ### Light mode tokens
 
-1. `--bg: #ececec`
-2. `--surface: #f6f6f3`
-3. `--text: #1f1f1f`
-4. `--muted: #5f5f5f`
-5. `--border: #cfcfc7`
-6. `--accent: #b8780a`
-7. `--tag-bg: #e2e2dc`
+1. `--bg: #f8f8f2`
+2. `--surface: #f8f8f2`
+3. `--text: #272822`
+4. `--muted: #75715e`
+5. `--border: #75715e`
+6. `--accent: #f92672`
+7. `--accent-alt: #fd971f`
+8. `--tag-bg: #e6db74`
 
 ### Dark mode tokens
 
 1. `--bg: #272822`
-2. `--surface: #2d2e2a`
+2. `--surface: #272822`
 3. `--text: #f8f8f2`
-4. `--muted: #a1a19a`
-5. `--border: #49483e`
+4. `--muted: #75715e`
+5. `--border: #75715e`
 6. `--accent: #f92672`
-7. `--tag-bg: #3a3b35`
+7. `--accent-alt: #fd971f`
+8. `--tag-bg: #75715e`
 
 ### Theme behavior
 
@@ -218,11 +256,30 @@ Both themes must preserve minimalist look and readability.
 
 ## 5.3 Minimal component styling rules
 
-1. Links are underlined by default.
+1. Links are underlined by default and use `--text` as the default link color in long-form content.
 2. Tag chips are flat rectangles with subtle border/background.
 3. Buttons use thin border and no heavy fills by default.
 4. Shadows are either none or very subtle.
 5. Rounded corners are low (`2-6px` range).
+6. Use `--accent` and `--accent-alt` sparingly for nav-active states, CTA borders, and small metadata highlights.
+7. For text below large-text thresholds, apply accent via underline/border/marker while keeping glyph color at `--text` unless measured contrast is `>= 4.5:1`.
+
+## 5.4 Post code block highlighting (Monokai required)
+
+1. Embedded code in post bodies (fenced blocks and Liquid `highlight` blocks) must render with Monokai syntax highlighting in both site themes.
+2. Syntax engine: Jekyll-compatible highlighter (`rouge`) with Monokai token mapping defined in `assets/css/main.css`.
+3. Required code tokens:
+   1. `--code-bg: #272822`
+   2. `--code-fg: #f8f8f2`
+   3. `--code-comment: #75715e`
+   4. `--code-keyword: #f92672`
+   5. `--code-string: #e6db74`
+   6. `--code-number: #ae81ff`
+   7. `--code-function: #a6e22e`
+   8. `--code-type: #66d9ef`
+4. Code block chrome includes a compact language/filename label row and copy button, styled minimally.
+5. Inline code uses a muted surface treatment and must remain visually distinct from links.
+6. Any code theme that materially deviates from the required Monokai palette fails CI.
 
 ---
 
@@ -244,18 +301,25 @@ Both themes must preserve minimalist look and readability.
 ## 6.3 Header behavior
 
 1. Desktop:
-   1. Inline nav row.
-   2. Subscribe button aligned right.
-2. Mobile:
-   1. Single-row compressed nav.
-   2. No multi-line overflowing nav; collapse spacing first.
-   3. If needed, shorten labels (`Subscribe` -> `Sub` only on very narrow screens).
+   1. Inline nav row with title (`Home`), `Blog`, and `RSS`.
+   2. `Subscribe` remains inline.
+   3. Language and theme toggles may be inline or grouped into one compact utility button to preserve sparse header styling.
+2. Tablet (`640-1023px`):
+   1. Single-row nav with title (`Home`), `Blog`, and `RSS`.
+   2. `Subscribe`, language toggle, and theme toggle may appear inline only when controls remain fully reachable.
+   3. If spacing is insufficient, move those controls into a utility panel button.
+3. Mobile:
+   1. `420-639px`: single-row nav with title (`Home`), `Blog`, `RSS`, and one utility button.
+   2. `<420px`: single-row nav with title (`Home`) and one utility button.
+   3. Utility panel contains all hidden global controls in order: `Blog` (if hidden), `RSS` (if hidden), `Subscribe`, language toggle, theme toggle.
+   4. Header must not introduce horizontal scrolling.
+   5. Utility panel may stack controls vertically; do not force inline compression.
 
 ## 6.4 Content behavior
 
 1. Post list remains one-column on all breakpoints.
 2. Code blocks scroll horizontally on mobile.
-3. Touch targets minimum `40px` height for tappable controls.
+3. Touch targets minimum `44px` height for tappable controls.
 4. Font sizes never below `16px` body on mobile.
 
 ---
@@ -269,6 +333,19 @@ Both themes must preserve minimalist look and readability.
 1. Minimal nav/header.
 2. Frequent tags block.
 3. Year-grouped recent post list.
+
+### Frequent tags algorithm (deterministic)
+
+1. Compute at build time from published posts only (exclude drafts/future posts).
+2. Rolling window: last `365` days anchored to the most recent published post date (`max(post.date)`), not wall-clock build time.
+3. Tag count rule: one count per tag per post.
+4. Sort order:
+   1. count descending
+   2. tag name ascending (tie-break)
+5. Render top `20` tags with counts.
+6. Hide tags with count `< 2`.
+7. `View all` must link to `/tags/`.
+8. Implementation must be static-safe (Liquid/build script), no runtime API calls.
 
 ### Optional blocks
 
@@ -296,7 +373,7 @@ Both themes must preserve minimalist look and readability.
 2. Title.
 3. Optional alternate-language link (if `translation_key` variant exists).
 4. Body content.
-5. Code blocks with copy action.
+5. Code blocks with copy action and Monokai syntax highlighting.
 6. Prev/next links.
 7. utterances comments.
 8. Small subscribe CTA.
@@ -321,19 +398,23 @@ Both themes must preserve minimalist look and readability.
 1. Meet WCAG AA contrast in both light and dark modes.
 2. Focus ring always visible and keyboard navigable.
 3. Respect `prefers-reduced-motion`.
-4. Set `html[lang]` based on page/post language.
-5. Korean paragraph wrapping uses `word-break: keep-all`.
-6. Every icon-only control has an accessible label.
+4. Non-post pages set `html[lang]` from active UI locale and update on locale toggle.
+5. Post pages set `html[lang]` from post front matter (`lang`); locale toggle must not relabel post body language.
+6. On post pages, locale-toggled chrome UI elements use element-level `lang` attributes so mixed-language UI remains semantically correct.
+7. Korean paragraph wrapping uses `word-break: keep-all` plus `overflow-wrap: anywhere` fallback for URLs and long Latin tokens.
+8. Every icon-only control has an accessible label.
 
 ---
 
 ## 9) SEO and metadata
 
 1. Canonical base URL: `https://stuffs.blog`.
-2. OpenGraph + Twitter cards on all pages.
-3. Expose RSS in header and `<head>`.
-4. Generate `sitemap.xml` and `robots.txt`.
-5. If translation variants exist (`translation_key`), emit `hreflang` alternates for available languages.
+2. Every page emits canonical URL without query parameters (strip `?lang`).
+3. OpenGraph + Twitter cards on all pages.
+4. Expose RSS in header and `<head>`.
+5. Generate `sitemap.xml` and `robots.txt`.
+6. If translation variants exist (`translation_key`), emit `hreflang` for available languages plus `x-default` to English variant when present.
+7. Each language variant is self-canonical (never canonicalize to another language variant).
 
 ---
 
@@ -342,10 +423,6 @@ Both themes must preserve minimalist look and readability.
 ```text
 /
   _config.yml
-  _data/
-    locales/
-      en.yml
-      ko.yml
   _includes/
     header.html
     footer.html
@@ -373,12 +450,24 @@ Both themes must preserve minimalist look and readability.
   scripts/
     validate_front_matter.sh
     validate_i18n_keys.sh
+    validate_translation_variants.sh
+    validate_static_constraints.sh
+    validate_code_highlighting.sh
     validate_kit_config.sh
+  tests/
+    visual/
+      smoke.spec.ts
 ```
 
 ---
 
 ## 11) Deployment pipeline (required)
+
+## 11.0 Static hosting constraints (GitHub Pages)
+
+1. Final deploy artifact must be static files only (`HTML`, `CSS`, `JS`, assets).
+2. No custom server runtime, API, or middleware is allowed.
+3. Dynamic behavior is limited to client-side JS and third-party embeds (Kit form post + utterances script).
 
 ## 11.1 PR validation workflow (`.github/workflows/ci.yml`)
 
@@ -392,15 +481,40 @@ Both themes must preserve minimalist look and readability.
 1. Front matter validation:
    1. checks required fields (`title`, `date`, `lang`, `tags`, `summary`)
    2. validates `lang in {en, ko}`
+   3. validates `translation_key` format when present
 2. i18n key validation:
    1. compares `en.json` and `ko.json` key parity
    2. fails on missing keys unless explicitly allowlisted
-3. Build:
+   3. fails if `_data/locales/*` includes UI translation payloads
+3. Translation variant validation:
+   1. enforces max one `en` and one `ko` per `translation_key`
+   2. enforces language-route rule (`lang: ko` -> `/ko/blog/...`)
+   3. enforces language-route rule (`lang: en` -> non-`/ko/...` route)
+   4. fails on duplicate output permalinks
+4. Progressive-enhancement i18n validation:
+   1. fails if critical nav labels are JS-only with no server-rendered fallback text
+   2. fails if fallback literals in templates/includes are missing matching `data-i18n` keys
+5. Static constraint validation:
+   1. fails if templates introduce internal API calls or server-only dependencies
+6. Build:
    1. `bundle exec jekyll build`
-4. HTML/link checks:
+7. HTML/link checks:
    1. no broken internal links
-   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`)
-5. Kit config validation:
+   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`, `/feed.xml`)
+   3. canonical tag excludes `?lang`
+   4. RSS endpoint returns valid XML
+8. UI smoke tests (Playwright or equivalent):
+   1. desktop viewport (`1366x900`): light/dark + `en/ko` toggles
+   2. mobile viewport (`390x844`): light/dark + `en/ko` toggles
+   3. asserts no horizontal overflow and header controls remain reachable (including utility-panel path)
+9. Accessibility audit (axe-core or equivalent):
+   1. scans `/`, `/blog/`, one post page, and `/subscribe/` in light and dark themes
+   2. fails on WCAG AA contrast and keyboard-focus regressions
+10. Code and palette validation:
+   1. fails if post code block styles/tokens deviate from required Monokai values
+   2. fails if post code blocks are missing minimal chrome hooks (language/filename row + copy action)
+   3. fails if blog visual tokens (`--accent`, `--accent-alt`, code tokens, and tag tokens) are outside the Monokai subset
+11. Kit config validation:
    1. subscribe page contains Kit form include
    2. required config values present
 
@@ -415,13 +529,14 @@ Both themes must preserve minimalist look and readability.
 1. Checkout.
 2. Setup Ruby and Bundler cache.
 3. Install dependencies.
-4. Build Jekyll site.
+4. Build static Jekyll site.
 5. Upload Pages artifact.
 6. Deploy using GitHub Pages action.
 7. Run post-deploy smoke checks:
    1. `/` returns `200`
    2. `/subscribe/` returns `200`
-   3. RSS endpoint reachable
+   3. `/feed.xml` returns `200` and parses as XML
+   4. one desktop and one mobile smoke probe succeed
 
 ### Environment controls
 
@@ -456,6 +571,8 @@ kit:
   error_url: "/subscribe/?status=error"
 ```
 
+Only public Kit form identifiers are allowed in repo. Do not commit Kit API secrets or tokens.
+
 ## 12.3 Template integration
 
 1. `subscribe-form.html` reads `site.kit.*`.
@@ -469,7 +586,8 @@ kit:
 
 1. CI fails if `kit.form_action` is missing for production builds.
 2. CI fails if subscribe page omits the form include.
-3. Manual QA verifies:
+3. CI fails if form action URL is not on Kit host allowlist.
+4. Manual QA verifies:
    1. successful subscription flow
    2. confirmation email delivery
    3. unsubscribe works
@@ -482,6 +600,9 @@ kit:
 2. Embed only on post pages.
 3. Theme must follow active site theme (light/dark variants).
 4. If utterances unavailable, page content still fully readable.
+5. Load utterances lazily (on explicit "Show comments" action or on viewport entry) to reduce third-party cost on first paint.
+6. Show a short privacy note near comments indicating third-party GitHub Issues-backed processing.
+7. If fronted by a proxy/CDN, apply CSP and referrer-policy headers compatible with Kit and utterances.
 
 ---
 
@@ -495,10 +616,15 @@ A release is done only if all items pass.
 4. UI strings localize correctly for `en` and `ko`.
 5. Korean text renders correctly in nav, tags, body, and buttons.
 6. Posts with and without `translation_key` both render correctly.
-7. Optional alternate-language link appears only when variant exists.
-8. Subscribe form works end-to-end with Kit.
-9. CI and deploy workflows are green.
-10. Production smoke checks pass.
+7. `translation_key` uniqueness rules are enforced by CI.
+8. Optional alternate-language link appears only when exactly one variant exists.
+9. Subscribe form works end-to-end with Kit.
+10. CI and deploy workflows are green.
+11. Production smoke checks pass.
+12. Non-post UI remains readable with JS disabled (i18n fallback requirement).
+13. Third-party embeds are lazy-loaded and privacy notice is present on post comments section.
+14. Post code blocks use Monokai highlighting with copy action in both light and dark site themes.
+15. Blog visual tokens and accents remain within the allowed Monokai subset.
 
 ---
 
@@ -538,7 +664,7 @@ A release is done only if all items pass.
 
 ## Phase 5 - CI/CD and launch
 
-1. Add CI workflow checks (front matter, i18n, build, link, Kit config).
+1. Add CI workflow checks (front matter, i18n parity + fallback, permalink rules, accessibility audit, build, link, Kit config).
 2. Add deploy workflow to GitHub Pages.
 3. Configure branch protection and production environment.
 4. Run smoke tests and publish.
@@ -553,9 +679,13 @@ A release is done only if all items pass.
 4. Uses `i18next` for UI localization (`en`, `ko`).
 5. Supports optional multilingual posts via `translation_key`.
 6. Maintains Korean-capable font coverage in both themes.
-7. CI/CD deploy pipeline is active and enforced.
-8. Kit email integration is configured, validated, and tested.
-9. Comments, RSS, SEO metadata, and accessibility requirements are met.
+7. Localization source of truth is only `assets/i18n/*.json`.
+8. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile UI smoke checks plus accessibility audit gates.
+9. Kit email integration is configured, validated, and tested with static-safe constraints.
+10. Comments, RSS, SEO metadata, and accessibility requirements are met.
+11. Language-route permalink rules and deterministic frequent-tags computation are enforced by CI.
+12. Embedded post code uses enforced Monokai highlighting and CI rejects non-Monokai theme drift.
+13. Site-wide visual token palette is enforced as a Monokai subset.
 
 ---
 
