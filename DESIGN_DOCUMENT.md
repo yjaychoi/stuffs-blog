@@ -8,7 +8,7 @@
 **Infrastructure boundary:** static GitHub Pages output + third-party Kit and utterances only (no custom backend/runtime)  
 **Repo visibility:** private source repo (GitHub Plus) with GitHub Pages deployment via Actions  
 **Localization scope:** none (English-only UI and posts)  
-**Primary visual reference:** none (no screenshot/baseline-image dependency)
+**Primary visual reference (required):** user-provided post-detail example (HTML snippet + screenshot from this task) is the canonical quality baseline for hierarchy, spacing rhythm, and component polish
 
 ## Platform prerequisites
 
@@ -30,11 +30,12 @@
 6. Keep implementation and operations simple enough for solo maintenance.
 7. Deploy automatically through CI/CD, including validated Kit email integration.
 8. Support subscriber signup and automated new-post notifications via Kit.
+9. Allow high-fidelity, JS-enabled UI behavior (theme init, menu interaction, code-copy, comments reveal) while keeping static hosting constraints.
 
 ### Non-goals
 
 1. No custom backend.
-2. No heavy animations or decorative UI.
+2. No gratuitous animation loops or decorative-only effects that hurt readability/performance.
 3. No dashboard widgets, side panels, carousels, or hero graphics.
 4. No localization/i18n framework or multilingual routing.
 
@@ -50,19 +51,37 @@ This section is mandatory and overrides stylistic ambiguity.
 2. Simple top nav row with only essential links.
 3. Text-first content blocks (about copy, tags, post links).
 4. Minimal accent usage (maximum two accent roles) and every accent must come from the Monokai palette subset.
-5. Style must be codified by explicit token/layout/accessibility checks rather than screenshot baselines.
+5. Style must be codified by explicit token/layout/accessibility checks and visual-regression baselines tied to the canonical reference.
 
 ### Maximum UI surface area
 
 1. Header control set must include: `Home`, `Blog`, `RSS`, `Subscribe`, and theme toggle.
 2. Desktop (`>=1024px`): show `Home`, `Blog`, `RSS`, and `Subscribe` inline; theme toggle must be reachable.
-3. Tablet (`640-1023px`): show title (`Home`), `Blog`, `RSS`, and `Subscribe` inline when possible; controls may wrap as needed.
-4. Mobile (`420-639px`): keep `Home`, `Blog`, `RSS`, and `Subscribe` reachable without JS-only menus; theme toggle must remain reachable.
-5. Narrow mobile (`<420px`): controls may wrap to multiple rows, but all primary links remain reachable without hidden JS-only menus.
+3. Tablet (`640-1023px`): inline or disclosure-menu navigation is allowed; all controls must remain reachable by keyboard and touch.
+4. Mobile (`420-639px`): disclosure-menu/hamburger patterns are allowed; include a visible menu control and theme toggle.
+5. Narrow mobile (`<420px`): controls may wrap or collapse; avoid clipped/hidden controls and horizontal overflow.
 6. No secondary content nav bars.
 7. No persistent sidebars on mobile.
 8. No card-heavy grids for the post index.
 9. No oversized hero section on index page.
+
+### Interaction contract (JS-enabled, progressive enhancement)
+
+1. JavaScript is a first-class part of the design system and may drive:
+   1. theme bootstrap and user preference persistence
+   2. responsive/disclosure navigation
+   3. code-block copy interactions
+   4. comments lazy-load interactions
+   5. small purposeful motion (e.g., hover/focus/state transitions)
+2. JS-dependent controls must have accessible semantics (`button`, `aria-expanded`, `aria-controls`, keyboard support).
+3. If JS fails, content reading must still work (header brand/home link, article body, footer links, and subscribe route remain discoverable), but parity with enhanced interactions is not required.
+4. Any enhancement script must be small, deterministic, and covered by CI behavior tests.
+
+### Canonical quality bar (required)
+
+1. The provided reference screenshot/HTML defines the minimum acceptable visual hierarchy and polish for post detail pages.
+2. “Minimalist” means restrained surface area, not low-fidelity UI; typography rhythm, spacing cadence, and component chrome must feel editorial and intentional.
+3. Implementations that are functionally correct but visually flat, weakly tiered, or wireframe-like fail design acceptance.
 
 ### Forbidden elements
 
@@ -171,13 +190,31 @@ featured: false
 1. Desktop:
    1. Site title: `36-46px`
    2. Section title: `34-42px`
-   3. Post title: `36-48px`
-   4. Body: `17-18px`
+   3. Post title: `56-64px` (canonical post-detail route), `40-52px` (other routes)
+   4. Body: `17-19px`
 2. Mobile:
    1. Site title: `28-34px`
    2. Section title: `26-30px`
-   3. Post title: `30-36px`
-   4. Body: `16-17px`
+   3. Post title: `36-44px` (canonical post-detail route), `30-36px` (other routes)
+   4. Body: `16-18px`
+
+### Editorial hierarchy lock values (post detail, required)
+
+1. Desktop (`>=1024px`) lock values:
+   1. metadata row: `11-12px`, uppercase, letter spacing `>=0.12em`, muted tone
+   2. post title: `56-64px`, weight `700`, line-height `1.08-1.18`
+   3. lead/body paragraphs: `28-34px` line-height with `17-19px` size equivalent
+   4. section heading `h2`: `34-40px` equivalent with clear top spacing step-up from body
+   5. subsection heading `h3`: `26-30px` equivalent
+   6. content measure: `62-72ch`
+2. Mobile (`<640px`) lock values:
+   1. metadata row: `10-11px`, uppercase, readable tracking
+   2. post title: `36-44px`, weight `700`, line-height `1.1-1.2`
+   3. body paragraphs: `16-18px` with line-height `1.65-1.85`
+   4. heading reductions preserve tier gaps (title > h2 > h3 > body) without collapsing into near-equal sizes
+3. Hierarchy invariants:
+   1. each tier transition (meta -> title -> lead/body -> h2/h3 -> support text) must be obvious in both size and spacing, not color-only
+   2. no adjacent tiers may differ by less than `12%` effective size on desktop or `10%` on mobile
 
 ## 5.2 Theme system (light + dark required)
 
@@ -287,6 +324,46 @@ Both themes must preserve minimalist look and readability.
    1. CI uses `size-limit` for CSS/JS gzip budgets and deterministic Vitest file-size checks for image/font budgets.
    2. Allowed overage tolerance is `0KB` (hard fail) to keep behavior predictable.
 
+## 5.6 High-fidelity page spec contract
+
+1. Page-level design specs must be explicit enough to reproduce a polished implementation without guesswork.
+2. For each major route (`/`, `/blog/`, post detail, `/tags/`, `/subscribe/`), the spec must define:
+   1. typography roles (font family, weight, scale, line-height)
+   2. color-token mapping by component state (default/hover/focus/active/disabled)
+   3. layout values (container widths, spacing scale, and breakpoint behavior)
+   4. interactive behaviors (menu state transitions, copy action feedback, comments reveal/loading state)
+   5. component chrome details (metadata row, section dividers, code-toolbar row, prev/next block style, comments placeholder state)
+3. Visual detail must be at least equal to the canonical reference quality bar; wireframe-level or merely utilitarian styling is non-compliant.
+4. CI and review checklists must validate behavior/state coverage, not only static structure.
+
+## 5.7 Canonical composition spec (post detail, required)
+
+1. The post-detail route is the canonical visual benchmark.
+2. Required desktop composition order and spacing rhythm:
+   1. header/nav block with bottom divider
+   2. metadata line
+   3. large title block
+   4. short accent rule under title
+   5. long-form article body
+   6. code panel with toolbar row (filename/language + copy action)
+   7. previous/next navigation split block
+   8. comments placeholder/shell block
+   9. footer divider and legal line
+3. Required chrome details:
+   1. code panel uses a visibly distinct dark surface with subtle border, small radius, and internal scroll affordance
+   2. copy control has icon/text feedback states and keyboard-visible focus styling
+   3. previous/next block uses muted direction labels plus stronger linked-title typography
+   4. comments area includes neutral surface container and loading/skeleton placeholder
+   5. accent rule under title is short and emphatic (`80-120px` width, `3-4px` thickness)
+4. Required spacing cadence:
+   1. large transitions between major sections (`>=48px` desktop, `>=32px` mobile)
+   2. medium transitions inside sections (`16-32px`)
+   3. tight utility spacing only for metadata/chrome (`4-12px`)
+5. Motion and state requirements:
+   1. hover/focus transitions are subtle (`120-180ms`), never bouncy
+   2. no layout-jumping transitions for nav, title, or article flow
+   3. state changes (active nav, copy success, menu open, comments reveal) must be visually explicit
+
 ---
 
 ## 6) Layout and responsiveness (PC + mobile)
@@ -309,14 +386,14 @@ Both themes must preserve minimalist look and readability.
 1. Desktop:
    1. Inline nav row with `Home`, `Blog`, `RSS`, `Subscribe`, and theme toggle visible.
 2. Tablet (`640-1023px`):
-   1. Same controls remain visible.
-   2. Controls may wrap to a second row when needed.
+   1. Inline layout or disclosure menu is allowed.
+   2. If disclosure menu is used, open/close states must be keyboard accessible and visually clear.
 3. Mobile:
-   1. Same controls remain visible at `420-639px` and `<420px`.
-   2. Controls may wrap to multiple rows.
-   3. Header must not introduce horizontal scrolling.
-4. No-JS requirement:
-   1. Header navigation and theme default (`prefers-color-scheme`) must remain functional without JavaScript.
+   1. Controls may wrap or collapse into disclosure menu patterns.
+   2. Header must not introduce horizontal scrolling.
+   3. Menu trigger touch target must be at least `44px`.
+4. Enhancement fallback requirement:
+   1. With JS unavailable, core reading flow and global recovery links (`Home`, `Blog`) remain available somewhere in the page shell.
 
 ## 6.4 Content behavior
 
@@ -373,13 +450,31 @@ Both themes must preserve minimalist look and readability.
 
 ## 7.3 Post detail
 
-1. Meta line: date (`MMM d, yyyy`) and reading time (optional override).
-2. Title.
-3. Body content.
-4. Code blocks with copy action and Monokai syntax highlighting.
-5. Prev/next links follow chronological order.
-6. utterances comments.
-7. Small subscribe CTA.
+1. Meta line:
+   1. includes date (`MMM d, yyyy`) and reading time (optional override)
+   2. compact uppercase treatment with widened tracking
+   3. metadata separators and active tag accent must be visible without dominating title/body
+2. Title block:
+   1. uses locked hierarchy values from section 5.1
+   2. must visually dominate the viewport above the fold
+   3. includes a short accent rule below title
+3. Body content:
+   1. readable editorial measure (`62-72ch` desktop)
+   2. paragraph spacing and line-height tuned for sustained reading
+   3. `h2`/`h3` spacing must clearly reestablish hierarchy after dense paragraphs
+4. Code experience:
+   1. code blocks with copy action and Monokai syntax highlighting
+   2. visible toolbar row (filename/language label + copy control)
+   3. horizontal overflow handled without clipping on mobile
+5. Post-navigation block:
+   1. previous/next links follow chronological order
+   2. direction labels are muted and linked titles are typographically stronger
+6. Comments block:
+   1. utterances loads on explicit user action
+   2. pre-load placeholder container must look intentional (not raw empty box)
+7. Subscribe CTA:
+   1. small, low-noise CTA after article flow
+   2. typography and border treatment aligned with global accent strategy
 
 ## 7.4 Tags page
 
@@ -423,7 +518,7 @@ Both themes must preserve minimalist look and readability.
 4. `html[lang]` is set to `en`.
 5. Every icon-only control has an accessible label.
 6. Dates must be semantically marked with `<time datetime="...">`.
-7. Header controls are keyboard reachable at every breakpoint without hidden-menu dependencies.
+7. Header/menu controls are keyboard reachable at every breakpoint, including disclosure-menu states.
 8. Code-copy action accessibility:
    1. button has an accessible name.
    2. keyboard activation via `Enter` and `Space`.
@@ -504,6 +599,7 @@ Both themes must preserve minimalist look and readability.
       feed.spec.ts
       static_constraints.spec.ts
       code_highlighting.spec.ts
+      visual_hierarchy_tokens.spec.ts
       font_budget.spec.ts
       asset_budget.spec.ts
       theme_contrast.spec.ts
@@ -511,6 +607,7 @@ Both themes must preserve minimalist look and readability.
     e2e/
       smoke.spec.ts
       no_js.spec.ts
+      visual_regression.spec.ts
       accessibility.spec.ts
   docs/
     moderation.md
@@ -570,32 +667,42 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
 5. UI smoke tests (Playwright):
    1. desktop viewport (`1366x900`) with light/dark toggle
    2. mobile viewport (`390x844`) with light/dark toggle
-   3. asserts no horizontal overflow and header controls remain reachable
-6. No-JS smoke tests:
-   1. JS disabled for `/`, `/blog/`, `/tags/`, `/subscribe/`, `/privacy/`
-   2. asserts primary controls remain reachable and core reading flow works
-7. Accessibility audit (axe-core or equivalent):
+   3. asserts no horizontal overflow and header/menu controls remain reachable
+6. Progressive-enhancement smoke tests:
+   1. JS enabled: validates disclosure-menu interaction, theme persistence, code-copy behavior, and comments reveal behavior.
+   2. JS disabled: validates fallback reading flow and recovery links (`Home`/`Blog`) on `/`, `/blog/`, `/tags/`, `/subscribe/`, and `/privacy/`.
+7. Visual hierarchy regression (Playwright snapshots, required):
+   1. compares canonical post fixture route in desktop (`1366x900`) and mobile (`390x844`)
+   2. checks both light and dark themes
+   3. diff threshold hard cap: `<= 0.8%` pixel delta per snapshot
+   4. canonical fixture route must use deterministic content and stable local assets (self-hosted fonts, fixed dates, no network-variant data)
+   5. snapshot harness disables non-essential animation and time-variant effects to prevent flaky diffs
+   6. fails if title prominence, section spacing cadence, code-panel chrome, prev/next block, or comments shell diverges from baseline capture
+8. Accessibility audit (axe-core or equivalent):
    1. scans `/`, `/blog/`, `/tags/`, one post page, `/subscribe/`, and `/privacy/` in light and dark themes
    2. fails on WCAG AA contrast (excluding code syntax token policy), keyboard-focus regressions, and missing accessible names
-8. Code and palette validation:
+9. Code and palette validation:
    1. fails if post code block styles/tokens deviate from required Monokai values
    2. fails if post code blocks are missing minimal chrome hooks (language/filename row + copy action)
    3. fails if blog visual tokens (`--accent`, `--accent-alt`, code tokens, and tag tokens) are outside the Monokai subset
    4. fails if text-role tokens (`--text`, `--muted-text`, `--tag-text`) violate AA contrast against theme background
    5. fails if code syntax tokens violate section 5.4 minimum contrast (`3:1`) and non-color-cue rules, or if `--code-fg` violates AA
-9. Kit config validation:
+10. Hierarchy token contract validation (`tests/contracts/visual_hierarchy_tokens.spec.ts`):
+   1. enforces required typography/spacing tiers from sections 5.1 and 5.7
+   2. fails if key post-detail selectors collapse hierarchy gaps below thresholds
+11. Kit config validation:
    1. subscribe page contains Kit form include
    2. required config values are present
    3. `success_url` is absolute `https://stuffs.blog/...` and route-matched
    4. if `error_url` is configured, it must be absolute `https://stuffs.blog/...` and route-matched
-10. Tag/slug/redirect validation:
+12. Tag/slug/redirect validation:
    1. fails on tag slug collisions
    2. redirect mappings are duplicate-free and syntactically valid
-11. Performance and cache validation:
+13. Performance and cache validation:
    1. enforce first-view font budget from section 5.1
    2. enforce CSS/JS/image budgets from section 5.5 using `size-limit` (CSS/JS) plus deterministic Vitest file-size checks (images/fonts)
    3. fail if critical CSS/JS/font references omit configured cache-busting strategy
-12. Workflow baseline hardening:
+14. Workflow baseline hardening:
    1. workflow/job permissions are least-privilege (`permissions:` explicitly set).
    2. Actions use pinned major versions or full commit SHA.
 
@@ -626,9 +733,10 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    2. `/feed.xml` parses as XML
    3. one post URL probe returns `200` and includes canonical metadata
    4. desktop and mobile smoke probes succeed
-   5. JS-disabled probes on `/`, `/tags/`, and `/privacy/` succeed
+   5. JS-disabled fallback probes on `/`, `/tags/`, and `/privacy/` succeed
    6. page-1 canonicalization checks pass (`/blog/page/1/` non-indexable and normalized)
    7. unknown-route probe returns `404` and renders readable fallback copy
+   8. canonical post-detail visual-regression snapshots (desktop/mobile, light/dark) pass against the approved baseline
 
 ### Environment controls
 
@@ -732,7 +840,7 @@ A release is done only if all items pass.
 2. Mobile layout remains one-column and readable without overlap.
 3. Light and dark themes pass automated WCAG AA checks for body/UI text with zero critical/serious keyboard-focus failures; code syntax tokens pass section 5.4 policy.
 4. Text-role tokens (`--text`, `--muted-text`, `--tag-text`) pass AA contrast validation in both themes.
-5. Non-post UI remains readable with JS disabled for `/`, `/blog/`, `/tags/`, `/subscribe/`, and `/privacy/`.
+5. JS-enabled interactions (menu/theme/copy/comments) work at required smoke viewports; JS-disabled fallback reading flow still works for core routes.
 6. Subscribe form works end-to-end with success handling and clear error fallback behavior.
 7. Kit feed-based notification flow is configured and tested.
 8. CI and deploy workflows are green; production smoke checks pass with retry/backoff.
@@ -741,12 +849,13 @@ A release is done only if all items pass.
 11. Blog visual tokens and accents remain within the allowed Monokai subset.
 12. Header and code-copy controls pass keyboard and screen-reader interaction checks.
 13. Home latest-post list and other list outputs are reproducible for the same content set (deterministic `SITE_BUILD_DATE_UTC` policy).
-14. No screenshot-baseline visual-diff process is required.
+14. Canonical visual-regression baselines are versioned and approved for post detail (desktop/mobile, light/dark), and CI pixel-diff thresholds pass.
 15. `404.html` provides readable fallback copy and unknown routes return `404`.
 16. Blog pagination canonicalization policy is enforced (`/blog/page/1/` normalization and page `>=2` self-canonical behavior).
 17. Feed strategy is valid (`/feed.xml`) and nav links route correctly.
 18. Workflow baseline hardening gates pass (least-privilege permissions and pinned action versions).
 19. Comment moderation/deletion operational policy is documented and linked from privacy route.
+20. Visual hierarchy token-contract tests pass with no tier-collapse regressions.
 
 ---
 
@@ -758,7 +867,8 @@ A release is done only if all items pass.
 2. Add typography assets, font-loading strategy (`font-display`, subset plan), and CSS token system.
 3. Implement minimal header/footer shells and add `CNAME`.
 4. Add route-generation foundation (`jekyll-paginate-v2`) and page-1 canonicalization strategy.
-5. Add CI skeleton early so each subsequent phase is validated incrementally.
+5. Add canonical post-detail fixture content used for deterministic visual hierarchy tests.
+6. Add CI skeleton early so each subsequent phase is validated incrementally.
 
 ## Phase 1 - core UI and responsiveness
 
@@ -766,7 +876,8 @@ A release is done only if all items pass.
 2. Implement responsive rules for mobile/tablet/desktop.
 3. Add `privacy` page.
 4. Match the minimalist spacing and typography contract.
-5. Keep header controls always visible (wrapping allowed) and verify keyboard/no-JS behavior.
+5. Implement responsive header/menu behavior (inline or disclosure by breakpoint) and verify keyboard + fallback behavior.
+6. Match canonical post-detail composition/chrome requirements from section 5.7.
 
 ## Phase 2 - core content and theming
 
@@ -787,13 +898,14 @@ A release is done only if all items pass.
 
 ## Phase 4 - CI/CD and launch
 
-1. Complete CI workflow checks (build, front matter/permalink, link/SEO, desktop+mobile smoke, no-JS smoke, accessibility audit, Kit config, slug/redirect validation, performance budgets).
+1. Complete CI workflow checks (build, front matter/permalink, link/SEO, desktop+mobile smoke, progressive-enhancement smoke, visual regression, hierarchy token contract, accessibility audit, Kit config, slug/redirect validation, performance budgets).
 2. Add deploy workflow to GitHub Pages with restricted `workflow_dispatch deploy_ref` (commit SHA from `main` ancestry only).
 3. Configure branch protection and production environment.
 4. Add workflow baseline hardening (pinned action versions and least-privilege permissions).
 5. Require deploy-time revalidation of the exact target commit.
-6. Add post-deploy smoke checks with retry/backoff, blog pagination canonicalization probes, and single-flight deploy concurrency.
-7. Run smoke tests and publish.
+6. Add post-deploy smoke checks with retry/backoff, blog pagination canonicalization probes, visual-baseline probes, and single-flight deploy concurrency.
+7. Version and approve baseline snapshots for canonical post detail before release.
+8. Run smoke tests and publish.
 
 ---
 
@@ -803,17 +915,20 @@ A release is done only if all items pass.
 2. Works on both PC and mobile with no broken layout or horizontal overflow in required smoke viewports.
 3. Supports light mode and dark mode with persistent preference.
 4. Is English-only (no localization or multilingual requirements).
-5. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile smoke checks, JS-disabled smoke checks, accessibility audit gates, and workflow hardening gates.
-6. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, `error_url` optional).
-7. Kit new-post notifications are configured through RSS automation or validated manual fallback.
-8. utterances comments are integrated with explicit click-to-load consent, privacy linkage, and operational moderation/deletion policy.
-9. RSS strategy is implemented and validated (`/feed.xml`) with nav integration.
-10. Permalink rules (immutable `slug`), blog page-1 canonicalization policy, and deterministic home latest-post computation are enforced by CI.
-11. Embedded post code uses enforced Monokai highlighting and CI rejects non-Monokai theme drift while applying section 5.4 code-token accessibility policy.
-12. Site-wide visual token palette is enforced as a Monokai subset while text-role tokens remain AA compliant.
-13. Deploy workflow can only deploy validated commits from `main` ancestry and re-validates target commits before release.
-14. Tag slug collisions and redirect-file consistency are validated by CI.
-15. Static asset cache-busting, image-budget policy, and 404 fallback behavior are implemented and verified.
+5. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile smoke checks, progressive-enhancement checks (JS-enabled behaviors + JS-disabled fallback), accessibility audit gates, and workflow hardening gates.
+6. Canonical post-detail visual regression passes in desktop/mobile and light/dark snapshots within configured pixel-diff threshold.
+7. Visual hierarchy token-contract gates pass, proving non-flat tiered typography/spacing comparable to the canonical reference.
+8. Post-detail page composition matches section 5.7 (title dominance, accent rule, body cadence, code chrome, prev/next block, comments shell).
+9. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, `error_url` optional).
+10. Kit new-post notifications are configured through RSS automation or validated manual fallback.
+11. utterances comments are integrated with explicit click-to-load consent, privacy linkage, and operational moderation/deletion policy.
+12. RSS strategy is implemented and validated (`/feed.xml`) with nav integration.
+13. Permalink rules (immutable `slug`), blog page-1 canonicalization policy, and deterministic home latest-post computation are enforced by CI.
+14. Embedded post code uses enforced Monokai highlighting and CI rejects non-Monokai theme drift while applying section 5.4 code-token accessibility policy.
+15. Site-wide visual token palette is enforced as a Monokai subset while text-role tokens remain AA compliant.
+16. Deploy workflow can only deploy validated commits from `main` ancestry and re-validates target commits before release.
+17. Tag slug collisions and redirect-file consistency are validated by CI.
+18. Static asset cache-busting, image-budget policy, and 404 fallback behavior are implemented and verified.
 
 ---
 
