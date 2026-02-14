@@ -1,13 +1,13 @@
-# Stuff of Thoughts — Design Document (GitHub Pages + Jekyll + Kit Free)
+# Stuff of Thoughts - Detailed Design and Delivery Plan
 
-**Domain:** `stuffs.blog`
-**Blog title (exact):** **Stuff of Thoughts**
-**Hosting:** GitHub Pages (Jekyll)
-**Email subscriptions:** Kit (Newsletter / free plan) ([help.kit.com][1])
-**Comments:** GitHub Issues–backed embed (utterances) ([GitHub][2])
-**Repo visibility:** Private repo allowed (GitHub Pro) while Pages remains public ([GitHub Docs][3])
-**DNS:** Cloudflare (registrar + DNS)
-**Localization:** English (`en`) + Korean (`ko`)
+**Domain:** `stuffs.blog`  
+**Blog title (exact):** `Stuff of Thoughts`  
+**Hosting:** GitHub Pages (Jekyll)  
+**Email subscriptions:** Kit (newsletter/free plan)  
+**Comments:** utterances (GitHub Issues-backed)  
+**Repo visibility:** private repo allowed, public Pages output  
+**Localization scope:** UI localization (`en`, `ko`) + optional multilingual posts (`en`/`ko`)  
+**Primary visual reference:** attached screenshot (minimal, content-first, low chrome)
 
 ---
 
@@ -15,518 +15,548 @@
 
 ### Primary goals
 
-1. **Write-first publishing**: new post = new Markdown file committed to GitHub.
-2. **Minimal, opinionated UI**: one “page” experience with strong typography and calm navigation.
-3. **Monokai visual identity**: dark-first, terminal-adjacent, with inline code that *immediately* reads as “Monokai.”
-4. **No backend**: every feature must work as static hosting + third-party embeds only.
-5. **Room to grow**: must support adding **LinkedIn + GitHub profile links later** without redesign.
-6. **Localization-ready**: first release supports English and Korean without redesigning templates.
+1. Publish by committing Markdown files to GitHub.
+2. Keep interface minimal to bare necessities only.
+3. Match screenshot style: narrow centered column, simple nav, sparse metadata, understated accents.
+4. Support both desktop (PC) and mobile without layout breakage.
+5. Support both light and dark mode with equal design quality.
+6. Localize UI using an explicit i18n framework (`i18next`).
+7. Support optional multilingual post variants without requiring every post translation.
+8. Deploy automatically through CI/CD, including validated Kit email integration.
 
-### Non-goals (explicitly not built now)
+### Non-goals
 
-* Site search (can be added later as client-side search)
-* Auto “new post → email blast” from RSS (Kit’s RSS campaigns are not on the free plan per pricing table) ([Kit][4])
-* Non-GitHub-authenticated comments (no anonymous comments)
+1. No custom backend.
+2. No heavy animations or decorative UI.
+3. No dashboard widgets, side panels, carousels, or hero graphics.
+4. No machine translation of post bodies at runtime.
 
 ---
 
-## 2) Target aesthetic (derived from the screenshots)
+## 2) Minimalist design contract (strict)
 
-This design intentionally blends two moods shown in the screenshots:
+This section is mandatory and overrides stylistic ambiguity.
 
-### A. “Centered paper on a stage”
+### Required layout shape
 
-* A **single, centered content sheet** with a clear edge and soft shadow.
-* The outer area feels like a **studio backdrop**: calm, matte, and slightly colored.
-* The content sheet is **visually separated** with a border and subtle elevation, so the page reads like a “document” floating over the background.
+1. One centered main column.
+2. Simple top nav row with only essential links.
+3. Text-first content blocks (tags, year groups, post links).
+4. Minimal accent usage (single accent color for links and CTA borders).
 
-### B. “Editorial terminal”
+### Maximum UI surface area
 
-* Dark background, **high-contrast mono/serif type**, and minimal chrome.
-* A thin accent rule under the title (editorial rhythm).
-* Code sections look like “snippets dropped into a post,” with a label (“Code example”) and a “Copy” affordance.
+1. Header contains: `Home`, `Blog`, `RSS`, `Subscribe`, language toggle, theme toggle.
+2. No secondary nav bars.
+3. No persistent sidebars on mobile.
+4. No card-heavy grids for the post index.
+5. No oversized hero section on index page.
 
-### Signature details to implement
+### Forbidden elements
 
-* **Oversized article title** with wide line-height and confident left alignment (no center titles).
-* **Micro metadata line** above the title (date + tags), with tiny type and generous letter spacing.
-* **Drop cap** on the first paragraph for long-form posts (optional but matches the vibe).
-* **Right rail navigation** on wide screens (tags + “All posts”), but never “dashboard-y.”
-* **A single accent color** that appears in:
-
-  * link underlines,
-  * the title rule,
-  * hover highlights,
-  * small UI affordances (“copy code”, tag hover).
-* **Soft UI**: no heavy borders everywhere; use borders only to define the “sheet,” code blocks, and small chips.
+1. Social feed embeds.
+2. Animated background effects.
+3. Multi-color accent systems.
+4. Floating action buttons.
+5. Non-essential badges/chips except tags and optional small language marker.
 
 ---
 
 ## 3) Information architecture
 
-### Pages
+### Routes
 
-1. **Home (landing + about)** `/`
+1. `/` home/about + frequent tags + recent posts.
+2. `/blog/` full reverse-chronological list.
+3. `/blog/YYYY/MM/DD/slug/` post detail.
+4. `/tags/` tag index.
+5. `/subscribe/` Kit subscription page.
+6. `/404.html` not found page.
 
-   * About copy
-   * Featured posts
-   * Recent posts
-   * Subscribe CTA
-2. **Blog index** `/blog/`
+### Navigation (global)
 
-   * Full reverse-chronological listing
-3. **Post detail** `/blog/YYYY/MM/DD/slug/` (or standard Jekyll permalink)
-4. **Tags** `/tags/`
+1. `Home`
+2. `Blog`
+3. `RSS`
+4. `Subscribe`
+5. `EN/KO` toggle
+6. `Light/Dark` toggle
 
-   * Tag index + per-tag sections
-5. **Subscribe** `/subscribe/`
+### Future slots (reserved but hidden)
 
-   * Dedicated Kit embed
-6. **404** `/404.html`
-
-### UI localization behavior
-
-* Routes stay single-source (`/`, `/blog/`, `/tags/`, `/subscribe/`) with no mirrored `/ko/` path requirement.
-* UI language toggle (`EN` / `KO`) localizes shared chrome only (nav labels, buttons, metadata labels, form copy).
-* Locale resolution order: query param (`?lang=`) -> saved preference -> browser language -> fallback `en`.
-* Blog posts are authored per-language (`lang: en` or `lang: ko`); translated counterparts are optional and linked via front matter.
-* No runtime machine translation; each language version is a separately authored Markdown file.
-
-### Navigation (top-level)
-
-* Home
-* Blog
-* Tags
-* Subscribe
-* RSS (icon or text)
-* Language toggle (`EN` / `KO`)
-
-**Reserved space for future** (must exist now, empty):
-
-* A small “social links slot” in header/footer that can later show **LinkedIn** and **GitHub** icons without shifting layout.
+1. Header/footer social slot sized for GitHub + LinkedIn links later.
+2. Layout must not shift when those links are enabled.
 
 ---
 
-## 4) Content model
+## 4) Localization and i18n architecture
 
-### Post front matter (required)
+## 4.1 UI localization framework (required)
+
+1. Framework: `i18next` (client-side).
+2. Init file: `assets/js/i18n.js`.
+3. Resource files:
+   1. `assets/i18n/en.json`
+   2. `assets/i18n/ko.json`
+4. Templates use translation keys via `data-i18n` attributes.
+5. Visible UI strings must not be hardcoded in layouts/includes.
+
+## 4.2 Locale resolution
+
+1. Priority order:
+   1. `?lang=en|ko` query param
+   2. `localStorage.stuffs_locale`
+   3. browser language
+   4. fallback `en`
+2. Language toggle updates:
+   1. current page text
+   2. stored preference
+3. Locale switch must not reload to a different route.
+
+## 4.3 Post language model (optional multilingual support)
+
+Each post file is authored in exactly one language.
+
+### Required front matter
 
 ```yaml
 ---
 layout: post
-title: "…"
+title: "..."
 date: 2026-02-14
-lang: en
+lang: en # en | ko
 tags: [css, javascript]
-summary: "One-sentence hook shown on lists and social previews."
+summary: "One sentence summary."
 featured: false
 ---
 ```
 
-`lang` must be either `en` or `ko` and describes the post content language.
-Multilingual support is optional and modeled as one post file per language variant.
+### Optional multilingual fields
 
-### Optional fields
+```yaml
+translation_key: mysql-vector-search-edition
+```
 
-* `reading_time_override`: for manual control
-* `canonical_url`: if cross-posting later
-* `draft: true`: for local preview only (not published)
-* `translation_key`: shared identifier that groups EN/KO versions of the same article
+### Rules
 
-### UI i18n framework
+1. `lang` is required on all posts.
+2. `translation_key` is optional.
+3. If multiple posts share a `translation_key`, they are translation variants.
+4. If no variant exists, post is treated as single-language with no errors.
 
-* Framework: `i18next` (client-side), initialized in `assets/js/i18n.js`
-* Locale resources: `assets/i18n/en.json` and `assets/i18n/ko.json`
-* Use stable translation keys for all shared UI strings (avoid hardcoded labels in includes/layouts)
-* Default fallback locale is `en` when a key is missing in `ko`
-* Post translation linking is optional and handled via post front matter (`lang` + `translation_key`)
+## 4.4 Variant linking behavior
+
+1. On post page:
+   1. If variant exists in other language, show a single alternate-language link.
+   2. If no variant, show nothing.
+2. On index pages:
+   1. Show each authored post as its own entry.
+   2. Include a compact language marker (`EN` or `KO`) in metadata.
+3. No automatic text translation.
 
 ---
 
 ## 5) Visual system
 
-## 5.1 Typography
+## 5.1 Typography and Korean coverage
 
-### Title font (required)
+### Heading/title stack
 
-**“Stuff of Thoughts”** uses a **typewriter-style serif**.
+1. Latin primary: `Courier Prime` (self-hosted WOFF2).
+2. Korean companion: `Noto Serif KR` (self-hosted WOFF2).
+3. Fallbacks: `"Apple SD Gothic Neo"`, `"Malgun Gothic"`, `"Noto Serif CJK KR"`, `serif`.
+4. For `:lang(ko)`, title headings switch to Korean-capable stack.
 
-**Recommended stack (self-host preferred):**
+### Body stack
 
-* Latin primary: `Courier Prime` (WOFF2 in repo)
-* Korean-capable companion: `Noto Serif KR` (WOFF2 in repo)
-* Final fallbacks: `"Apple SD Gothic Neo"`, `"Malgun Gothic"`, `"Noto Serif CJK KR"`, `serif`
+1. `"Noto Sans KR"`, `"Apple SD Gothic Neo"`, `"Malgun Gothic"`, `system-ui`, `sans-serif`.
+2. Must render full Hangul coverage (no tofu).
 
-**Usage**
+### Type scale
 
-* Site title (header + homepage hero)
-* Post titles (H1)
-* Section headers (H2/H3) optionally in the same family at smaller sizes
-* For Korean (`:lang(ko)`), switch heading/title token to `Noto Serif KR` to guarantee Hangul rendering
+1. Desktop:
+   1. Site title: `36-46px`
+   2. Section title: `34-42px`
+   3. Post title: `36-48px`
+   4. Body: `17-18px`
+2. Mobile:
+   1. Site title: `28-34px`
+   2. Section title: `26-30px`
+   3. Post title: `30-36px`
+   4. Body: `16-17px`
 
-### Body font
+## 5.2 Theme system (light + dark required)
 
-Body should be calm and highly readable on a dark background:
+Both themes must preserve minimalist look and readability.
 
-* Primary body stack: `"Noto Sans KR"`, `"Apple SD Gothic Neo"`, `"Malgun Gothic"`, `system-ui`, `sans-serif`
-* Keep body **not** fully monospaced to reduce fatigue; use mono for code only.
-* Requirement: every default/fallback body font must render full Korean glyph coverage (no tofu boxes)
+### Light mode tokens
 
-### Type scale (desktop)
+1. `--bg: #ececec`
+2. `--surface: #f6f6f3`
+3. `--text: #1f1f1f`
+4. `--muted: #5f5f5f`
+5. `--border: #cfcfc7`
+6. `--accent: #b8780a`
+7. `--tag-bg: #e2e2dc`
 
-* Site title: 40–52px
-* Post title: 44–60px
-* H2: 24–28px
-* Body: 16–18px
-* Meta: 12–13px
-* Line height:
+### Dark mode tokens
 
-  * Titles: 1.05–1.15
-  * Body: 1.65–1.85
+1. `--bg: #272822`
+2. `--surface: #2d2e2a`
+3. `--text: #f8f8f2`
+4. `--muted: #a1a19a`
+5. `--border: #49483e`
+6. `--accent: #f92672`
+7. `--tag-bg: #3a3b35`
 
-### Drop cap
+### Theme behavior
 
-* First paragraph of posts (only when post length > ~600 words)
-* Drop cap is a single letter in title font, ~3.2–3.8em height, slightly lowered baseline.
+1. Default follows `prefers-color-scheme`.
+2. User toggle persists to `localStorage.stuffs_theme`.
+3. Toggle is compact text or icon button in header.
+4. No theme transition animation longer than `150ms`.
 
----
+## 5.3 Minimal component styling rules
 
-## 5.2 Color (Monokai-first)
-
-### Core palette (tokens)
-
-**Background / surfaces**
-
-* `--bg`: `#272822` (Monokai base)
-* `--surface`: `#2d2e2a` (raised sheet)
-* `--surface-2`: `#31322d` (hover/alt)
-* `--border`: `#49483e` (Monokai muted border)
-
-**Text**
-
-* `--text`: `#f8f8f2`
-* `--muted`: `#a1a19a` (derived from Monokai gray family)
-* `--faint`: `#75715e` (Monokai comment)
-
-**Accent (keep UI coherent)**
-Pick **one** primary accent for UI chrome:
-
-* `--accent`: `#f92672` (Monokai pink) — recommended for links/rules/buttons
-  Supporting accents allowed only inside code highlighting:
-* `--cyan`: `#66d9ef`
-* `--green`: `#a6e22e`
-* `--orange`: `#fd971f`
-* `--purple`: `#ae81ff`
-* `--yellow`: `#e6db74`
-
-### Link styling
-
-* Default: text color stays `--text`
-* Underline: thin, offset underline in `--accent`
-* Hover: underline thickens + subtle background tint (`--surface-2`)
-
-### Inline code (explicit requirement)
-
-Inline code must scream Monokai:
-
-* Background: `--surface-2`
-* Border: `1px solid --border`
-* Text: `--yellow` or `--orange` (choose one; recommend `--yellow` for readability)
-* Padding: `0.1em 0.35em`
-* Radius: 6px
-
-### Code blocks
-
-* Background: slightly darker than sheet (still Monokai)
-* Syntax colors follow Monokai tokens (Rouge “monokai” or custom CSS)
-* Provide a “Code example” header row with:
-
-  * left label (muted)
-  * right “Copy” button (accent outline)
+1. Links are underlined by default.
+2. Tag chips are flat rectangles with subtle border/background.
+3. Buttons use thin border and no heavy fills by default.
+4. Shadows are either none or very subtle.
+5. Rounded corners are low (`2-6px` range).
 
 ---
 
-## 5.3 Layout, grid, and depth
+## 6) Layout and responsiveness (PC + mobile)
 
-### Page “stage” (screenshot-derived)
+## 6.1 Breakpoints
 
-* Full-viewport background: Monokai base + subtle radial vignette.
-* Centered “sheet”:
+1. Mobile: `< 640px`
+2. Tablet: `640-1023px`
+3. Desktop/PC: `>= 1024px`
 
-  * Max width: 980–1120px container
-  * Text column inside sheet: 680–760px
-  * Sheet padding: 56–72px top, 48–64px sides
-  * Border: 1px `--border`
-  * Shadow: soft, large blur (to mimic “floating paper”)
+## 6.2 Container and spacing
 
-### Rails
+1. Desktop content width: `680-760px`.
+2. Tablet content width: `90vw`, max `760px`.
+3. Mobile content width: `92vw`.
+4. Vertical rhythm uses `8px` base spacing scale.
 
-On wide screens (≥1100px):
+## 6.3 Header behavior
 
-* Right rail inside sheet:
+1. Desktop:
+   1. Inline nav row.
+   2. Subscribe button aligned right.
+2. Mobile:
+   1. Single-row compressed nav.
+   2. No multi-line overflowing nav; collapse spacing first.
+   3. If needed, shorten labels (`Subscribe` -> `Sub` only on very narrow screens).
 
-  * “All posts”
-  * Tag list
-  * Subscribe link
-* Left rail is **reserved** for future social links:
+## 6.4 Content behavior
 
-  * For now: empty space (no icons)
-  * Later: GitHub + LinkedIn icons appear without shifting main column
-
-On smaller screens:
-
-* Rails collapse under header as a compact row: `Blog · Tags · Subscribe · RSS`
-
----
-
-## 6) Components
-
-## 6.1 Header
-
-**Contents**
-
-* Left: Site title “Stuff of Thoughts” (click → home)
-* Right: nav items (Home/Blog/Tags/Subscribe/RSS)
-* Reserved social slot (hidden until configured):
-
-  * layout reserves ~56px; when enabled, icons appear
-
-**Behavior**
-
-* Sticky header optional; if used, keep it subtle (no big shadows, just a faint border line).
-
-## 6.2 Home (landing + about)
-
-**Top section**
-
-* Title: “Stuff of Thoughts” large
-* One-paragraph about
-* “Subscribe” CTA button
-
-**Featured posts**
-
-* 3–5 curated links (manual list in config or `featured: true`)
-* Each entry shows:
-
-  * title
-  * date
-  * tags
-
-**Recent posts**
-
-* Simple list, 10–20 items with date + title + tags
-
-## 6.3 Blog index
-
-* List of posts with:
-
-  * date (muted)
-  * title (title font)
-  * one-line summary
-  * tags
-
-Optional: pagination (static) after ~30 posts.
-
-## 6.4 Post page
-
-**Top meta row**
-
-* Date (muted)
-* Reading time (muted)
-* Tags (chips)
-
-**Title**
-
-* Huge, typewriter-serif
-* Under-title accent rule: 1–2px in `--accent`
-
-**Body**
-
-* Comfortable line length
-* Drop cap on first paragraph for long posts
-* Images centered, max width = text column, with subtle border
-
-**Code blocks**
-
-* Code header row: “Code example” + “Copy”
-* Monokai syntax highlighting
-
-**Footer**
-
-* Previous / Next post links with accent underline
-* Comments section
-* Subscribe CTA (small)
-
-## 6.5 Tags
-
-**Tags index page**
-
-* Alphabetical tag list at top
-* Below: per-tag sections on the same page (anchor links)
-
-  * Avoid generating many separate pages unless you later switch to Actions-based build.
-  * This keeps it “sensible” for GitHub Pages while still feeling complete.
-
-## 6.6 Subscribe
-
-* Dedicated page with:
-
-  * short pitch
-  * Kit embed form
-  * privacy note (“unsubscribe anytime”, “we store emails in Kit”)
-
-**CAPTCHA**
-
-* Rely on Kit’s built-in form protections (honeypot + conditional challenges) to satisfy the “captcha for signup” requirement. ([help.kit.com][1])
-  (No custom CAPTCHA widget required on the static site.)
-
-## 6.7 Comments (utterances)
-
-* Embedded at bottom of post, after prev/next.
-* Uses GitHub Issues for storage, no ads/tracking, and supports dark theme. ([GitHub][2])
-  **Implementation constraints**
-* The comments repo must be public for readers to load/comment.
-* Theme set to a dark variant tuned to Monokai (or closest supported).
+1. Post list remains one-column on all breakpoints.
+2. Code blocks scroll horizontally on mobile.
+3. Touch targets minimum `40px` height for tappable controls.
+4. Font sizes never below `16px` body on mobile.
 
 ---
 
-## 7) Interaction & motion
+## 7) Page-level component specs
 
-* Hover states are minimal:
+## 7.1 Home (`/`)
 
-  * links: underline thickens
-  * tag chips: background tint
-  * copy button: accent fill on hover
-* Copy code:
+### Required blocks (top to bottom)
 
-  * on click: “Copied” micro-toast near button (no modal)
-* Prefer **no page transitions**; keep it crisp and doc-like.
+1. Minimal nav/header.
+2. Frequent tags block.
+3. Year-grouped recent post list.
 
----
+### Optional blocks
 
-## 8) Responsiveness
+1. One short about paragraph.
+2. One compact subscribe CTA link.
 
-### Breakpoints
+### Must not include
 
-* Mobile: < 640px
-* Tablet: 640–1024px
-* Desktop: > 1024px
-* Wide: > 1280px (enable rails)
+1. Hero image.
+2. Multi-column cards.
+3. Sticky sidebars.
 
-### Mobile rules
+## 7.2 Blog index (`/blog/`)
 
-* Title size reduced (H1 ~34–40px)
-* Rails collapse into a single nav row
-* Code blocks horizontally scroll with momentum; show “Copy” still
+1. Reverse-chronological list grouped by year.
+2. Per item:
+   1. date
+   2. title link
+   3. tags
+   4. language marker
 
----
+## 7.3 Post detail
 
-## 9) Accessibility & legibility
+1. Meta line: date, reading time (optional override), language marker.
+2. Title.
+3. Optional alternate-language link (if `translation_key` variant exists).
+4. Body content.
+5. Code blocks with copy action.
+6. Prev/next links.
+7. utterances comments.
+8. Small subscribe CTA.
 
-* Contrast: Monokai text on dark is strong; ensure muted text still meets AA for small sizes.
-* Focus styles: visible focus ring using `--cyan` or `--accent`.
-* Motion: respect `prefers-reduced-motion`.
-* Code blocks: ensure line-height and font-size are readable (min 14–15px).
-* Set correct document language per page using post front matter (`<html lang="en">` or `<html lang="ko">` for posts).
-* Korean typography: use `word-break: keep-all` for paragraphs and avoid awkward Hangul wrapping.
+## 7.4 Tags page
 
----
+1. Frequent tags list at top.
+2. Alphabetical full list below.
+3. Clicking tag opens filtered list page/anchor section.
 
-## 10) SEO & metadata
+## 7.5 Subscribe page
 
-* Canonical URL: `https://stuffs.blog`
-* OpenGraph/Twitter cards:
-
-  * Use `summary_large_image` by default
-* RSS feed exposed in header + nav
-* `sitemap.xml` + `robots.txt`
-* If language-variant landing pages are added later, emit `hreflang` alternates (`en`, `ko`) for those variants
-* For posts with matching `translation_key`, emit `hreflang` alternates for the available language variants
-
----
-
-## 11) Implementation notes (Jekyll + GitHub Pages)
-
-### Core approach
-
-* Standard Jekyll structure:
-
-  * `_posts/` for Markdown
-  * `_layouts/` for `home`, `post`, `page`
-  * `_includes/` for header/footer/components
-  * `assets/` for CSS/JS/fonts
-
-### Plugins (keep it GitHub Pages-friendly)
-
-* RSS feed plugin (for `/feed.xml`)
-* SEO + sitemap if desired
-
-### Localization implementation (GitHub Pages-safe)
-
-* Avoid non-supported Jekyll i18n plugins; use client-side `i18next`.
-* Keep one set of routes and localize UI strings at render time.
-* Add a reusable language switcher include in header.
-* Translate shared UI via `data-i18n` keys in templates/includes.
-* Persist selected locale (`en` or `ko`) in local storage.
-* Build a post translation map by `translation_key`; render alternate-language post links only when a variant exists.
-* Self-host Korean font files in `assets/fonts/` and preload only the needed weights.
-
-### Repo visibility
-
-* Site repo may be private on GitHub Pro while Pages is published publicly. ([GitHub Docs][3])
+1. Short value proposition.
+2. Kit embed form.
+3. Privacy line (`unsubscribe anytime`).
+4. Minimal confirmation/success messaging.
 
 ---
 
-## 12) Future-proofing (required: LinkedIn + GitHub later)
+## 8) Accessibility and legibility
 
-**Design requirement:** Adding LinkedIn/GitHub later must not require layout changes.
-
-### How we guarantee this
-
-* **Reserved social slot** in header and footer:
-
-  * Invisible but space-reserved on desktop
-  * When configured later, icons appear in that exact slot
-* Social links configuration (future):
-
-  * `social.github`
-  * `social.linkedin`
-
-No UI for these links ships now; only the slot and styling rules exist.
+1. Meet WCAG AA contrast in both light and dark modes.
+2. Focus ring always visible and keyboard navigable.
+3. Respect `prefers-reduced-motion`.
+4. Set `html[lang]` based on page/post language.
+5. Korean paragraph wrapping uses `word-break: keep-all`.
+6. Every icon-only control has an accessible label.
 
 ---
 
-## 13) Acceptance criteria (what “done” means)
+## 9) SEO and metadata
 
-1. Site title displays exactly: **Stuff of Thoughts** in typewriter-style serif.
-2. Home page is an About page + featured posts + recent posts.
-3. Blog index lists posts with date, title, summary, tags.
-4. Post pages include:
-
-   * meta row + huge title + accent rule
-   * Monokai inline code styling
-   * Monokai code blocks with “Copy” button
-   * prev/next links
-   * comments embed (GitHub Issues)
-5. Tags page exists and allows browsing posts by tag without a backend.
-6. Subscribe page exists with Kit embed and spam protection handled by Kit.
-7. Visual language matches the screenshots’ feel:
-
-   * centered “sheet on stage”
-   * editorial/terminal typography
-   * minimal navigation and rails
-   * subtle depth and clean spacing
-8. Layout reserves a future slot for LinkedIn/GitHub icons without shifting content.
-9. UI is localized via `i18next` with `en`/`ko` resource files and a visible `EN` / `KO` language toggle.
-10. Korean text renders Hangul correctly with the specified Korean-capable font stacks.
-11. Post pages emit correct `html lang` metadata based on each post’s `lang` front matter.
-12. Multilingual posts are optional: when variants share a `translation_key`, each variant exposes an alternate-language link and `hreflang`; single-language posts still work without alternates.
+1. Canonical base URL: `https://stuffs.blog`.
+2. OpenGraph + Twitter cards on all pages.
+3. Expose RSS in header and `<head>`.
+4. Generate `sitemap.xml` and `robots.txt`.
+5. If translation variants exist (`translation_key`), emit `hreflang` alternates for available languages.
 
 ---
 
-If you want the next step, I can produce the **exact Jekyll layout structure** (`_layouts/home.html`, `_layouts/post.html`, `assets/main.css`, `tags.html`, `subscribe.html`) and the embed snippets (Kit + utterances) to match this design 1:1.
+## 10) Repository structure
 
-[1]: https://help.kit.com/en/articles/9053602-the-kit-newsletter-plan?utm_source=chatgpt.com "The Kit Newsletter Plan"
-[2]: https://github.com/utterance/utterances?utm_source=chatgpt.com "utterance/utterances: :crystal_ball: A lightweight comments ..."
-[3]: https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages?utm_source=chatgpt.com "What is GitHub Pages?"
-[4]: https://kit.com/pricing?utm_source=chatgpt.com "Flexible Pricing Plans for Every Stage of Your Creator ..."
+```text
+/
+  _config.yml
+  _data/
+    locales/
+      en.yml
+      ko.yml
+  _includes/
+    header.html
+    footer.html
+    subscribe-form.html
+    language-toggle.html
+    theme-toggle.html
+  _layouts/
+    default.html
+    home.html
+    blog_index.html
+    post.html
+    tags.html
+    subscribe.html
+  _posts/
+  assets/
+    css/main.css
+    js/i18n.js
+    js/theme.js
+    i18n/en.json
+    i18n/ko.json
+    fonts/
+      CourierPrime-Regular.woff2
+      NotoSerifKR-Regular.woff2
+      NotoSansKR-Regular.woff2
+  scripts/
+    validate_front_matter.sh
+    validate_i18n_keys.sh
+    validate_kit_config.sh
+```
+
+---
+
+## 11) Deployment pipeline (required)
+
+## 11.1 PR validation workflow (`.github/workflows/ci.yml`)
+
+### Triggers
+
+1. `pull_request` on `main`.
+2. Manual `workflow_dispatch`.
+
+### Jobs (must pass)
+
+1. Front matter validation:
+   1. checks required fields (`title`, `date`, `lang`, `tags`, `summary`)
+   2. validates `lang in {en, ko}`
+2. i18n key validation:
+   1. compares `en.json` and `ko.json` key parity
+   2. fails on missing keys unless explicitly allowlisted
+3. Build:
+   1. `bundle exec jekyll build`
+4. HTML/link checks:
+   1. no broken internal links
+   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`)
+5. Kit config validation:
+   1. subscribe page contains Kit form include
+   2. required config values present
+
+## 11.2 Production deploy workflow (`.github/workflows/deploy.yml`)
+
+### Trigger
+
+1. Push to `main` after PR merge.
+
+### Steps
+
+1. Checkout.
+2. Setup Ruby and Bundler cache.
+3. Install dependencies.
+4. Build Jekyll site.
+5. Upload Pages artifact.
+6. Deploy using GitHub Pages action.
+7. Run post-deploy smoke checks:
+   1. `/` returns `200`
+   2. `/subscribe/` returns `200`
+   3. RSS endpoint reachable
+
+### Environment controls
+
+1. Use protected GitHub Environment (`production`).
+2. Branch protection requires CI success before merge.
+
+## 11.3 Rollback
+
+1. Re-run deploy workflow for last known good commit.
+2. If urgent, revert merge commit in `main` and redeploy.
+
+---
+
+## 12) Kit email integration setup (required)
+
+## 12.1 One-time Kit setup
+
+1. Create Kit account and publication.
+2. Create a form dedicated to `stuffs.blog`.
+3. Enable double opt-in (recommended).
+4. Configure confirmation/thank-you destination page.
+
+## 12.2 Site configuration
+
+Add to `_config.yml`:
+
+```yaml
+kit:
+  form_action: "https://app.kit.com/forms/<FORM_ID>/subscriptions"
+  form_uid: "<FORM_ID>"
+  success_url: "/subscribe/?status=success"
+  error_url: "/subscribe/?status=error"
+```
+
+## 12.3 Template integration
+
+1. `subscribe-form.html` reads `site.kit.*`.
+2. Form includes:
+   1. email field
+   2. submit button
+   3. honeypot field (hidden)
+3. Keep copy minimal and localized through `i18next`.
+
+## 12.4 Validation gates
+
+1. CI fails if `kit.form_action` is missing for production builds.
+2. CI fails if subscribe page omits the form include.
+3. Manual QA verifies:
+   1. successful subscription flow
+   2. confirmation email delivery
+   3. unsubscribe works
+
+---
+
+## 13) Comments integration (utterances)
+
+1. Store comments in a dedicated public repo.
+2. Embed only on post pages.
+3. Theme must follow active site theme (light/dark variants).
+4. If utterances unavailable, page content still fully readable.
+
+---
+
+## 14) Quality checklist (definition of done)
+
+A release is done only if all items pass.
+
+1. Minimalist design matches screenshot intent on desktop.
+2. Mobile layout remains one-column and readable without overlap.
+3. Light and dark mode both pass contrast and visual QA.
+4. UI strings localize correctly for `en` and `ko`.
+5. Korean text renders correctly in nav, tags, body, and buttons.
+6. Posts with and without `translation_key` both render correctly.
+7. Optional alternate-language link appears only when variant exists.
+8. Subscribe form works end-to-end with Kit.
+9. CI and deploy workflows are green.
+10. Production smoke checks pass.
+
+---
+
+## 15) Execution plan (phased)
+
+## Phase 0 - foundation
+
+1. Create file structure and base layouts.
+2. Add typography assets and CSS token system.
+3. Implement minimal header/footer shells.
+
+## Phase 1 - core UI and responsiveness
+
+1. Build home/blog/post/tags/subscribe layouts.
+2. Implement responsive rules for mobile/tablet/desktop.
+3. Match screenshot-inspired minimalist spacing and typography.
+
+## Phase 2 - i18n and themeing
+
+1. Add `i18next` bootstrapping.
+2. Replace hardcoded UI strings with keys.
+3. Add language toggle and persistence.
+4. Add light/dark toggle and persistence.
+
+## Phase 3 - post language variants
+
+1. Enforce post `lang` front matter.
+2. Add optional `translation_key` logic.
+3. Render alternate-language link when applicable.
+4. Emit `hreflang` for variant pairs.
+
+## Phase 4 - integrations
+
+1. Integrate Kit form and localized labels.
+2. Integrate utterances with light/dark mapping.
+3. Verify no integration adds visual clutter.
+
+## Phase 5 - CI/CD and launch
+
+1. Add CI workflow checks (front matter, i18n, build, link, Kit config).
+2. Add deploy workflow to GitHub Pages.
+3. Configure branch protection and production environment.
+4. Run smoke tests and publish.
+
+---
+
+## 16) Acceptance criteria (final)
+
+1. Site is minimalist, matching screenshot principles and bare necessities.
+2. Works on both PC and mobile with no broken layout.
+3. Supports light mode and dark mode with persistent preference.
+4. Uses `i18next` for UI localization (`en`, `ko`).
+5. Supports optional multilingual posts via `translation_key`.
+6. Maintains Korean-capable font coverage in both themes.
+7. CI/CD deploy pipeline is active and enforced.
+8. Kit email integration is configured, validated, and tested.
+9. Comments, RSS, SEO metadata, and accessibility requirements are met.
+
+---
+
+If needed, next step is converting this plan into exact files and workflows (`_layouts/*`, `assets/*`, `.github/workflows/*`, and Kit form include) with concrete code.
