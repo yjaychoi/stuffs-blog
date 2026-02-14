@@ -71,14 +71,16 @@ This section is mandatory and overrides stylistic ambiguity.
 
 ### Routes
 
-1. `/` home/about + frequent tags + recent posts.
-2. `/blog/` full reverse-chronological list.
-3. `/blog/YYYY/MM/DD/slug/` default post detail route.
+1. `/` and `/ko/` home/about + frequent tags + recent posts.
+2. `/blog/` and `/ko/blog/` full reverse-chronological list.
+3. `/blog/YYYY/MM/DD/slug/` route for posts authored with `lang: en`.
 4. `/ko/blog/YYYY/MM/DD/slug/` required route pattern for posts authored with `lang: ko`.
-5. `/tags/` tag index.
-6. `/subscribe/` Kit subscription page.
-7. `/feed.xml` RSS feed.
-8. `/404.html` not found page.
+5. `/tags/` and `/ko/tags/` tag index.
+6. `/tags/<tag-slug>/` and `/ko/tags/<tag-slug>/` canonical tag-filtered pages.
+7. `/subscribe/` and `/ko/subscribe/` Kit subscription page.
+8. `/privacy/` and `/ko/privacy/` privacy notice page.
+9. `/feed.xml` RSS feed.
+10. `/404.html` not found page.
 
 ### Navigation (global)
 
@@ -100,28 +102,32 @@ This section is mandatory and overrides stylistic ambiguity.
 
 ## 4.1 UI localization framework (required)
 
-1. Framework: `i18next` (client-side).
+1. Framework: `i18next` (client-side enhancement) + Liquid server-rendered locale fallbacks.
 2. Init file: `assets/js/i18n.js`.
 3. Resource files (single source of truth):
    1. `assets/i18n/en.json`
    2. `assets/i18n/ko.json`
-4. Templates use translation keys via `data-i18n` attributes and include server-rendered fallback text.
-5. Fallback text is `en` by default and must keep non-post UI readable when JS is disabled.
-6. UI translation source of truth is only `assets/i18n/*.json`; `_data/locales/*` must not define UI copy.
-7. Layout/include fallback literals are allowed only as progressive-enhancement defaults paired with `data-i18n` keys.
+4. Build sync step `scripts/sync_i18n_data.sh` must generate `_data/i18n.generated.json` from `assets/i18n/*.json`.
+5. Templates use translation keys via `data-i18n` attributes and include server-rendered fallback text from `_data/i18n.generated.json`.
+6. Non-post pages are pre-rendered for both locale route sets (`/` + `/ko/...`) so JS-disabled users get locale-correct UI copy.
+7. UI translation source of truth is only `assets/i18n/*.json`; `_data/locales/*` must not define or duplicate UI copy.
+8. Layout/include fallback literals are allowed only as progressive-enhancement defaults paired with `data-i18n` keys.
 
 ## 4.2 Locale resolution
 
 1. Priority order:
-   1. `?lang=en|ko` query param
-   2. `localStorage.stuffs_locale`
-   3. browser language
-   4. fallback `en`
+   1. locale route prefix (`/ko/...` => `ko`; unprefixed => `en`)
+   2. `?lang=en|ko` query param only as route-redirection hint on initial load
+   3. `localStorage.stuffs_locale`
+   4. browser language
+   5. fallback `en`
 2. Language toggle updates:
-   1. current page text
-   2. stored preference
-3. Locale switch must not reload to a different route.
-4. Internal links must use canonical route URLs without `?lang`.
+   1. stored preference
+   2. current page route to its locale equivalent for non-post pages (for example `/blog/` <-> `/ko/blog/`)
+   3. current page chrome text on post pages while keeping post URL stable
+3. Internal links must preserve active locale prefix for non-post routes.
+4. Canonical URLs must not include `?lang`.
+5. Locale routes must remain shareable and crawlable.
 
 ## 4.3 Post language model (optional multilingual support)
 
@@ -156,11 +162,17 @@ translation_key: mysql-vector-search-edition
 5. `translation_key` format is lowercase kebab-case (`[a-z0-9-]+`).
 6. For one `translation_key`, at most one `en` post and at most one `ko` post are allowed.
 7. Duplicate language variants for the same `translation_key` fail CI.
-8. Permalink language rule:
-   1. `lang: en` uses default non-prefixed blog route (`/blog/...`) unless explicitly changed.
-   2. `lang: ko` must use `/ko/blog/...`.
-   3. Any manual `permalink` override must preserve the language prefix rule above.
-9. Variant permalinks must be unique; CI fails on output URL collisions.
+8. Permalink generation strategy (required):
+   1. English posts must live under `_posts/en/`.
+   2. Korean posts must live under `_posts/ko/`.
+   3. `_config.yml` defaults map `_posts/en/*` to `/blog/:year/:month/:day/:title/`.
+   4. `_config.yml` defaults map `_posts/ko/*` to `/ko/blog/:year/:month/:day/:title/`.
+   5. Manual `permalink` overrides are forbidden by default.
+   6. Exception path: manual override is allowed only with `permalink_override_reason` and explicit CI allowlist entry.
+9. Language-route rules:
+   1. `lang: en` must never output under `/ko/...`.
+   2. `lang: ko` must always output under `/ko/blog/...`.
+10. Variant permalinks must be unique; CI fails on output URL collisions.
 
 ## 4.4 Variant linking behavior
 
@@ -190,6 +202,13 @@ translation_key: mysql-vector-search-edition
 
 1. `"Noto Sans KR"`, `"Apple SD Gothic Neo"`, `"Malgun Gothic"`, `system-ui`, `sans-serif`.
 2. Must render full Hangul coverage (no tofu).
+
+### Font loading and performance
+
+1. Self-hosted fonts must use `font-display: swap`.
+2. Provide subset files (Latin/core + Korean) using `unicode-range` to reduce first paint cost.
+3. Preload only the title font and current-locale primary body font on first view.
+4. CI must enforce a first-view font budget for critical routes (target: <= `350KB` combined WOFF2 transfer before caching).
 
 ### Type scale
 
@@ -224,28 +243,36 @@ Both themes must preserve minimalist look and readability.
 3. Accent role mapping:
    1. `--accent` = primary emphasis (active nav, highlighted metadata).
    2. `--accent-alt` = secondary emphasis (CTA borders, subtle highlights).
+4. Text role mapping:
+   1. `--text` and `--muted-text` are the only default glyph-color tokens for body-size text.
+   2. `--accent` and `--accent-alt` are decorative by default (underline, border, marker), not body-size text colors unless measured contrast is `>= 4.5:1`.
+   3. `--muted-stroke` is non-text (border/divider/chrome) and may not be used as body-size text color.
 
 ### Light mode tokens
 
 1. `--bg: #f8f8f2`
 2. `--surface: #f8f8f2`
 3. `--text: #272822`
-4. `--muted: #75715e`
-5. `--border: #75715e`
-6. `--accent: #f92672`
-7. `--accent-alt: #fd971f`
-8. `--tag-bg: #e6db74`
+4. `--muted-text: #75715e`
+5. `--muted-stroke: #75715e`
+6. `--border: #75715e`
+7. `--accent: #f92672`
+8. `--accent-alt: #fd971f`
+9. `--tag-bg: #e6db74`
+10. `--tag-text: #272822`
 
 ### Dark mode tokens
 
 1. `--bg: #272822`
 2. `--surface: #272822`
 3. `--text: #f8f8f2`
-4. `--muted: #75715e`
-5. `--border: #75715e`
-6. `--accent: #f92672`
-7. `--accent-alt: #fd971f`
-8. `--tag-bg: #75715e`
+4. `--muted-text: #ae81ff`
+5. `--muted-stroke: #75715e`
+6. `--border: #75715e`
+7. `--accent: #f92672`
+8. `--accent-alt: #fd971f`
+9. `--tag-bg: #75715e`
+10. `--tag-text: #f8f8f2`
 
 ### Theme behavior
 
@@ -262,7 +289,8 @@ Both themes must preserve minimalist look and readability.
 4. Shadows are either none or very subtle.
 5. Rounded corners are low (`2-6px` range).
 6. Use `--accent` and `--accent-alt` sparingly for nav-active states, CTA borders, and small metadata highlights.
-7. For text below large-text thresholds, apply accent via underline/border/marker while keeping glyph color at `--text` unless measured contrast is `>= 4.5:1`.
+7. For text below large-text thresholds, apply accent via underline/border/marker while keeping glyph color at `--text` or `--muted-text` unless measured contrast is `>= 4.5:1`.
+8. In dark theme, `#75715e` is reserved for borders/dividers/chrome and must not be used as paragraph-scale glyph color.
 
 ## 5.4 Post code block highlighting (Monokai required)
 
@@ -337,15 +365,16 @@ Both themes must preserve minimalist look and readability.
 ### Frequent tags algorithm (deterministic)
 
 1. Compute at build time from published posts only (exclude drafts/future posts).
-2. Rolling window: last `365` days anchored to the most recent published post date (`max(post.date)`), not wall-clock build time.
-3. Tag count rule: one count per tag per post.
-4. Sort order:
+2. Rolling window: last `365` days anchored to build date in UTC (`site.time`).
+3. CI snapshot tests must set `SITE_BUILD_DATE_UTC` to freeze the anchor date for deterministic assertions.
+4. Tag count rule: one count per tag per post.
+5. Sort order:
    1. count descending
    2. tag name ascending (tie-break)
-5. Render top `20` tags with counts.
-6. Hide tags with count `< 2`.
-7. `View all` must link to `/tags/`.
-8. Implementation must be static-safe (Liquid/build script), no runtime API calls.
+6. Render top `20` tags with counts.
+7. Hide tags with count `< 2`.
+8. `View all` must link to locale-equivalent tags index (`/tags/` or `/ko/tags/`).
+9. Implementation must be static-safe (Liquid/build script), no runtime API calls.
 
 ### Optional blocks
 
@@ -362,19 +391,19 @@ Both themes must preserve minimalist look and readability.
 
 1. Reverse-chronological list grouped by year.
 2. Per item:
-   1. date
+   1. localized date in `<time datetime="...">` (visible format: `en => MMM d, yyyy`, `ko => yyyy.MM.dd`; machine value: ISO-8601)
    2. title link
    3. tags
    4. language marker
 
 ## 7.3 Post detail
 
-1. Meta line: date, reading time (optional override), language marker.
+1. Meta line: localized date (`en => MMM d, yyyy`, `ko => yyyy.MM.dd`), reading time (optional override), language marker.
 2. Title.
 3. Optional alternate-language link (if `translation_key` variant exists).
 4. Body content.
 5. Code blocks with copy action and Monokai syntax highlighting.
-6. Prev/next links.
+6. Prev/next links are constrained to the current post language (`en` links only to `en`, `ko` only to `ko`).
 7. utterances comments.
 8. Small subscribe CTA.
 
@@ -382,7 +411,7 @@ Both themes must preserve minimalist look and readability.
 
 1. Frequent tags list at top.
 2. Alphabetical full list below.
-3. Clicking tag opens filtered list page/anchor section.
+3. Clicking tag must navigate to canonical tag route pages (`/tags/<tag-slug>/` or `/ko/tags/<tag-slug>/`), not ad-hoc anchors.
 
 ## 7.5 Subscribe page
 
@@ -391,6 +420,13 @@ Both themes must preserve minimalist look and readability.
 3. Privacy line (`unsubscribe anytime`).
 4. Minimal confirmation/success messaging.
 
+## 7.6 Privacy page
+
+1. Explains data processing for Kit form submissions and utterances comments.
+2. Lists third-party processors and links to their privacy policies.
+3. Provides contact channel for privacy-related requests.
+4. Keeps copy concise and available in both locale routes (`/privacy/`, `/ko/privacy/`).
+
 ---
 
 ## 8) Accessibility and legibility
@@ -398,11 +434,12 @@ Both themes must preserve minimalist look and readability.
 1. Meet WCAG AA contrast in both light and dark modes.
 2. Focus ring always visible and keyboard navigable.
 3. Respect `prefers-reduced-motion`.
-4. Non-post pages set `html[lang]` from active UI locale and update on locale toggle.
+4. Non-post pages set `html[lang]` from route locale (`/` => `en`, `/ko/...` => `ko`) and remain readable with JS disabled.
 5. Post pages set `html[lang]` from post front matter (`lang`); locale toggle must not relabel post body language.
 6. On post pages, locale-toggled chrome UI elements use element-level `lang` attributes so mixed-language UI remains semantically correct.
 7. Korean paragraph wrapping uses `word-break: keep-all` plus `overflow-wrap: anywhere` fallback for URLs and long Latin tokens.
 8. Every icon-only control has an accessible label.
+9. Dates must be semantically marked with `<time datetime="...">` and visually localized by active UI locale.
 
 ---
 
@@ -415,6 +452,8 @@ Both themes must preserve minimalist look and readability.
 5. Generate `sitemap.xml` and `robots.txt`.
 6. If translation variants exist (`translation_key`), emit `hreflang` for available languages plus `x-default` to English variant when present.
 7. Each language variant is self-canonical (never canonicalize to another language variant).
+8. Locale-paired non-post routes (`/`<->`/ko/`, `/blog/`<->`/ko/blog/`, `/tags/`<->`/ko/tags/`, `/subscribe/`<->`/ko/subscribe/`, `/privacy/`<->`/ko/privacy/`) must emit reciprocal `hreflang` links.
+9. `_config.yml` must set `url: https://stuffs.blog` and `baseurl: ""`; repository must also include `CNAME` with `stuffs.blog`.
 
 ---
 
@@ -422,7 +461,10 @@ Both themes must preserve minimalist look and readability.
 
 ```text
 /
+  CNAME
   _config.yml
+  _data/
+    i18n.generated.json
   _includes/
     header.html
     footer.html
@@ -435,8 +477,12 @@ Both themes must preserve minimalist look and readability.
     blog_index.html
     post.html
     tags.html
+    tag_detail.html
     subscribe.html
+    privacy.html
   _posts/
+    en/
+    ko/
   assets/
     css/main.css
     js/i18n.js
@@ -448,15 +494,21 @@ Both themes must preserve minimalist look and readability.
       NotoSerifKR-Regular.woff2
       NotoSansKR-Regular.woff2
   scripts/
+    sync_i18n_data.sh
     validate_front_matter.sh
     validate_i18n_keys.sh
+    validate_i18n_allowlist.sh
     validate_translation_variants.sh
+    validate_permalink_strategy.sh
     validate_static_constraints.sh
     validate_code_highlighting.sh
+    validate_theme_contrast.sh
+    validate_seo_config.sh
     validate_kit_config.sh
   tests/
     visual/
       smoke.spec.ts
+      no_js_locale.spec.ts
 ```
 
 ---
@@ -476,77 +528,100 @@ Both themes must preserve minimalist look and readability.
 1. `pull_request` on `main`.
 2. Manual `workflow_dispatch`.
 
+### Toolchain setup (required for CI jobs)
+
+1. Setup Ruby + Bundler cache.
+2. Setup Node LTS + npm cache.
+3. Install dependencies: `bundle install` and `npm ci`.
+
 ### Jobs (must pass)
 
 1. Front matter validation:
    1. checks required fields (`title`, `date`, `lang`, `tags`, `summary`)
    2. validates `lang in {en, ko}`
    3. validates `translation_key` format when present
-2. i18n key validation:
-   1. compares `en.json` and `ko.json` key parity
-   2. fails on missing keys unless explicitly allowlisted
-   3. fails if `_data/locales/*` includes UI translation payloads
-3. Translation variant validation:
+2. i18n source/sync validation:
+   1. runs `scripts/sync_i18n_data.sh` and fails if generated `_data/i18n.generated.json` is out of sync
+   2. compares `en.json` and `ko.json` key parity
+   3. fails on missing keys unless explicitly allowlisted
+   4. allowlist entries must include owner + issue link + expiry date; expired entries fail CI
+   5. fails if `_data/locales/*` includes UI translation payloads
+3. Translation/permalink validation:
    1. enforces max one `en` and one `ko` per `translation_key`
-   2. enforces language-route rule (`lang: ko` -> `/ko/blog/...`)
-   3. enforces language-route rule (`lang: en` -> non-`/ko/...` route)
+   2. enforces post path strategy (`_posts/en/*` or `_posts/ko/*`)
+   3. enforces language-route rules (`lang: ko` -> `/ko/blog/...`, `lang: en` -> non-`/ko/...`)
    4. fails on duplicate output permalinks
+   5. fails manual `permalink` overrides unless exception metadata + allowlist entry are present
 4. Progressive-enhancement i18n validation:
    1. fails if critical nav labels are JS-only with no server-rendered fallback text
    2. fails if fallback literals in templates/includes are missing matching `data-i18n` keys
+   3. fails if locale-paired non-post routes are missing server-rendered localized fallback copy
 5. Static constraint validation:
    1. fails if templates introduce internal API calls or server-only dependencies
 6. Build:
-   1. `bundle exec jekyll build`
-7. HTML/link checks:
+   1. `bundle exec jekyll build` in UTC timezone
+7. HTML/link/SEO checks:
    1. no broken internal links
-   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`, `/feed.xml`)
-   3. canonical tag excludes `?lang`
-   4. RSS endpoint returns valid XML
+   2. key pages exist (`/`, `/ko/`, `/blog/`, `/ko/blog/`, `/tags/`, `/ko/tags/`, `/subscribe/`, `/ko/subscribe/`, `/privacy/`, `/ko/privacy/`, `/feed.xml`)
+   3. canonical tags exclude `?lang`
+   4. reciprocal `hreflang` links exist for locale-paired non-post routes
+   5. RSS endpoint returns valid XML
+   6. `url`, `baseurl`, and `CNAME` values are consistent with `https://stuffs.blog`
 8. UI smoke tests (Playwright or equivalent):
    1. desktop viewport (`1366x900`): light/dark + `en/ko` toggles
    2. mobile viewport (`390x844`): light/dark + `en/ko` toggles
    3. asserts no horizontal overflow and header controls remain reachable (including utility-panel path)
-9. Accessibility audit (axe-core or equivalent):
-   1. scans `/`, `/blog/`, one post page, and `/subscribe/` in light and dark themes
+9. No-JS localization smoke tests:
+   1. JS disabled for `/ko/`, `/ko/blog/`, and `/ko/subscribe/`
+   2. asserts localized fallback labels render and primary controls remain reachable
+10. Accessibility audit (axe-core or equivalent):
+   1. scans `/`, `/ko/`, `/blog/`, `/ko/blog/`, one `en` post page, one `ko` post page, `/subscribe/`, and `/ko/subscribe/` in light and dark themes
    2. fails on WCAG AA contrast and keyboard-focus regressions
-10. Code and palette validation:
+11. Code and palette validation:
    1. fails if post code block styles/tokens deviate from required Monokai values
    2. fails if post code blocks are missing minimal chrome hooks (language/filename row + copy action)
    3. fails if blog visual tokens (`--accent`, `--accent-alt`, code tokens, and tag tokens) are outside the Monokai subset
-11. Kit config validation:
+   4. fails if text-role tokens (`--text`, `--muted-text`, `--tag-text`) violate AA contrast against theme background
+12. Kit config validation:
    1. subscribe page contains Kit form include
-   2. required config values present
+   2. required config values are present
+   3. `kit.success_url` and `kit.error_url` are absolute `https://stuffs.blog/...` URLs
+   4. production gate uses `github.ref == refs/heads/main` on `push` or `workflow_dispatch`
 
 ## 11.2 Production deploy workflow (`.github/workflows/deploy.yml`)
 
 ### Trigger
 
 1. Push to `main` after PR merge.
+2. Manual `workflow_dispatch` with optional `deploy_ref` input (branch, tag, or commit SHA).
 
 ### Steps
 
 1. Checkout.
-2. Setup Ruby and Bundler cache.
-3. Install dependencies.
-4. Build static Jekyll site.
-5. Upload Pages artifact.
-6. Deploy using GitHub Pages action.
-7. Run post-deploy smoke checks:
-   1. `/` returns `200`
-   2. `/subscribe/` returns `200`
-   3. `/feed.xml` returns `200` and parses as XML
-   4. one desktop and one mobile smoke probe succeed
+2. Checkout `deploy_ref` when provided; otherwise checkout `main`.
+3. Setup Ruby and Bundler cache.
+4. Setup Node LTS and npm cache.
+5. Install dependencies (`bundle install`, `npm ci`).
+6. Build static Jekyll site.
+7. Upload Pages artifact.
+8. Deploy using GitHub Pages action.
+9. Run post-deploy smoke checks with retry/backoff (`5s`, `15s`, `30s`, `60s`, `120s`):
+   1. `/`, `/ko/`, `/subscribe/`, `/ko/subscribe/`, `/privacy/`, and `/feed.xml` return `200`
+   2. `/feed.xml` parses as XML
+   3. one desktop and one mobile smoke probe succeed
+   4. one JS-disabled probe on `/ko/` succeeds
 
 ### Environment controls
 
 1. Use protected GitHub Environment (`production`).
 2. Branch protection requires CI success before merge.
+3. Deployment concurrency is single-flight (`production` group) to prevent out-of-order releases.
 
 ## 11.3 Rollback
 
-1. Re-run deploy workflow for last known good commit.
-2. If urgent, revert merge commit in `main` and redeploy.
+1. Preferred: run `workflow_dispatch` with `deploy_ref=<last-known-good-sha>` to redeploy an exact commit.
+2. Fallback: revert merge commit in `main` and let push-triggered deploy run.
+3. Record last-known-good SHA from successful deploy logs/artifacts.
 
 ---
 
@@ -567,8 +642,8 @@ Add to `_config.yml`:
 kit:
   form_action: "https://app.kit.com/forms/<FORM_ID>/subscriptions"
   form_uid: "<FORM_ID>"
-  success_url: "/subscribe/?status=success"
-  error_url: "/subscribe/?status=error"
+  success_url: "https://stuffs.blog/subscribe/?status=success"
+  error_url: "https://stuffs.blog/subscribe/?status=error"
 ```
 
 Only public Kit form identifiers are allowed in repo. Do not commit Kit API secrets or tokens.
@@ -580,14 +655,15 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
    1. email field
    2. submit button
    3. honeypot field (hidden)
-3. Keep copy minimal and localized through `i18next`.
+3. Keep copy minimal and localized through shared i18n resources (`assets/i18n/*.json` + generated server fallbacks).
 
 ## 12.4 Validation gates
 
-1. CI fails if `kit.form_action` is missing for production builds.
+1. CI fails if `kit.form_action` is missing for production builds (`push` or `workflow_dispatch` on `main`).
 2. CI fails if subscribe page omits the form include.
 3. CI fails if form action URL is not on Kit host allowlist.
-4. Manual QA verifies:
+4. CI fails if `success_url` or `error_url` is not absolute `https://stuffs.blog/...`.
+5. Manual QA verifies:
    1. successful subscription flow
    2. confirmation email delivery
    3. unsubscribe works
@@ -602,7 +678,9 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 4. If utterances unavailable, page content still fully readable.
 5. Load utterances lazily (on explicit "Show comments" action or on viewport entry) to reduce third-party cost on first paint.
 6. Show a short privacy note near comments indicating third-party GitHub Issues-backed processing.
-7. If fronted by a proxy/CDN, apply CSP and referrer-policy headers compatible with Kit and utterances.
+7. On GitHub Pages, include a restrictive meta CSP and referrer policy compatible with Kit and utterances (`app.kit.com`, `utteranc.es`, `github.com`).
+8. If fronted by a proxy/CDN, enforce equivalent or stricter CSP/referrer-policy headers at the edge.
+9. Comments and subscribe privacy notes must link to locale-equivalent privacy page (`/privacy/` or `/ko/privacy/`).
 
 ---
 
@@ -610,21 +688,22 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 
 A release is done only if all items pass.
 
-1. Minimalist design matches screenshot intent on desktop.
+1. Header controls follow the breakpoint matrix in section 2/6, with no horizontal overflow at `1366x900`, `768x1024`, `390x844`, and `360x780`.
 2. Mobile layout remains one-column and readable without overlap.
-3. Light and dark mode both pass contrast and visual QA.
-4. UI strings localize correctly for `en` and `ko`.
-5. Korean text renders correctly in nav, tags, body, and buttons.
-6. Posts with and without `translation_key` both render correctly.
-7. `translation_key` uniqueness rules are enforced by CI.
-8. Optional alternate-language link appears only when exactly one variant exists.
-9. Subscribe form works end-to-end with Kit.
-10. CI and deploy workflows are green.
-11. Production smoke checks pass.
-12. Non-post UI remains readable with JS disabled (i18n fallback requirement).
-13. Third-party embeds are lazy-loaded and privacy notice is present on post comments section.
-14. Post code blocks use Monokai highlighting with copy action in both light and dark site themes.
-15. Blog visual tokens and accents remain within the allowed Monokai subset.
+3. Light and dark themes pass automated WCAG AA checks with zero critical/serious contrast or keyboard-focus failures.
+4. Text-role tokens (`--text`, `--muted-text`, `--tag-text`) pass AA contrast validation in both themes.
+5. Locale route pairs render correct server fallback copy and `html[lang]` (`/`+`/ko/`, `/blog/`+`/ko/blog/`, `/tags/`+`/ko/tags/`, `/subscribe/`+`/ko/subscribe/`, `/privacy/`+`/ko/privacy/`).
+6. Non-post UI remains readable with JS disabled, including `/ko/`, `/ko/blog/`, and `/ko/subscribe/`.
+7. Korean text renders correctly in nav, tags, body, and buttons (no tofu).
+8. Posts with and without `translation_key` both render correctly.
+9. `translation_key` uniqueness and language-route rules are enforced by CI.
+10. Optional alternate-language link appears only when exactly one variant exists.
+11. Prev/next navigation is limited to same-language posts.
+12. Subscribe form works end-to-end with Kit, including success/error redirect handling.
+13. CI and deploy workflows are green; production smoke checks pass with retry/backoff.
+14. Third-party embeds are lazy-loaded; privacy note and privacy page links are present.
+15. Post code blocks use Monokai highlighting with copy action in both site themes.
+16. Blog visual tokens and accents remain within the allowed Monokai subset.
 
 ---
 
@@ -633,59 +712,67 @@ A release is done only if all items pass.
 ## Phase 0 - foundation
 
 1. Create file structure and base layouts.
-2. Add typography assets and CSS token system.
-3. Implement minimal header/footer shells.
+2. Add typography assets, font-loading strategy (`font-display`, subset plan), and CSS token system.
+3. Implement minimal header/footer shells and add `CNAME`.
 
 ## Phase 1 - core UI and responsiveness
 
 1. Build home/blog/post/tags/subscribe layouts.
 2. Implement responsive rules for mobile/tablet/desktop.
-3. Match screenshot-inspired minimalist spacing and typography.
+3. Add `privacy` and localized route variants (`/ko/...`) for non-post pages.
+4. Match screenshot-inspired minimalist spacing and typography.
 
-## Phase 2 - i18n and themeing
+## Phase 2 - i18n and theming
 
 1. Add `i18next` bootstrapping.
 2. Replace hardcoded UI strings with keys.
-3. Add language toggle and persistence.
-4. Add light/dark toggle and persistence.
+3. Add `scripts/sync_i18n_data.sh` and generated `_data/i18n.generated.json` fallback pipeline.
+4. Add language toggle with locale-route switching and persistence.
+5. Add light/dark toggle and persistence.
+6. Enforce AA-safe text token usage rules.
 
 ## Phase 3 - post language variants
 
 1. Enforce post `lang` front matter.
-2. Add optional `translation_key` logic.
-3. Render alternate-language link when applicable.
-4. Emit `hreflang` for variant pairs.
+2. Enforce `_posts/en` and `_posts/ko` path strategy with permalink defaults.
+3. Add optional `translation_key` logic.
+4. Render alternate-language link when applicable.
+5. Emit `hreflang` for variant pairs.
+6. Constrain prev/next navigation to same-language posts.
 
 ## Phase 4 - integrations
 
 1. Integrate Kit form and localized labels.
 2. Integrate utterances with light/dark mapping.
-3. Verify no integration adds visual clutter.
+3. Add privacy page + privacy links for comments and subscription.
+4. Verify no integration adds visual clutter.
 
 ## Phase 5 - CI/CD and launch
 
-1. Add CI workflow checks (front matter, i18n parity + fallback, permalink rules, accessibility audit, build, link, Kit config).
-2. Add deploy workflow to GitHub Pages.
+1. Add CI workflow checks (front matter, i18n sync/parity/fallback, permalink strategy, no-JS locale smoke, accessibility audit, build, link/SEO, Kit config).
+2. Add deploy workflow to GitHub Pages with `workflow_dispatch deploy_ref` support.
 3. Configure branch protection and production environment.
-4. Run smoke tests and publish.
+4. Add post-deploy smoke checks with retry/backoff and single-flight deploy concurrency.
+5. Run smoke tests and publish.
 
 ---
 
 ## 16) Acceptance criteria (final)
 
-1. Site is minimalist, matching screenshot principles and bare necessities.
-2. Works on both PC and mobile with no broken layout.
+1. Site is minimalist and conforms to the header/content constraints in sections 2 and 6.
+2. Works on both PC and mobile with no broken layout or horizontal overflow in required smoke viewports.
 3. Supports light mode and dark mode with persistent preference.
-4. Uses `i18next` for UI localization (`en`, `ko`).
-5. Supports optional multilingual posts via `translation_key`.
-6. Maintains Korean-capable font coverage in both themes.
-7. Localization source of truth is only `assets/i18n/*.json`.
-8. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile UI smoke checks plus accessibility audit gates.
-9. Kit email integration is configured, validated, and tested with static-safe constraints.
-10. Comments, RSS, SEO metadata, and accessibility requirements are met.
-11. Language-route permalink rules and deterministic frequent-tags computation are enforced by CI.
-12. Embedded post code uses enforced Monokai highlighting and CI rejects non-Monokai theme drift.
-13. Site-wide visual token palette is enforced as a Monokai subset.
+4. Uses `i18next` for UI localization (`en`, `ko`) with server-rendered locale fallbacks.
+5. Non-post pages are locale-addressable (`/` and `/ko/...`) and readable with JS disabled.
+6. Supports optional multilingual posts via `translation_key`.
+7. Maintains Korean-capable font coverage in both themes.
+8. Localization source of truth is only `assets/i18n/*.json`, with generated `_data/i18n.generated.json` kept in sync.
+9. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile smoke checks, JS-disabled locale smoke checks, and accessibility audit gates.
+10. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs.
+11. Comments, RSS, SEO metadata, privacy page linkage, and accessibility requirements are met.
+12. Language-route permalink rules and deterministic frequent-tags computation are enforced by CI.
+13. Embedded post code uses enforced Monokai highlighting and CI rejects non-Monokai theme drift.
+14. Site-wide visual token palette is enforced as a Monokai subset while text-role tokens remain AA compliant.
 
 ---
 
