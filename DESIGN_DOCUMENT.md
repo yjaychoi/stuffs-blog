@@ -58,7 +58,7 @@ This section is mandatory and overrides stylistic ambiguity.
 2. Desktop (`>=1024px`): show `Home`, `Blog`, `RSS`, and `Subscribe` inline; theme toggle must be reachable.
 3. Tablet (`640-1023px`): show title (`Home`), `Blog`, `RSS`, and `Subscribe` inline when possible; controls may wrap as needed.
 4. Mobile (`420-639px`): keep `Home`, `Blog`, `RSS`, and `Subscribe` reachable without JS-only menus; theme toggle must remain reachable.
-5. Narrow mobile (`<420px`): controls may wrap to multiple rows, but all primary links remain reachable without JS-only utility panels.
+5. Narrow mobile (`<420px`): controls may wrap to multiple rows, but all primary links remain reachable without hidden JS-only menus.
 6. No secondary content nav bars.
 7. No persistent sidebars on mobile.
 8. No card-heavy grids for the post index.
@@ -83,9 +83,9 @@ This section is mandatory and overrides stylistic ambiguity.
 2. `/blog/` and `/blog/page/<n>/` reverse-chronological list with pagination.
 3. `/blog/YYYY/MM/DD/slug/` post detail route.
 4. `/tags/` tag index.
-5. `/tags/<tag-slug>/` and `/tags/<tag-slug>/page/<n>/` canonical tag-filtered pages.
+5. `/tags/<tag-slug>/` canonical tag-filtered page.
 6. `/subscribe/` Kit subscription page.
-7. `/subscribe/success/` and `/subscribe/error/` subscribe status pages.
+7. `/subscribe/success/` subscribe success page (`/subscribe/error/` optional).
 8. `/privacy/` privacy notice page.
 9. `/feed.xml` RSS feed.
 10. `/404.html` not-found page (GitHub Pages canonical 404 entrypoint).
@@ -93,9 +93,8 @@ This section is mandatory and overrides stylistic ambiguity.
 ### Route generation implementation contract (required)
 
 1. Use `jekyll-paginate-v2` for `/blog/page/<n>/` generation.
-2. Use a custom build plugin (`_plugins/tag_pages.rb`) to generate paginated tag detail routes.
-3. Build with plugins in GitHub Actions (not GitHub's implicit Pages builder), with plugin versions pinned by `Gemfile.lock`.
-4. CI must fail when required paginated routes are missing or when page-index routes are generated outside canonical patterns.
+2. Build with plugins in GitHub Actions (not GitHub's implicit Pages builder), with plugin versions pinned by `Gemfile.lock`.
+3. CI must fail when required blog pagination routes are missing or when page-index routes are generated outside canonical patterns.
 
 ### Navigation (global)
 
@@ -122,6 +121,7 @@ Each post file is authored in English.
 ---
 layout: post
 post_uid: 2026-02-14-mysql-vector-search
+slug: mysql-vector-search
 title: "..."
 date: 2026-02-14 09:00:00 +0900
 tags: [css, javascript]
@@ -134,17 +134,14 @@ featured: false
 
 1. `post_uid` is required, immutable, and globally unique (`[a-z0-9][a-z0-9-]*`).
 2. `date` is required and must include explicit timezone offset (`YYYY-MM-DD HH:MM:SS +/-TTTT`).
-3. Permalink generation strategy (required):
+3. `slug` is required, immutable after publish, and URL-safe (`[a-z0-9][a-z0-9-]*`).
+4. Permalink generation strategy (required):
    1. posts live under `_posts/`.
-   2. `_config.yml` defaults map `_posts/*` to `/blog/:year/:month/:day/:title/`.
-   3. Manual `permalink` overrides are forbidden by default.
-   4. Exception path: manual override is allowed only with `permalink_override_reason` and explicit CI allowlist entry.
-4. Permalink-change policy:
-   1. when a published URL changes, old URL must be mapped in `_data/redirects.yml`.
-   2. `_data/url_history.yml` is the canonical URL history ledger (`post_uid` -> ordered published URLs).
-   3. CI compares current output URL for each known `post_uid` against latest `url_history` entry and fails if changed without both redirect mapping and history update.
-   4. New posts must create an initial `url_history` entry on first publication.
-   5. Deleted or unpublished previously published posts must retain historical URL entries and corresponding redirect/tombstone handling metadata so CI can validate intent.
+   2. `_config.yml` defaults map `_posts/*` to `/blog/:year/:month/:day/:slug/`.
+   3. Manual `permalink` overrides are forbidden.
+5. URL change policy (rare):
+   1. if a published URL must change, add one static redirect entry to `_data/redirects.yml`.
+   2. CI validates redirect-file syntax and duplicate-free mappings.
 
 ---
 
@@ -277,7 +274,7 @@ Both themes must preserve minimalist look and readability.
 ## 5.5 Asset and image performance budgets
 
 1. Critical CSS budget (home/blog/post route first view, gzip): <= `60KB`.
-2. Critical JS budget (theme + header interaction + code-copy, gzip): <= `80KB`.
+2. Critical JS budget (theme + code-copy + comments loader, gzip): <= `60KB`.
 3. First-view non-font image transfer budget:
    1. home/blog routes: <= `150KB`.
    2. post route (excluding article body images): <= `100KB`.
@@ -286,6 +283,9 @@ Both themes must preserve minimalist look and readability.
    2. must include intrinsic dimensions (`width`/`height`) or explicit `aspect-ratio`.
    3. non-critical images must use lazy loading.
    4. external asset hosts (if any) must be declared in `_data/external_asset_hosts.yml`; CI fails if rendered image/script/frame hosts are outside the explicit allowlist.
+5. Budget measurement policy (deterministic):
+   1. CI uses `size-limit` for CSS/JS gzip budgets and deterministic Vitest file-size checks for image/font budgets.
+   2. Allowed overage tolerance is `0KB` (hard fail) to keep behavior predictable.
 
 ---
 
@@ -307,30 +307,16 @@ Both themes must preserve minimalist look and readability.
 ## 6.3 Header behavior
 
 1. Desktop:
-   1. Inline nav row with title (`Home`), `Blog`, and `RSS`.
-   2. `Subscribe` remains inline.
-   3. Theme toggle may be inline or grouped into one compact utility button to preserve sparse header styling.
+   1. Inline nav row with `Home`, `Blog`, `RSS`, `Subscribe`, and theme toggle visible.
 2. Tablet (`640-1023px`):
-   1. Single-row nav with title (`Home`), `Blog`, and `RSS`.
-   2. `Subscribe` and theme toggle may appear inline only when controls remain fully reachable.
-   3. If spacing is insufficient, move those controls into a utility panel button.
+   1. Same controls remain visible.
+   2. Controls may wrap to a second row when needed.
 3. Mobile:
-   1. `420-639px`: single-row nav with title (`Home`), `Blog`, `RSS`, and one utility button.
-   2. `<420px`: single-row nav with title (`Home`) and one utility button.
-   3. Utility panel contains all hidden global controls in order: `Blog` (if hidden), `RSS` (if hidden), `Subscribe`, theme toggle.
-   4. Header must not introduce horizontal scrolling.
-   5. Utility panel may stack controls vertically; do not force inline compression.
-   6. Utility button and panel accessibility (required whenever utility panel is used at any breakpoint):
-      1. utility button uses `aria-controls` + `aria-expanded`.
-      2. panel close via `Escape` is required.
-      3. when panel closes, focus returns to the utility button.
-      4. opening the panel must place focus on first interactive control.
-      5. while panel is open, focus must be contained within panel controls.
-      6. while panel is open, background content must be inert and body scroll locked.
-      7. click/tap outside panel closes it.
-      8. if native `inert` is unavailable, apply an equivalent fallback strategy (`aria-hidden` + focus management + scroll lock) with the same behavior guarantees.
-4. No-JS fallback requirement:
-   1. `Home`, `Blog`, `RSS`, and `Subscribe` must remain reachable even when the utility panel script is unavailable.
+   1. Same controls remain visible at `420-639px` and `<420px`.
+   2. Controls may wrap to multiple rows.
+   3. Header must not introduce horizontal scrolling.
+4. No-JS requirement:
+   1. Header navigation and theme default (`prefers-color-scheme`) must remain functional without JavaScript.
 
 ## 6.4 Content behavior
 
@@ -404,9 +390,6 @@ Both themes must preserve minimalist look and readability.
    1. default slug is generated from normalized tag text (NFKC -> lowercase -> hyphenated slug).
    2. explicit overrides live in `_data/tag_slugs.yml` for ambiguous or colliding cases.
    3. CI fails on slug collisions.
-5. Tag detail pagination:
-   1. page size `50` posts per tag detail page.
-   2. routes use `/tags/<slug>/page/<n>/`.
 
 ## 7.5 Subscribe page
 
@@ -414,7 +397,8 @@ Both themes must preserve minimalist look and readability.
 2. Kit HTML form POST integration (no third-party form embed script).
 3. Privacy line (`unsubscribe anytime`).
 4. Minimal confirmation/success messaging.
-5. Success/error messaging uses dedicated status routes (`/subscribe/success/`, `/subscribe/error/`) rather than query-parameter state.
+5. Success uses dedicated status route (`/subscribe/success/`).
+6. Error handling may use optional `/subscribe/error/` route when supported by provider; otherwise keep concise inline recovery copy on `/subscribe/`.
 
 ## 7.6 Privacy page
 
@@ -439,7 +423,7 @@ Both themes must preserve minimalist look and readability.
 4. `html[lang]` is set to `en`.
 5. Every icon-only control has an accessible label.
 6. Dates must be semantically marked with `<time datetime="...">`.
-7. If a utility panel/menu is used at any breakpoint, keyboard behavior is mandatory (`Tab`, `Shift+Tab`, `Escape`, focus containment while open, focus-return behavior, and inert background/fallback behavior while open).
+7. Header controls are keyboard reachable at every breakpoint without hidden-menu dependencies.
 8. Code-copy action accessibility:
    1. button has an accessible name.
    2. keyboard activation via `Enter` and `Space`.
@@ -462,8 +446,8 @@ Both themes must preserve minimalist look and readability.
 6. `_config.yml` must set `url: https://stuffs.blog` and `baseurl: ""`; repository must also include `CNAME` with `stuffs.blog`.
 7. Pagination canonicalization policy:
    1. canonical route is page root (`/blog/`, `/tags/<slug>/`) for page 1.
-   2. `/page/1/` routes must not be indexable (`noindex`) and must redirect or canonicalize to page-root.
-   3. page `>=2` routes self-canonicalize and may emit `rel="prev"`/`rel="next"` for crawler hints.
+   2. `/blog/page/1/` must not be indexable (`noindex`) and must redirect or canonicalize to `/blog/`.
+   3. `/blog/page/<n>/` for page `>=2` self-canonicalizes and may emit `rel="prev"`/`rel="next"` for crawler hints.
 8. CSS/JS/font references must include cache-busting (content hash in filename or build-revision query token) to avoid stale static assets.
 9. Canonical host policy is apex-only (`https://stuffs.blog`); `www.stuffs.blog` (if configured) must 301 to apex at DNS/proxy layer and never appear in canonical tags.
 
@@ -482,12 +466,8 @@ Both themes must preserve minimalist look and readability.
   _data/
     build_meta.json
     redirects.yml
-    url_history.yml
     tag_slugs.yml
     external_asset_hosts.yml
-  _plugins/
-    tag_pages.rb
-    pagination_page_one_canonicalizer.rb
   _includes/
     header.html
     footer.html
@@ -506,7 +486,6 @@ Both themes must preserve minimalist look and readability.
   assets/
     css/main.css
     js/theme.js
-    js/header-utility-panel.js
     js/code-copy.js
     js/comments.js
     fonts/
@@ -529,7 +508,6 @@ Both themes must preserve minimalist look and readability.
       asset_budget.spec.ts
       theme_contrast.spec.ts
       kit_config.spec.ts
-      workflow_security.spec.ts
     e2e/
       smoke.spec.ts
       no_js.spec.ts
@@ -579,22 +557,20 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    1. checks required fields (`post_uid`, `title`, `date`, `tags`, `summary`)
    2. validates `date` format includes timezone offset (`YYYY-MM-DD HH:MM:SS +/-TTTT`)
    3. validates `post_uid` format and uniqueness
-   4. fails manual `permalink` overrides unless exception metadata + allowlist entry are present
+   4. fails any manual `permalink` override
 3. Static constraint validation:
    1. fails if templates introduce internal API calls or server-only dependencies
 4. HTML/link/SEO checks:
    1. no broken internal links
-   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`, `/subscribe/success/`, `/subscribe/error/`, `/privacy/`, `/feed.xml`, `/404.html`)
+   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`, `/subscribe/success/`, `/privacy/`, `/feed.xml`, `/404.html`)
    3. canonical tags are present and consistent
-   4. pagination canonicalization policy is enforced (`/page/1/` normalization and page `>=2` self-canonical)
+   4. blog pagination canonicalization policy is enforced (`/blog/page/1/` normalization and page `>=2` self-canonical)
    5. RSS endpoint returns valid XML
    6. `url`, `baseurl`, and `CNAME` values are consistent with `https://stuffs.blog`
 5. UI smoke tests (Playwright):
    1. desktop viewport (`1366x900`) with light/dark toggle
-   2. tablet viewport (`768x1024`) with light/dark toggle
-   3. mobile viewport (`390x844`) with light/dark toggle
-   4. narrow mobile viewport (`360x780`) with light/dark toggle
-   5. asserts no horizontal overflow and header controls remain reachable
+   2. mobile viewport (`390x844`) with light/dark toggle
+   3. asserts no horizontal overflow and header controls remain reachable
 6. No-JS smoke tests:
    1. JS disabled for `/`, `/blog/`, `/tags/`, `/subscribe/`, `/privacy/`
    2. asserts primary controls remain reachable and core reading flow works
@@ -610,18 +586,18 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
 9. Kit config validation:
    1. subscribe page contains Kit form include
    2. required config values are present
-   3. success/error URLs are absolute `https://stuffs.blog/...` URLs and route-matched
+   3. `success_url` is absolute `https://stuffs.blog/...` and route-matched
+   4. if `error_url` is configured, it must be absolute `https://stuffs.blog/...` and route-matched
 10. Tag/slug/redirect validation:
    1. fails on tag slug collisions
-   2. fails when renamed permalinks lack a redirect mapping in `_data/redirects.yml`
+   2. redirect mappings are duplicate-free and syntactically valid
 11. Performance and cache validation:
    1. enforce first-view font budget from section 5.1
-   2. enforce CSS/JS/image budgets from section 5.5
+   2. enforce CSS/JS/image budgets from section 5.5 using `size-limit` (CSS/JS) plus deterministic Vitest file-size checks (images/fonts)
    3. fail if critical CSS/JS/font references omit configured cache-busting strategy
-12. Workflow and supply-chain hardening:
-   1. all GitHub Actions are pinned to full commit SHA (no floating tags).
-   2. workflow/job permissions are least-privilege (`permissions:` explicitly set).
-   3. dependency audits (`npm audit` and `bundle audit`) run on a scheduled workflow with severity threshold policy (`high`/`critical`) and tracked exceptions.
+12. Workflow baseline hardening:
+   1. workflow/job permissions are least-privilege (`permissions:` explicitly set).
+   2. Actions use pinned major versions or full commit SHA.
 
 ## 11.2 Production deploy workflow (`.github/workflows/deploy.yml`)
 
@@ -646,12 +622,12 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
 10. Upload Pages artifact.
 11. Deploy using GitHub Pages action.
 12. Run post-deploy smoke checks with retry/backoff (`5s`, `15s`, `30s`, `60s`, `120s`):
-   1. `/`, `/blog/`, `/tags/`, `/subscribe/`, `/subscribe/success/`, `/subscribe/error/`, `/privacy/`, and `/feed.xml` return `200`
+   1. `/`, `/blog/`, `/tags/`, `/subscribe/`, `/subscribe/success/`, `/privacy/`, and `/feed.xml` return `200`
    2. `/feed.xml` parses as XML
    3. one post URL probe returns `200` and includes canonical metadata
    4. desktop and mobile smoke probes succeed
    5. JS-disabled probes on `/`, `/tags/`, and `/privacy/` succeed
-   6. page-1 canonicalization checks pass (`/blog/page/1/` and tag `page/1` non-indexable and normalized)
+   6. page-1 canonicalization checks pass (`/blog/page/1/` non-indexable and normalized)
    7. unknown-route probe returns `404` and renders readable fallback copy
 
 ### Environment controls
@@ -659,7 +635,7 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
 1. Use protected GitHub Environment (`production`).
 2. Branch protection requires CI success before merge.
 3. Deployment concurrency is single-flight (`production` group) to prevent out-of-order releases.
-4. Deploy workflow permissions remain least-privilege and Actions are SHA-pinned.
+4. Deploy workflow permissions remain least-privilege and Actions use pinned versions (major version or full SHA).
 
 ## 11.3 Rollback
 
@@ -688,7 +664,8 @@ kit:
     form_action: "https://app.kit.com/forms/<FORM_ID>/subscriptions"
     form_uid: "<FORM_ID>"
     success_url: "https://stuffs.blog/subscribe/success/"
-    error_url: "https://stuffs.blog/subscribe/error/"
+    # Optional if your Kit plan/flow supports custom error redirects:
+    # error_url: "https://stuffs.blog/subscribe/error/"
 ```
 
 Only public Kit form identifiers are allowed in repo. Do not commit Kit API secrets or tokens.
@@ -717,7 +694,7 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 1. CI fails if form config is missing for production builds (`push` or `workflow_dispatch` on `main`).
 2. CI fails if subscribe page omits the form include.
 3. CI fails if form action URL is not on Kit host allowlist.
-4. CI fails if success/error URLs are not absolute `https://stuffs.blog/...`.
+4. CI fails if `success_url` is not absolute `https://stuffs.blog/...`; if `error_url` exists, it must also be absolute `https://stuffs.blog/...`.
 5. CI fails if external Kit embed scripts are added.
 6. Manual QA verifies:
    1. successful subscription flow
@@ -751,24 +728,24 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 
 A release is done only if all items pass.
 
-1. Header controls follow the breakpoint matrix in section 2/6, with no horizontal overflow at `1366x900`, `768x1024`, `390x844`, and `360x780`.
+1. Header controls follow the breakpoint matrix in section 2/6, with no horizontal overflow at required smoke viewports `1366x900` and `390x844` (plus manual verification at `768x1024` and `360x780`).
 2. Mobile layout remains one-column and readable without overlap.
 3. Light and dark themes pass automated WCAG AA checks for body/UI text with zero critical/serious keyboard-focus failures; code syntax tokens pass section 5.4 policy.
 4. Text-role tokens (`--text`, `--muted-text`, `--tag-text`) pass AA contrast validation in both themes.
 5. Non-post UI remains readable with JS disabled for `/`, `/blog/`, `/tags/`, `/subscribe/`, and `/privacy/`.
-6. Subscribe form works end-to-end with success/error handling.
+6. Subscribe form works end-to-end with success handling and clear error fallback behavior.
 7. Kit feed-based notification flow is configured and tested.
 8. CI and deploy workflows are green; production smoke checks pass with retry/backoff.
 9. utterances comments load only after explicit user action; privacy note and privacy page links are present.
 10. Post code blocks use Monokai highlighting with copy action in both site themes.
 11. Blog visual tokens and accents remain within the allowed Monokai subset.
-12. Utility panel and code-copy controls pass keyboard and screen-reader interaction checks, including focus containment and focus return wherever the utility panel is used.
+12. Header and code-copy controls pass keyboard and screen-reader interaction checks.
 13. Home latest-post list and other list outputs are reproducible for the same content set (deterministic `SITE_BUILD_DATE_UTC` policy).
 14. No screenshot-baseline visual-diff process is required.
 15. `404.html` provides readable fallback copy and unknown routes return `404`.
-16. Pagination canonicalization policy is enforced (`/page/1/` normalization and page `>=2` self-canonical behavior).
+16. Blog pagination canonicalization policy is enforced (`/blog/page/1/` normalization and page `>=2` self-canonical behavior).
 17. Feed strategy is valid (`/feed.xml`) and nav links route correctly.
-18. Workflow hardening gates pass (SHA-pinned actions, least-privilege permissions, dependency audit policy).
+18. Workflow baseline hardening gates pass (least-privilege permissions and pinned action versions).
 19. Comment moderation/deletion operational policy is documented and linked from privacy route.
 
 ---
@@ -780,7 +757,7 @@ A release is done only if all items pass.
 1. Create file structure and base layouts.
 2. Add typography assets, font-loading strategy (`font-display`, subset plan), and CSS token system.
 3. Implement minimal header/footer shells and add `CNAME`.
-4. Add route-generation foundation (`jekyll-paginate-v2`, tag-page plugin) and page-1 canonicalization strategy.
+4. Add route-generation foundation (`jekyll-paginate-v2`) and page-1 canonicalization strategy.
 5. Add CI skeleton early so each subsequent phase is validated incrementally.
 
 ## Phase 1 - core UI and responsiveness
@@ -789,16 +766,15 @@ A release is done only if all items pass.
 2. Implement responsive rules for mobile/tablet/desktop.
 3. Add `privacy` page.
 4. Match the minimalist spacing and typography contract.
-5. Add utility panel accessibility behavior and keyboard interaction tests (including focus containment and inert/fallback behavior wherever the panel is used).
-6. Add no-JS fallback behavior for primary nav links.
+5. Keep header controls always visible (wrapping allowed) and verify keyboard/no-JS behavior.
 
 ## Phase 2 - core content and theming
 
 1. Enforce post front matter contract (`post_uid`, timezone-aware `date`, required core fields).
-2. Enforce permalink strategy and redirect/url-history policy.
+2. Enforce permalink strategy with immutable `slug` and simple static-redirect policy.
 3. Add light/dark toggle and persistence.
 4. Enforce AA-safe text token usage rules and code-token contrast policy.
-5. Add tag slug and pagination validation.
+5. Add tag slug validation.
 
 ## Phase 3 - integrations
 
@@ -811,12 +787,12 @@ A release is done only if all items pass.
 
 ## Phase 4 - CI/CD and launch
 
-1. Complete CI workflow checks (front matter/permalink, no-JS smoke, accessibility audit, build, link/SEO, Kit config, slug/redirect validation, performance budgets).
+1. Complete CI workflow checks (build, front matter/permalink, link/SEO, desktop+mobile smoke, no-JS smoke, accessibility audit, Kit config, slug/redirect validation, performance budgets).
 2. Add deploy workflow to GitHub Pages with restricted `workflow_dispatch deploy_ref` (commit SHA from `main` ancestry only).
 3. Configure branch protection and production environment.
-4. Add workflow hardening (SHA-pinned actions, least-privilege permissions, dependency-audit policy).
+4. Add workflow baseline hardening (pinned action versions and least-privilege permissions).
 5. Require deploy-time revalidation of the exact target commit.
-6. Add post-deploy smoke checks with retry/backoff, pagination canonicalization probes, and single-flight deploy concurrency.
+6. Add post-deploy smoke checks with retry/backoff, blog pagination canonicalization probes, and single-flight deploy concurrency.
 7. Run smoke tests and publish.
 
 ---
@@ -828,15 +804,15 @@ A release is done only if all items pass.
 3. Supports light mode and dark mode with persistent preference.
 4. Is English-only (no localization or multilingual requirements).
 5. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile smoke checks, JS-disabled smoke checks, accessibility audit gates, and workflow hardening gates.
-6. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs.
+6. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, `error_url` optional).
 7. Kit new-post notifications are configured through RSS automation or validated manual fallback.
 8. utterances comments are integrated with explicit click-to-load consent, privacy linkage, and operational moderation/deletion policy.
 9. RSS strategy is implemented and validated (`/feed.xml`) with nav integration.
-10. Permalink rules, page-1 pagination canonicalization policy, and deterministic home latest-post computation are enforced by CI.
+10. Permalink rules (immutable `slug`), blog page-1 canonicalization policy, and deterministic home latest-post computation are enforced by CI.
 11. Embedded post code uses enforced Monokai highlighting and CI rejects non-Monokai theme drift while applying section 5.4 code-token accessibility policy.
 12. Site-wide visual token palette is enforced as a Monokai subset while text-role tokens remain AA compliant.
 13. Deploy workflow can only deploy validated commits from `main` ancestry and re-validates target commits before release.
-14. Tag slug collisions and redirect/url-history ledger consistency are validated by CI.
+14. Tag slug collisions and redirect-file consistency are validated by CI.
 15. Static asset cache-busting, image-budget policy, and 404 fallback behavior are implemented and verified.
 
 ---
