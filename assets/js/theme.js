@@ -6,6 +6,8 @@
   var toggleLabel = toggleButton ? toggleButton.querySelector(".theme-toggle__label") : null;
   var menuButton = document.getElementById("menu-toggle");
   var nav = document.getElementById("site-nav");
+  var header = document.querySelector(".site-header");
+  var lastScrollY = 0;
 
   function readStoredTheme() {
     try {
@@ -75,6 +77,7 @@
     }
 
     nav.dataset.open = open ? "true" : "false";
+    menuButton.dataset.open = open ? "true" : "false";
     menuButton.setAttribute("aria-expanded", String(open));
     menuButton.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
   }
@@ -89,6 +92,26 @@
     } else {
       setMenuState(true);
     }
+  }
+
+  function updateMobileHeaderVisibility() {
+    if (!header) {
+      return;
+    }
+
+    var currentY = Math.max(window.scrollY, 0);
+    var delta = currentY - lastScrollY;
+    var mobileMenuIsOpen =
+      Boolean(menuButton && nav && nav.dataset.open === "true") &&
+      window.matchMedia("(max-width: 639px)").matches;
+
+    if (currentY < 24 || mobileMenuIsOpen || delta < -3) {
+      header.classList.remove("site-header--hidden");
+    } else if (delta > 5) {
+      header.classList.add("site-header--hidden");
+    }
+
+    lastScrollY = currentY;
   }
 
   var initialTheme = readStoredTheme() || getCurrentTheme();
@@ -122,6 +145,17 @@
       setMenuState(nav.dataset.open !== "true");
     });
 
+    nav.addEventListener("click", function (event) {
+      if (!window.matchMedia("(max-width: 639px)").matches) {
+        return;
+      }
+
+      var link = event.target && event.target.closest ? event.target.closest("a") : null;
+      if (link) {
+        setMenuState(false);
+      }
+    });
+
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && nav.dataset.open === "true" && window.matchMedia("(max-width: 639px)").matches) {
         setMenuState(false);
@@ -130,6 +164,11 @@
     });
 
     window.addEventListener("resize", syncMenuToViewport);
+    window.addEventListener("resize", updateMobileHeaderVisibility);
     syncMenuToViewport();
   }
+
+  lastScrollY = window.scrollY;
+  window.addEventListener("scroll", updateMobileHeaderVisibility, { passive: true });
+  updateMobileHeaderVisibility();
 })();

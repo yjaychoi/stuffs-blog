@@ -1,4 +1,8 @@
 {% assign current_url = page.url | default: "/" %}
+{% assign is_subscribe = false %}
+{% if current_url == "/subscribe/" or current_url == "/subscribe" or current_url contains "/subscribe/" %}
+  {% assign is_subscribe = true %}
+{% endif %}
 <header class="site-header">
   <div class="shell site-header__inner">
     <a class="site-brand" href="/"{% if current_url == "/" %} aria-current="page"{% endif %}>Stuff of Thoughts</a>
@@ -8,7 +12,7 @@
         <a href="/"{% if current_url == "/" %} class="is-active" aria-current="page"{% endif %}>Home</a>
         <a href="/blog/"{% if current_url == "/blog/" or current_url contains "/blog/" and current_url != "/" and current_url != "/blog/page/1/" %} class="is-active" aria-current="page"{% endif %}>Blog</a>
         <a href="/feed.xml">RSS</a>
-        <a class="subscribe-link subscribe-link--nav" href="/subscribe/"{% if current_url == "/subscribe/" %} aria-current="page"{% endif %}>Subscribe</a>
+        <a class="subscribe-link subscribe-link--nav{% if is_subscribe %} is-active{% endif %}" href="/subscribe/"{% if is_subscribe %} aria-current="page"{% endif %}>Subscribe</a>
       </nav>
 
       <div class="site-header__actions">
@@ -20,10 +24,11 @@
           aria-expanded="false"
           aria-controls="site-nav"
           aria-label="Open navigation menu"
+          data-open="false"
         >
-          Menu
+          <span class="menu-toggle__icon" aria-hidden="true"></span>
         </button>
-        <a class="subscribe-link" href="/subscribe/"{% if current_url == "/subscribe/" %} aria-current="page"{% endif %}>Subscribe</a>
+        <a class="subscribe-link{% if is_subscribe %} is-active{% endif %}" href="/subscribe/"{% if is_subscribe %} aria-current="page"{% endif %}>Subscribe</a>
       </div>
     </div>
   </div>
