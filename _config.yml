@@ -70,10 +70,17 @@ exclude:
   - node_modules
   - vendor
   - docs
+  - tests
+  - scripts
   - README.md
   - DESIGN_DOCUMENT.md
   - mockup.html
+  - Gemfile
   - package-lock.json
+  - package.json
+  - playwright.config.ts
+  - size-limit.config.cjs
+  - vitest.config.ts
   - Gemfile.lock
   - playwright-report
   - test-results
