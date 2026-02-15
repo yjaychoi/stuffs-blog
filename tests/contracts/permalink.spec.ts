@@ -9,7 +9,7 @@ type ConfigShape = {
 describe("permalink contract", () => {
   it("uses canonical post permalink strategy", () => {
     const config = loadYaml("_config.yml") as ConfigShape;
-    expect(config.permalink).toBe("/blog/:year/:month/:day/:slug/");
+    expect(config.permalink).toBe("/blog/:slug/");
   });
 
   it("forbids manual permalink overrides in posts", () => {

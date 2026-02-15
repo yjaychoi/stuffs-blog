@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const routes = ["/", "/blog/", "/tags/", "/blog/2026/02/08/mysql-vector-search/", "/subscribe/", "/privacy/"];
+const routes = ["/", "/blog/", "/tags/", "/blog/mysql-vector-search/", "/subscribe/", "/privacy/"];
 
 test("accessibility smoke on key routes", async ({ page }) => {
   for (const theme of ["light", "dark"] as const) {

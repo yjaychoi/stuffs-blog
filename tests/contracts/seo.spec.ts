@@ -54,7 +54,7 @@ describe("seo and metadata contracts", () => {
   it("includes deterministic metadata mapping on post pages", () => {
     ensureBuiltSite();
 
-    const post = load(readBuilt("blog/2026/02/08/mysql-vector-search/index.html"));
+    const post = load(readBuilt("blog/mysql-vector-search/index.html"));
     const title = post("meta[property='og:title']").attr("content") || "";
     const description = post("meta[name='description']").attr("content") || "";
 

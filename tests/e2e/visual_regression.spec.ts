@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("visual regression", () => {
   test.skip(!process.env.ENABLE_VISUAL_REGRESSION, "ENABLE_VISUAL_REGRESSION is not set");
 
-  const route = "/blog/2026/02/08/mysql-vector-search/";
+  const route = "/blog/mysql-vector-search/";
 
   async function disableVisualNoise(page: import("@playwright/test").Page) {
     await page.addStyleTag({

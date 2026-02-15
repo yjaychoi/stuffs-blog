@@ -8,7 +8,7 @@ test("provider=none keeps placeholder and avoids utterances traffic", async ({ p
     }
   });
 
-  await page.goto("/blog/2026/02/08/mysql-vector-search/");
+  await page.goto("/blog/mysql-vector-search/");
 
   await expect(page.getByRole("heading", { name: "Comments" })).toBeVisible();
   await expect(page.locator(".comments-shell__placeholder")).toBeVisible();

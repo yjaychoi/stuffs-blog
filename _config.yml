@@ -19,7 +19,7 @@ kramdown:
       line_numbers: true
       start_line: 1
 
-permalink: /blog/:year/:month/:day/:slug/
+permalink: /blog/:slug/
 
 plugins:
   - jekyll-feed
@@ -49,7 +49,7 @@ defaults:
       type: posts
     values:
       layout: post
-      permalink: /blog/:year/:month/:day/:slug/
+      permalink: /blog/:slug/
 
 kit:
   form:

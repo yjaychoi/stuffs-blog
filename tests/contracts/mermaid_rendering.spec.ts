@@ -19,7 +19,7 @@ describe("mermaid contract", () => {
 
   it("keeps readable fallback in built output", () => {
     ensureBuiltSite();
-    const html = readBuilt("blog/2026/02/08/mysql-vector-search/index.html");
+    const html = readBuilt("blog/mysql-vector-search/index.html");
     expect(html).toMatch(/language-mermaid|mermaid/);
   });
 });
