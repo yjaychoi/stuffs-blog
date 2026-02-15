@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#25231f" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f3f1e7" media="(prefers-color-scheme: light)">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self' https://app.kit.com; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com{{ csp_host_allowlist | strip }}; frame-src 'self' https://utteranc.es; connect-src 'self' https://api.github.com https://github.com https://utteranc.es{{ csp_host_allowlist | strip }};">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self' https://app.kit.com; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://avatars.githubusercontent.com{{ csp_host_allowlist | strip }}; frame-src 'self' https://utteranc.es; connect-src 'self' https://api.github.com https://github.com https://utteranc.es{{ csp_host_allowlist | strip }};">
     <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="/feed.xml">
     <script src="/assets/js/boot.js?v={{ site.data.build_meta.asset_version }}"></script>
     <style>
@@ -36,9 +36,6 @@
         }
       }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
     <link rel="stylesheet" href="/assets/css/main.css?v={{ site.data.build_meta.asset_version }}">
     {% if page.noindex %}
       <meta name="robots" content="noindex,follow">

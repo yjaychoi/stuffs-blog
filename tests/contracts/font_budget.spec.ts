@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
 
 import fg from "fast-glob";
 import { describe, expect, it } from "vitest";
@@ -7,9 +6,10 @@ import { describe, expect, it } from "vitest";
 import { ROOT, readRepoFile } from "./helpers";
 
 describe("font budget contract", () => {
-  it("uses swap-display font loading", () => {
+  it("does not depend on external webfont CDNs", () => {
     const layout = readRepoFile("_layouts/default.html");
-    expect(layout).toContain("display=swap");
+    expect(layout).not.toContain("fonts.googleapis.com");
+    expect(layout).not.toContain("fonts.gstatic.com");
   });
 
   it("keeps first-view font transfer within 350KB when self-hosting", () => {

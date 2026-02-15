@@ -1,6 +1,6 @@
 :root {
-  --font-display: "Courier Prime", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-body: "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
+  --font-display: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
 
   --bg: #f3f1e7;
   --surface: #ebe7da;
@@ -8,7 +8,7 @@
   --text: #353c35;
   --muted-text: #70786f;
   --border: #c7cdbf;
-  --accent: #8fcf30;
+  --accent: #2f7a00;
   --accent-ink: #2f7a00;
   --accent-alt: #ea9d33;
   --focus: #2f7a00;
@@ -27,6 +27,7 @@
   --radius-md: 6px;
   --shadow-subtle: 0 6px 22px rgba(26, 30, 25, 0.06);
   --content-max: 52rem;
+  --title-size-page: clamp(1.9rem, 1.4rem + 1.6vw, 2.35rem);
 }
 
 html[data-theme="dark"] {
@@ -147,6 +148,12 @@ iframe {
 
 .site-header {
   border-bottom: 1px solid var(--border);
+  font-family: var(--font-display);
+}
+
+.site-header a,
+.site-header button {
+  font-family: inherit;
 }
 
 .site-header__inner {
@@ -286,8 +293,8 @@ iframe {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(2.45rem, 1.7rem + 2.65vw, 3.5rem);
-  line-height: 1.08;
+  font-size: var(--title-size-page);
+  line-height: 1.12;
 }
 
 .route-header p {
@@ -314,8 +321,8 @@ iframe {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(2rem, 1.45rem + 1.65vw, 2.7rem);
-  line-height: 1.1;
+  font-size: var(--title-size-page);
+  line-height: 1.12;
 }
 
 .post-list {
@@ -472,7 +479,7 @@ iframe {
 .post-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.92rem, 1.08rem + 2.6vw, 2.72rem);
+  font-size: var(--title-size-page);
   line-height: 1.16;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -994,7 +1001,7 @@ iframe {
 .privacy-content h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.35rem);
+  font-size: var(--title-size-page);
 }
 
 .privacy-content p,
@@ -1010,6 +1017,12 @@ iframe {
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 1.5rem 0 2rem;
+  font-family: var(--font-display);
+}
+
+.site-footer a,
+.site-footer button {
+  font-family: inherit;
 }
 
 .site-footer__line {
@@ -1035,7 +1048,7 @@ iframe {
 
 .site-footer__line a:hover,
 .site-footer__line a:focus-visible {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 @media (min-width: 1024px) {
@@ -1148,10 +1161,6 @@ iframe {
 
   .js .site-nav[data-open="true"] {
     display: flex;
-  }
-
-  .post-title {
-    font-size: clamp(1.78rem, 1.36rem + 2.2vw, 2.18rem);
   }
 
   .meta-row {
