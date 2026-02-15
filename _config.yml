@@ -73,8 +73,6 @@ exclude:
   - tests
   - scripts
   - README.md
-  - DESIGN_DOCUMENT.md
-  - mockup.html
   - Gemfile
   - package-lock.json
   - package.json
