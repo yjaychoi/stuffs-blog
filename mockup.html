@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Blog Post Detail - Stuff of Thoughts</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&amp;family=Noto+Sans+KR:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.9.0/highlightjs-line-numbers.min.js"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#a6e22e", // Monokai Green for primary accents
+                        "background-light": "#f8f8f2", // Light mode fallback (soft white)
+                        "background-dark": "#272822", // Monokai Background
+                        "surface-dark": "#1e1f1c", // Slightly darker surface for code blocks
+                        "text-light": "#272822",
+                        "text-dark": "#f8f8f2",
+                        "monokai-orange": "#fd971f",
+                        "monokai-green": "#a6e22e",
+                        "monokai-orange-ink": "#c77418",
+                        "monokai-green-ink": "#6f9020",
+                        "monokai-blue-ink": "#1f5d73",
+                        "monokai-purple-ink": "#5f3c99",
+                        "monokai-yellow-ink": "#7a6a28",
+                        "monokai-pink-ink": "#a31955",
+                        "monokai-blue": "#66d9ef",
+                        "monokai-purple": "#ae81ff",
+                        "monokai-yellow": "#e6db74",
+                        "monokai-pink": "#f92672",
+                    },
+                    fontFamily: {
+                        display: ["'Courier Prime'", "monospace"], // Typewriter aesthetic
+                        body: ["'Noto Sans KR'", "sans-serif"],
+                    },
+                    typography: (theme) => ({
+                        DEFAULT: {
+                            css: {
+                                color: theme('colors.gray.800'),
+                                fontFamily: theme('fontFamily.body'),
+                                p: {
+                                    color: theme('colors.gray.800'),
+                                },
+                                li: {
+                                    color: theme('colors.gray.800'),
+                                },
+                                h1: {
+                                    fontFamily: theme('fontFamily.display'),
+                                    fontWeight: '700',
+                                },
+                                h2: {
+                                    fontFamily: theme('fontFamily.body'),
+                                    fontWeight: '700',
+                                    color: theme('colors.gray.900'),
+                                },
+                                h3: {
+                                    fontFamily: theme('fontFamily.body'),
+                                    fontWeight: '700',
+                                    color: theme('colors.gray.900'),
+                                },
+                                code: {
+                                    color: theme('colors.monokai-orange-ink'),
+                                    backgroundColor: 'rgba(253, 151, 31, 0.1)',
+                                    borderRadius: '0.25rem',
+                                    padding: '0.125rem 0.25rem',
+                                    fontWeight: '400',
+                                },
+                                'code::before': { content: '""' },
+                                'code::after': { content: '""' },
+                            },
+                        },
+                        invert: {
+                            css: {
+                                color: theme('colors.gray.300'),
+                                p: { color: theme('colors.gray.300') },
+                                li: { color: theme('colors.gray.300') },
+                                h1: { color: theme('colors.white') },
+                                h2: { color: theme('colors.gray.200') },
+                                h3: { color: theme('colors.gray.200') },
+                                strong: { color: theme('colors.monokai-orange') },
+                                a: { color: theme('colors.monokai-green') },
+                                code: {
+                                    color: theme('colors.monokai-orange'),
+                                    backgroundColor: 'rgba(253, 151, 31, 0.1)',
+                                },
+                            },
+                        },
+                    }),
+                },
+            },
+        };
+    </script>
+<style>.code-scroll::-webkit-scrollbar {
+            height: 8px;
+            background-color: #e6e2d7;
+        }
+        .code-scroll::-webkit-scrollbar-thumb {
+            background-color: #b8b2a2;
+            border-radius: 4px;
+        }
+        .dark .code-scroll::-webkit-scrollbar {
+            background-color: #1e1f1c;
+        }
+        .dark .code-scroll::-webkit-scrollbar-thumb {
+            background-color: #49483e;
+        }
+
+        .code-panel pre {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            color: inherit !important;
+        }
+        .code-panel pre code,
+        .code-panel pre code.hljs {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+        }
+        .code-panel .hljs {
+            display: block;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: transparent !important;
+            color: #272822;
+        }
+        .dark .code-panel .hljs {
+            color: #f8f8f2;
+        }
+        .code-panel .hljs-comment,
+        .code-panel .hljs-quote {
+            color: #75715e;
+        }
+        .code-panel .hljs-keyword,
+        .code-panel .hljs-selector-tag,
+        .code-panel .hljs-literal,
+        .code-panel .hljs-doctag,
+        .code-panel .hljs-meta .hljs-keyword {
+            color: #a31955;
+            font-weight: 600;
+        }
+        .code-panel .hljs-string,
+        .code-panel .hljs-regexp,
+        .code-panel .hljs-symbol,
+        .code-panel .hljs-bullet {
+            color: #7a6a28;
+        }
+        .code-panel .hljs-number,
+        .code-panel .hljs-type {
+            color: #5f3c99;
+        }
+        .code-panel .hljs-title,
+        .code-panel .hljs-title.function_,
+        .code-panel .hljs-function .hljs-title,
+        .code-panel .hljs-built_in {
+            color: #6f9020;
+        }
+        .code-panel .hljs-attr,
+        .code-panel .hljs-attribute,
+        .code-panel .hljs-variable,
+        .code-panel .hljs-class .hljs-title {
+            color: #1f5d73;
+        }
+        .code-panel .hljs-meta {
+            color: #c77418;
+        }
+        .dark .code-panel .hljs-keyword,
+        .dark .code-panel .hljs-selector-tag,
+        .dark .code-panel .hljs-literal,
+        .dark .code-panel .hljs-doctag,
+        .dark .code-panel .hljs-meta .hljs-keyword {
+            color: #f92672;
+        }
+        .dark .code-panel .hljs-string,
+        .dark .code-panel .hljs-regexp,
+        .dark .code-panel .hljs-symbol,
+        .dark .code-panel .hljs-bullet {
+            color: #e6db74;
+        }
+        .dark .code-panel .hljs-number,
+        .dark .code-panel .hljs-type {
+            color: #ae81ff;
+        }
+        .dark .code-panel .hljs-title,
+        .dark .code-panel .hljs-title.function_,
+        .dark .code-panel .hljs-function .hljs-title,
+        .dark .code-panel .hljs-built_in {
+            color: #a6e22e;
+        }
+        .dark .code-panel .hljs-attr,
+        .dark .code-panel .hljs-attribute,
+        .dark .code-panel .hljs-variable,
+        .dark .code-panel .hljs-class .hljs-title {
+            color: #66d9ef;
+        }
+        .dark .code-panel .hljs-meta {
+            color: #fd971f;
+        }
+
+        .code-panel .hljs-ln-numbers {
+            color: #75715e;
+            border-right: 1px solid #d6d2c4;
+            text-align: right;
+            vertical-align: top;
+            user-select: none;
+            padding-right: 0.75rem !important;
+            padding-left: 0.25rem !important;
+        }
+        .dark .code-panel .hljs-ln-numbers {
+            border-right-color: #49483e;
+        }
+        .code-panel .hljs-ln {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .code-panel .hljs-ln td,
+        .code-panel .hljs-ln tr {
+            border: 0;
+            padding: 0;
+        }
+        .code-panel .hljs-ln-code {
+            padding-left: 0.75rem !important;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-body min-h-screen flex flex-col transition-colors duration-300">
+<header class="w-full max-w-4xl mx-auto px-6 py-12 flex justify-between items-center border-b border-gray-300 dark:border-gray-700">
+<nav class="flex gap-6 text-sm font-display tracking-wide">
+<a class="hover:text-monokai-green-ink dark:hover:text-monokai-green transition-colors" href="#">Home</a>
+<a class="text-monokai-green-ink dark:text-monokai-green font-bold" href="#">Blog</a>
+<a class="hover:text-monokai-green-ink dark:hover:text-monokai-green transition-colors" href="#">RSS</a>
+</nav>
+<div class="flex items-center gap-3">
+<button id="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false" class="inline-flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:border-monokai-green-ink hover:text-monokai-green-ink dark:hover:border-monokai-green dark:hover:text-monokai-green transition-colors rounded text-sm font-display" type="button">
+<span aria-hidden="true" class="material-icons text-sm" id="theme-toggle-icon">dark_mode</span>
+<span id="theme-toggle-label">Dark</span>
+</button>
+<button class="px-4 py-2 border border-monokai-orange-ink text-monokai-orange-ink dark:border-monokai-orange dark:text-monokai-orange hover:bg-monokai-orange dark:hover:bg-monokai-orange hover:text-background-dark dark:hover:text-background-dark transition-all rounded text-sm font-display">
+            Subscribe
+        </button>
+</div>
+</header>
+<main class="w-full max-w-3xl mx-auto px-6 py-16 flex-grow">
+<header class="mb-12">
+<div class="flex flex-wrap gap-x-4 gap-y-2 text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 font-display mb-4">
+<span>Feb 08, 2026</span>
+<span>•</span>
+<span>8 min read</span>
+<span>•</span>
+<span class="text-monokai-green-ink dark:text-monokai-green">#databases</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-display font-bold leading-tight mb-6">
+                Paths of MySQL, vector search edition
+            </h1>
+<div class="h-1 w-24 bg-monokai-green-ink dark:bg-monokai-green rounded-full"></div>
+</header>
+<article class="prose prose-lg dark:prose-invert max-w-none prose-headings:font-body prose-p:leading-relaxed prose-li:marker:text-gray-500 dark:prose-li:marker:text-gray-400 prose-pre:bg-[#f3f1e8] prose-pre:text-gray-800 prose-pre:border prose-pre:border-gray-300 prose-pre:shadow-none dark:prose-pre:bg-[#1e1f1c] dark:prose-pre:text-gray-200 dark:prose-pre:border-gray-700">
+<p>
+                In the ever-evolving landscape of database technology, the integration of vector search capabilities has become a pivotal feature for modern applications. As we move deeper into 2026, the demand for semantic search powered by large language models continues to reshape how we architect data storage layers.
+            </p>
+<p>
+                MySQL, often seen as the traditional workhorse of the web, hasn't been sitting idle. The ecosystem has bifurcated into several interesting paths, each attempting to solve the <code class="text-sm">k-nearest neighbor</code> problem without sacrificing the ACID compliance we all know and love.
+            </p>
+<h2 class="text-2xl mt-10 mb-4 font-body text-gray-800 dark:text-gray-200">The Native Approach</h2>
+<p>
+                Initially, many developers resorted to storing vectors as <code class="text-sm">BLOB</code> types and performing brute-force scans. While simple, this approach scales linearly with data size—a death knell for latency-sensitive applications.
+            </p>
+<div class="code-panel my-8 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-lg">
+<div class="bg-gray-100 dark:bg-surface-dark px-4 py-2 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
+<span class="text-xs font-mono text-gray-500 dark:text-gray-400">sql_example.sql</span>
+<button class="copy-code-btn flex items-center gap-1 text-xs text-gray-500 hover:text-monokai-green-ink dark:text-gray-400 dark:hover:text-monokai-green transition-colors" type="button">
+<span class="material-icons text-sm">content_copy</span>
+<span class="copy-label">Copy</span>
+                    </button>
+</div>
+<div class="bg-[#f3f1e8] dark:bg-[#1e1f1c] p-4 overflow-x-auto code-scroll">
+<pre class="text-sm font-mono leading-relaxed"><code class="language-sql">CREATE TABLE embeddings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    content TEXT,
+    embedding VECTOR(1536) -- New MySQL 9.0 syntax
+);
+-- Performing a cosine similarity search
+SELECT id, content,
+       vec_cosine_distance(embedding, @query_vector) AS distance
+FROM embeddings
+ORDER BY distance ASC
+LIMIT 5;</code></pre>
+</div>
+</div>
+<p>
+                The snippet above highlights the new native syntax introduced recently. It’s clean, integrated, and surprisingly performant for datasets under a few million rows. However, when you start hitting the 10M+ row mark, the lack of an HNSW index becomes apparent.
+            </p>
+<h3 class="text-xl mt-8 mb-3 font-body text-gray-800 dark:text-gray-200">Alternative Extensions</h3>
+<p>
+                This is where extensions like <strong>pgvector</strong>'s spiritual successors in the MySQL world come into play. We are seeing a renaissance of storage engines designed specifically for high-dimensional data.
+            </p>
+<ul class="list-disc pl-5 space-y-2">
+<li><strong>PlanetScale's Vector</strong>: A serverless-first approach that abstracts the indexing complexity.</li>
+<li><strong>Manticore Search</strong>: While not strictly MySQL, it speaks the protocol and offers lightning-fast retrieval.</li>
+</ul>
+</article>
+<hr class="border-gray-200 dark:border-gray-700 my-16"/>
+<div class="flex flex-col md:flex-row justify-between gap-8 font-display text-sm">
+<a class="group flex flex-col items-start gap-1 max-w-xs" href="#">
+<span class="text-gray-500 dark:text-gray-500 group-hover:text-monokai-green-ink dark:group-hover:text-monokai-green transition-colors">← Previous</span>
+<span class="text-lg font-bold text-gray-800 dark:text-gray-200 group-hover:text-monokai-green-ink dark:group-hover:text-monokai-green transition-colors">
+                    Companies behind Postgres 18 development
+                </span>
+</a>
+<a class="group flex flex-col items-end gap-1 max-w-xs text-right" href="#">
+<span class="text-gray-500 dark:text-gray-500 group-hover:text-monokai-green-ink dark:group-hover:text-monokai-green transition-colors">Next →</span>
+<span class="text-lg font-bold text-gray-800 dark:text-gray-200 group-hover:text-monokai-green-ink dark:group-hover:text-monokai-green transition-colors">
+                    LLMs and your career path
+                </span>
+</a>
+</div>
+<div class="mt-14">
+<section class="pt-2">
+<h3 class="font-body font-bold text-xl mb-2 text-gray-800 dark:text-gray-200">Subscribe</h3>
+<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Get new posts in your inbox.
+                </p>
+<form action="#" class="flex flex-col sm:flex-row gap-3" method="post" onsubmit="return false;">
+<label class="sr-only" for="mock-subscribe-email">Email address</label>
+<input class="flex-1 min-w-0 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#272822] text-gray-800 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-500 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-monokai-green-ink/40 dark:focus:ring-monokai-green/40 focus:border-monokai-green-ink dark:focus:border-monokai-green" id="mock-subscribe-email" name="email" placeholder="you@example.com" type="email"/>
+<button class="inline-flex items-center justify-center rounded px-4 py-2.5 text-sm font-display border border-monokai-orange-ink text-monokai-orange-ink dark:border-monokai-orange dark:text-monokai-orange hover:bg-monokai-orange hover:text-background-dark dark:hover:bg-monokai-orange dark:hover:text-background-dark transition-colors sm:whitespace-nowrap" type="button">
+                        Subscribe
+                    </button>
+</form>
+<p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Weekly updates. No spam. Unsubscribe anytime.
+                </p>
+</section>
+</div>
+<div class="mt-20">
+<div class="bg-gray-100 dark:bg-surface-dark rounded-lg p-8 flex flex-col items-center justify-center text-center border border-gray-200 dark:border-gray-700">
+<span class="material-icons text-4xl text-gray-400 dark:text-gray-500 mb-2">chat_bubble_outline</span>
+<h3 class="font-body font-bold text-lg mb-2 text-gray-700 dark:text-gray-300">Comments</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-sm">
+                    Comments are powered by Utterances and require GitHub authorization.
+                </p>
+<div class="animate-pulse w-full max-w-md h-32 bg-gray-200 dark:bg-[#272822] rounded opacity-50"></div>
+</div>
+</div>
+</main>
+<footer class="w-full py-8 text-center text-xs text-gray-500 dark:text-gray-600 font-display border-t border-gray-200 dark:border-gray-800">
+<p>© 2026 Stuff of Thoughts. All rights reserved.</p>
+</footer>
+<script>
+        (function () {
+            var root = document.documentElement;
+            var storageKey = "stuffs_theme";
+            var toggleButton = document.getElementById("theme-toggle");
+            var toggleIcon = document.getElementById("theme-toggle-icon");
+            var toggleLabel = document.getElementById("theme-toggle-label");
+
+            function prefersDark() {
+                return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            }
+
+            function getStoredTheme() {
+                try {
+                    var savedTheme = localStorage.getItem(storageKey);
+                    if (savedTheme === "dark" || savedTheme === "light") {
+                        return savedTheme;
+                    }
+                } catch (error) {}
+                return null;
+            }
+
+            function applyTheme(theme) {
+                var isDark = theme === "dark";
+                root.classList.toggle("dark", isDark);
+
+                if (!toggleButton) return;
+
+                toggleButton.setAttribute("aria-pressed", String(isDark));
+                toggleButton.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+                if (toggleIcon) toggleIcon.textContent = isDark ? "light_mode" : "dark_mode";
+                if (toggleLabel) toggleLabel.textContent = isDark ? "Light" : "Dark";
+            }
+
+            var initialTheme = getStoredTheme() || (prefersDark() ? "dark" : "light");
+            applyTheme(initialTheme);
+
+            if (toggleButton) {
+                toggleButton.addEventListener("click", function () {
+                    var nextTheme = root.classList.contains("dark") ? "light" : "dark";
+                    applyTheme(nextTheme);
+                    try {
+                        localStorage.setItem(storageKey, nextTheme);
+                    } catch (error) {}
+                });
+            }
+
+            if (window.matchMedia) {
+                var media = window.matchMedia("(prefers-color-scheme: dark)");
+                var mediaHandler = function (event) {
+                    if (getStoredTheme() !== null) return;
+                    applyTheme(event.matches ? "dark" : "light");
+                };
+                if (media.addEventListener) {
+                    media.addEventListener("change", mediaHandler);
+                } else if (media.addListener) {
+                    media.addListener(mediaHandler);
+                }
+            }
+
+            function copyText(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text);
+                }
+                return new Promise(function (resolve, reject) {
+                    var textarea = document.createElement("textarea");
+                    textarea.value = text;
+                    textarea.setAttribute("readonly", "");
+                    textarea.style.position = "absolute";
+                    textarea.style.left = "-9999px";
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand("copy");
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    } finally {
+                        document.body.removeChild(textarea);
+                    }
+                });
+            }
+
+            function bindCopyButtons() {
+                var buttons = document.querySelectorAll(".copy-code-btn");
+                buttons.forEach(function (button) {
+                    if (button.dataset.bound === "true") return;
+                    button.dataset.bound = "true";
+                    button.addEventListener("click", function () {
+                        var panel = button.closest(".code-panel");
+                        if (!panel) return;
+                        var code = panel.querySelector("pre code");
+                        if (!code) return;
+
+                        var source = code.dataset.rawCode || code.textContent || "";
+                        var label = button.querySelector(".copy-label");
+                        var icon = button.querySelector(".material-icons");
+
+                        copyText(source).then(function () {
+                            if (label) label.textContent = "Copied";
+                            if (icon) icon.textContent = "check";
+                            window.setTimeout(function () {
+                                if (label) label.textContent = "Copy";
+                                if (icon) icon.textContent = "content_copy";
+                            }, 1400);
+                        }).catch(function () {});
+                    });
+                });
+            }
+
+            function initializeSyntaxHighlighting() {
+                var blocks = document.querySelectorAll("pre code");
+                blocks.forEach(function (block) {
+                    block.dataset.rawCode = (block.textContent || "").replace(/\n$/, "");
+                });
+
+                if (!window.hljs || !window.hljs.highlightElement) return;
+
+                blocks.forEach(function (block) {
+                    window.hljs.highlightElement(block);
+                    if (window.hljs.lineNumbersBlock) {
+                        window.hljs.lineNumbersBlock(block);
+                    }
+                });
+            }
+
+            initializeSyntaxHighlighting();
+            bindCopyButtons();
+        })();
+    </script>
+
+</body></html>
