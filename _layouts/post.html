@@ -1,0 +1,75 @@
+---
+layout: default
+---
+<article class="post-detail">
+  <header class="post-header">
+    <div class="meta-row">
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%b %-d, %Y" }}</time>
+      <span aria-hidden="true">•</span>
+      <span>{{ page.read_time | default: content | reading_time }}</span>
+      {% if page.tags and page.tags.size > 0 %}
+        <span aria-hidden="true">•</span>
+        <span class="meta-row__tags">
+          {% for tag in page.tags %}
+            <a class="meta-row__tag" href="/tags/{{ tag | canonical_tag_slug }}/">#{{ tag }}</a>
+          {% endfor %}
+        </span>
+      {% endif %}
+    </div>
+    <h1 class="post-title">{{ page.title }}</h1>
+    <div class="post-title-rule" aria-hidden="true"></div>
+  </header>
+
+  <div class="post-content">
+    {{ content }}
+  </div>
+
+  <hr class="post-divider">
+
+  <nav class="post-navigation{% if page.previous and page.next %} post-navigation--split{% endif %}" aria-label="Post navigation">
+    {% if page.previous %}
+      <a class="post-navigation__item" href="{{ page.previous.url }}">
+        <span>← Previous</span>
+        <strong>{{ page.previous.title }}</strong>
+      </a>
+    {% endif %}
+
+    {% if page.next %}
+      <a class="post-navigation__item post-navigation__item--next" href="{{ page.next.url }}">
+        <span>Next →</span>
+        <strong>{{ page.next.title }}</strong>
+      </a>
+    {% endif %}
+  </nav>
+
+  <section class="post-subscribe">
+    {% include subscribe-form.html variant="compact" id=page.post_uid %}
+  </section>
+
+  <section
+    class="comments-shell"
+    data-comments-provider="{{ site.comments.provider }}"
+    data-comments-repo="{{ site.comments.utterances.repo }}"
+    data-comments-issue-term="{{ site.comments.utterances.issue_term }}"
+  >
+    <h2>Comments</h2>
+    {% if site.comments.provider == "utterances" %}
+      <p class="comments-shell__note">Comments are hosted on GitHub Issues.</p>
+      <button
+        type="button"
+        class="comments-shell__toggle"
+        data-comments-toggle
+        aria-expanded="false"
+        aria-controls="comments-mount-{{ page.post_uid }}"
+      >
+        Show comments
+      </button>
+      <div id="comments-mount-{{ page.post_uid }}" class="comments-shell__mount" data-comments-mount>
+        <p class="comments-shell__fallback">Comments load only when you choose to show them.</p>
+      </div>
+    {% else %}
+      <p class="comments-shell__note">Comments are currently unavailable.</p>
+      <div class="comments-shell__placeholder" aria-hidden="true"></div>
+    {% endif %}
+  </section>
+</article>

@@ -1,0 +1,17 @@
+{% assign figure_id = include.id | default: include.src | slugify %}
+{% assign alt_text = include.alt | default: "" %}
+<figure class="post-figure" id="{{ figure_id }}">
+  <img
+    src="{{ include.src }}"
+    alt="{{ alt_text | escape }}"
+    width="{{ include.width }}"
+    height="{{ include.height }}"
+    loading="{{ include.loading | default: 'lazy' }}"
+    decoding="async"
+    sizes="{{ include.sizes | default: '(min-width: 1024px) 680px, 92vw' }}"
+    {% if include.srcset %}srcset="{{ include.srcset }}"{% endif %}
+  >
+  {% if include.caption %}
+    <figcaption>{{ include.caption }}</figcaption>
+  {% endif %}
+</figure>

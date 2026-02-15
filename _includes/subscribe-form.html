@@ -1,0 +1,42 @@
+{% assign form = site.kit.form %}
+{% assign is_compact = false %}
+{% if include.variant == "compact" %}
+  {% assign is_compact = true %}
+{% endif %}
+{% assign instance_id = include.id | default: page.url | append: "-subscribe" | slugify %}
+<section class="subscribe-block{% if is_compact %} subscribe-block--compact{% endif %}">
+  {% if is_compact %}
+    <h3>Subscribe</h3>
+  {% else %}
+    <h1>Subscribe</h1>
+  {% endif %}
+  <p class="subscribe-block__lede">Get new posts in your inbox.</p>
+  <form action="{{ form.form_action }}" class="subscribe-form" method="post" accept-charset="utf-8" novalidate>
+    <input type="hidden" name="redirect_to" value="{{ form.success_url }}">
+    {% if form.error_url %}
+      <input type="hidden" name="error_redirect_to" value="{{ form.error_url }}">
+    {% endif %}
+
+    <label class="sr-only" for="{{ instance_id }}-email">Email address</label>
+    <input
+      id="{{ instance_id }}-email"
+      name="email_address"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      required
+      placeholder="you@example.com"
+      aria-describedby="{{ instance_id }}-privacy"
+    >
+
+    <div class="sr-only" aria-hidden="true">
+      <label for="{{ instance_id }}-trap">Leave this blank</label>
+      <input id="{{ instance_id }}-trap" type="text" name="fields[website]" tabindex="-1" autocomplete="off">
+    </div>
+
+    <button type="submit">Subscribe</button>
+  </form>
+  <p class="subscribe-block__privacy" id="{{ instance_id }}-privacy">
+    Weekly updates. No spam. Unsubscribe anytime.
+  </p>
+</section>

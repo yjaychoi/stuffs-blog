@@ -1,0 +1,22 @@
+---
+layout: default
+---
+<section class="route-header">
+  <h1>#{{ page.tag_name }}</h1>
+  <p>Posts tagged with {{ page.tag_name }}.</p>
+</section>
+
+<section class="route-section">
+  {% if page.posts and page.posts.size > 0 %}
+    <ul class="post-list post-list--dense">
+      {% for post in page.posts %}
+        <li class="post-row">
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+          <a href="{{ post.url }}">{{ post.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-state">No posts found for this tag.</p>
+  {% endif %}
+</section>

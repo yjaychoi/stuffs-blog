@@ -1,0 +1,30 @@
+{% assign current_url = page.url | default: "/" %}
+<header class="site-header">
+  <div class="shell shell--wide site-header__inner">
+    <a class="site-brand" href="/"{% if current_url == "/" %} aria-current="page"{% endif %}>Stuff of Thoughts</a>
+
+    <div class="site-header__cluster">
+      <nav class="site-nav" id="site-nav" aria-label="Primary" data-open="false">
+        <a href="/"{% if current_url == "/" %} class="is-active" aria-current="page"{% endif %}>Home</a>
+        <a href="/blog/"{% if current_url == "/blog/" or current_url contains "/blog/" and current_url != "/" and current_url != "/blog/page/1/" %} class="is-active" aria-current="page"{% endif %}>Blog</a>
+        <a href="/feed.xml">RSS</a>
+        <a class="subscribe-link subscribe-link--nav" href="/subscribe/"{% if current_url == "/subscribe/" %} aria-current="page"{% endif %}>Subscribe</a>
+      </nav>
+
+      <div class="site-header__actions">
+        {% include theme-toggle.html %}
+        <button
+          class="menu-toggle"
+          type="button"
+          id="menu-toggle"
+          aria-expanded="false"
+          aria-controls="site-nav"
+          aria-label="Open navigation menu"
+        >
+          Menu
+        </button>
+        <a class="subscribe-link" href="/subscribe/"{% if current_url == "/subscribe/" %} aria-current="page"{% endif %}>Subscribe</a>
+      </div>
+    </div>
+  </div>
+</header>

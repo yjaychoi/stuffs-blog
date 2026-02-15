@@ -1,0 +1,23 @@
+---
+layout: default
+---
+<section class="route-header">
+  <h1>Tags</h1>
+  <p>Canonical tag routes for browsing focused topics.</p>
+</section>
+
+<section class="route-section">
+  {% assign tag_names = site.tags | tag_names | deterministic_tag_sort %}
+  {% if tag_names.size == 0 %}
+    <p class="empty-state">No tags yet.</p>
+  {% else %}
+    <ul class="tag-list">
+      {% for tag_name in tag_names %}
+        <li>
+          <a href="/tags/{{ tag_name | canonical_tag_slug }}/">#{{ tag_name }}</a>
+          <span>{{ site.tags[tag_name].size }} post{% if site.tags[tag_name].size != 1 %}s{% endif %}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>

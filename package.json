@@ -1,0 +1,33 @@
+{
+  "name": "stuffs-blog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.11.0"
+  },
+  "scripts": {
+    "build:meta": "node scripts/build-meta.mjs",
+    "build:site": "bundle exec jekyll build",
+    "build": "npm run build:meta && npm run build:site",
+    "test:contracts": "npm run build && vitest run tests/contracts",
+    "test:e2e": "playwright test",
+    "test:e2e:smoke": "playwright test --grep @smoke",
+    "test:size": "size-limit --config size-limit.config.cjs",
+    "test": "npm run test:contracts && npm run test:size && npm run test:e2e",
+    "dev": "bundle exec jekyll serve --livereload"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
+    "@playwright/test": "^1.53.1",
+    "@size-limit/file": "^11.2.0",
+    "cheerio": "^1.1.0",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "http-server": "^14.1.1",
+    "jsdom": "^26.1.0",
+    "size-limit": "^11.2.0",
+    "vitest": "^2.1.8",
+    "yaml": "^2.8.1"
+  }
+}

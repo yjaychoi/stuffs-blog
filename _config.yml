@@ -1,0 +1,84 @@
+title: Stuff of Thoughts
+description: Stuff of Thoughts is a minimalist engineering blog focused on practical software craftsmanship.
+url: https://stuffs.blog
+baseurl: ""
+lang: en
+timezone: UTC
+markdown: kramdown
+future: false
+
+author:
+  name: Stuff of Thoughts
+
+kramdown:
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
+      start_line: 1
+
+permalink: /blog/:year/:month/:day/:slug/
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-paginate-v2
+
+pagination:
+  enabled: true
+  collection: posts
+  per_page: 30
+  permalink: /blog/page/:num/
+  sort_reverse: true
+
+feed:
+  path: feed.xml
+  excerpt_only: true
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+      image: /assets/images/og-default.png
+  - scope:
+      path: "_posts"
+      type: posts
+    values:
+      layout: post
+      permalink: /blog/:year/:month/:day/:slug/
+
+kit:
+  form:
+    form_action: "https://app.kit.com/forms/0000000/subscriptions"
+    form_uid: "0000000"
+    success_url: "https://stuffs.blog/subscribe/success/"
+    error_url: "https://stuffs.blog/subscribe/error/"
+
+comments:
+  provider: none
+  utterances:
+    repo: "example/stuffs-blog-comments"
+    issue_term: "pathname"
+
+external_asset_hosts: []
+
+exclude:
+  - node_modules
+  - vendor
+  - docs
+  - README.md
+  - DESIGN_DOCUMENT.md
+  - mockup.html
+  - package-lock.json
+  - Gemfile.lock
+  - playwright-report
+  - test-results
+
+liquid:
+  error_mode: strict
+  strict_filters: true
+  strict_variables: false

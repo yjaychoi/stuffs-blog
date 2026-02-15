@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {% capture csp_host_allowlist %}{% for host in site.data.external_asset_hosts %} https://{{ host }}{% endfor %}{% endcapture %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#25231f" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f3f1e7" media="(prefers-color-scheme: light)">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; form-action 'self' https://app.kit.com; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com{{ csp_host_allowlist | strip }}; frame-src 'self' https://utteranc.es; connect-src 'self' https://api.github.com https://github.com https://utteranc.es{{ csp_host_allowlist | strip }};">
+    <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="/feed.xml">
+    <script src="/assets/js/boot.js?v={{ site.data.build_meta.asset_version }}"></script>
+    <style>
+      html,
+      body {
+        background: #25231f;
+      }
+
+      html[data-theme="light"],
+      html[data-theme="light"] body {
+        background: #f3f1e7;
+      }
+
+      @media (prefers-color-scheme: light) {
+        html:not([data-theme]),
+        html:not([data-theme]) body {
+          background: #f3f1e7;
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme]),
+        html:not([data-theme]) body {
+          background: #25231f;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="/assets/css/main.css?v={{ site.data.build_meta.asset_version }}">
+    {% if page.noindex %}
+      <meta name="robots" content="noindex,follow">
+    {% endif %}
+    {% seo %}
+    {% if page.canonical_override %}
+      <link rel="canonical" href="https://stuffs.blog{{ page.canonical_override }}">
+    {% endif %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    {% include header.html %}
+    <main id="main-content" class="site-main shell">
+      {{ content }}
+    </main>
+    {% include footer.html %}
+    <div id="aria-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <script src="/assets/js/theme.js?v={{ site.data.build_meta.asset_version }}" defer></script>
+    <script src="/assets/js/code-copy.js?v={{ site.data.build_meta.asset_version }}" defer></script>
+    <script src="/assets/js/comments.js?v={{ site.data.build_meta.asset_version }}" defer></script>
+    {% include mermaid-loader.html %}
+  </body>
+</html>
