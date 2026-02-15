@@ -8,26 +8,32 @@
   {% if is_compact %}
     <h3>Subscribe</h3>
   {% else %}
-    <h1>Subscribe</h1>
+    <h2>Email Updates</h2>
   {% endif %}
-  <p class="subscribe-block__lede">Get new posts in your inbox.</p>
+  {% if is_compact %}
+    <p class="subscribe-block__lede">Get new posts in your inbox.</p>
+  {% else %}
+    <p class="subscribe-block__lede">Practical notes on delivery and architecture, sent when new posts are published.</p>
+  {% endif %}
   <form action="{{ form.form_action }}" class="subscribe-form" method="post" accept-charset="utf-8" novalidate>
     <input type="hidden" name="redirect_to" value="{{ form.success_url }}">
     {% if form.error_url %}
       <input type="hidden" name="error_redirect_to" value="{{ form.error_url }}">
     {% endif %}
 
-    <label class="sr-only" for="{{ instance_id }}-email">Email address</label>
-    <input
-      id="{{ instance_id }}-email"
-      name="email_address"
-      type="email"
-      autocomplete="email"
-      inputmode="email"
-      required
-      placeholder="you@example.com"
-      aria-describedby="{{ instance_id }}-privacy"
-    >
+    <div class="subscribe-form__field">
+      <label class="subscribe-form__label" for="{{ instance_id }}-email">Email address</label>
+      <input
+        id="{{ instance_id }}-email"
+        name="email_address"
+        type="email"
+        autocomplete="email"
+        inputmode="email"
+        required
+        placeholder="you@example.com"
+        aria-describedby="{{ instance_id }}-privacy"
+      >
+    </div>
 
     <div class="sr-only" aria-hidden="true">
       <label for="{{ instance_id }}-trap">Leave this blank</label>
@@ -37,6 +43,6 @@
     <button type="submit">Subscribe</button>
   </form>
   <p class="subscribe-block__privacy" id="{{ instance_id }}-privacy">
-    Weekly updates. No spam. Unsubscribe anytime.
+    No spam. Unsubscribe anytime.
   </p>
 </section>

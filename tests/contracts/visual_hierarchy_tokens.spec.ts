@@ -14,13 +14,13 @@ describe("visual hierarchy token contract", () => {
   });
 
   it("keeps title dominance and accent rule lock values", () => {
-    expect(css).toMatch(/\.post-title\s*\{[\s\S]*font-size:\s*clamp\(1\.92rem,[\s\S]*2\.72rem\)/);
+    expect(css).toMatch(/\.post-title\s*\{[\s\S]*font-size:\s*clamp\(1\.65rem,[\s\S]*2\.05rem\)/);
     expect(css).toMatch(/\.post-title-rule\s*\{[\s\S]*width:\s*96px;[\s\S]*height:\s*4px;/);
   });
 
   it("keeps major section spacing cadence", () => {
-    expect(css).toMatch(/\.post-divider\s*\{[\s\S]*margin:\s*3\.4rem\s0;/);
-    expect(css).toMatch(/\.post-subscribe\s*\{[\s\S]*margin-top:\s*3\.2rem;/);
+    expect(css).toMatch(/\.post-divider\s*\{[\s\S]*margin:\s*2\.7rem\s0;/);
+    expect(css).toMatch(/\.post-subscribe\s*\{[\s\S]*margin-top:\s*2\.6rem;/);
     expect(css).toMatch(/\.comments-shell\s*\{[\s\S]*margin-top:\s*3\.6rem;/);
   });
 });

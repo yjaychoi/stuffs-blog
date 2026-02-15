@@ -3,7 +3,6 @@
   root.classList.add("js");
   var storageKey = "stuffs_theme";
   var toggleButton = document.getElementById("theme-toggle");
-  var toggleIcon = toggleButton ? toggleButton.querySelector(".theme-toggle__icon") : null;
   var toggleLabel = toggleButton ? toggleButton.querySelector(".theme-toggle__label") : null;
   var menuButton = document.getElementById("menu-toggle");
   var nav = document.getElementById("site-nav");
@@ -40,10 +39,6 @@
     var isDark = theme === "dark";
     toggleButton.setAttribute("aria-pressed", String(isDark));
     toggleButton.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
-
-    if (toggleIcon) {
-      toggleIcon.textContent = isDark ? "☀" : "☾";
-    }
 
     if (toggleLabel) {
       toggleLabel.textContent = isDark ? "Light" : "Dark";

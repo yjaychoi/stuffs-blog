@@ -5,7 +5,7 @@ slug: queue-latency-budgeting
 title: "Queue latency budgeting under burst traffic"
 date: 2026-02-12 11:15:00 +0900
 tags: [architecture, operations]
-summary: "A sample post used to validate previous/next navigation alignment with a third entry in the timeline."
+summary: "Sample post for validating previous/next navigation alignment with a three-entry timeline, including title wrapping and spacing behavior on desktop and mobile."
 featured: false
 ---
 This is a sample entry for layout validation.
