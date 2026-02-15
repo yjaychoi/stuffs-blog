@@ -59,10 +59,24 @@ kit:
     error_url: "https://stuffs.blog/subscribe/error/"
 
 comments:
-  provider: none
-  utterances:
-    repo: "example/stuffs-blog-comments"
-    issue_term: "pathname"
+  provider: giscus
+  giscus:
+    repo: "yjaychoi/stuffs-blog"
+    repo_id: "R_kgDORQKTuQ"
+    category: "Announcements"
+    category_id: "DIC_kwDORQKTuc4C2fre"
+    mapping: "url"
+    strict: "0"
+    reactions_enabled: "0"
+    emit_metadata: "0"
+    input_position: "top"
+    # Local paths are resolved to absolute URLs at runtime.
+    # On localhost/non-HTTPS preview, comments.js falls back to built-in giscus themes
+    # because custom theme URLs from the giscus iframe require HTTPS+CORS.
+    theme_light: "/assets/css/giscus-light.css"
+    theme_dark: "/assets/css/giscus-dark.css"
+    lang: "en"
+    loading: "lazy"
 
 external_asset_hosts: []
 

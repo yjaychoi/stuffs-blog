@@ -7,6 +7,7 @@ date: 2026-02-08 09:00:00 +0900
 tags: [databases, mysql, vector-search]
 summary: "A practical look at MySQL vector-search options, with tradeoffs across native features, extensions, and operational constraints."
 featured: true
+comments: true
 ---
 In the ever-evolving landscape of database technology, the integration of vector search capabilities has become a pivotal feature for modern applications. As we move deeper into 2026, the demand for semantic search powered by large language models continues to reshape how we architect data storage layers.
 

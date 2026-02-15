@@ -4,8 +4,8 @@
 **Blog title (exact):** `Stuff of Thoughts`  
 **Hosting:** GitHub Pages (Jekyll)  
 **Email subscriptions:** Kit (newsletter/free plan)  
-**Comments:** planned utterances integration (GitHub Issues-backed; spec defined, activation deferred)  
-**Infrastructure boundary:** static GitHub Pages output + third-party Kit now, with utterances reserved for future activation (no custom backend/runtime)  
+**Comments:** planned giscus integration (GitHub Discussions-backed; spec defined, activation deferred)  
+**Infrastructure boundary:** static GitHub Pages output + third-party Kit now, with giscus reserved for future activation (no custom backend/runtime)  
 **Repo visibility:** private source repo (GitHub Plus) with GitHub Pages deployment via Actions  
 **Localization scope:** none (English-only UI and posts)  
 **Primary visual reference (required):** `docs/mockup.html` in this repository is the canonical quality baseline for hierarchy, spacing rhythm, and component polish; screenshot captures are supplemental only. Visual determinism is satisfied by this canonical reference.
@@ -30,7 +30,7 @@
 6. Keep implementation and operations simple enough for solo maintenance.
 7. Deploy automatically through CI/CD, including validated Kit email integration.
 8. Support subscriber signup and automated new-post notifications via Kit.
-9. Allow high-fidelity, JS-enabled UI behavior (theme init, menu interaction, code-copy; comments reveal when future utterances phase is enabled) while keeping static hosting constraints.
+9. Allow high-fidelity, JS-enabled UI behavior (theme init, menu interaction, code-copy; comments reveal when future giscus phase is enabled) while keeping static hosting constraints.
 
 ### Non-goals
 
@@ -71,7 +71,7 @@ This section defines implementation guidance anchored to `docs/mockup.html`.
    1. theme bootstrap and user preference persistence
    2. responsive/disclosure navigation
    3. code-block copy interactions
-   4. comments lazy-load interactions (future utterances phase)
+   4. comments viewport-triggered load interactions (future giscus phase)
    5. small purposeful motion (e.g., hover/focus/state transitions)
 2. JS-dependent controls must have accessible semantics (`button`, `aria-expanded`, `aria-controls`, keyboard support).
 3. If JS fails, content reading must still work (header brand/home link, article body, footer links, and subscribe route remain discoverable), but parity with enhanced interactions is not required.
@@ -175,6 +175,7 @@ featured: false
    2. `cover_image` (canonical social/share image path)
    3. `cover_image_alt` (required when `cover_image` is present)
    4. `last_modified_at` (`YYYY-MM-DD HH:MM:SS +/-TTTT`)
+   5. `comments` (boolean per-post opt-in for comments shell/embed)
 5. Forbidden keys inside post front matter:
    1. `permalink`
    2. `redirect_from`
@@ -557,7 +558,7 @@ Both themes must preserve minimalist look and readability.
    2. direction labels are muted and linked titles are typographically stronger
 6. Comments block (current + future contract):
    1. current release must render an intentional placeholder/shell block on post pages
-   2. utterances activation is deferred; future behavior is specified in section 13
+   2. giscus activation is deferred; future behavior is specified in section 13
 7. Bottom-of-article subscribe form (required):
    1. include the actual Kit-managed subscribe form embed (or `subscribe-form.html` wrapper around that embed) at the end of each post detail page (not just a link/CTA)
    2. form appears below article content and post-navigation, before footer
@@ -599,7 +600,7 @@ Both themes must preserve minimalist look and readability.
 
 ## 7.6 Privacy page
 
-1. Explains data processing for Kit form submissions and planned utterances comments.
+1. Explains data processing for Kit form submissions and planned giscus comments.
 2. Lists third-party processors and links to their privacy policies.
 3. Provides contact channel for privacy-related requests.
 4. Keeps copy concise.
@@ -724,11 +725,10 @@ Both themes must preserve minimalist look and readability.
       no_js.spec.ts
       mermaid.spec.ts
       comments_disabled.spec.ts
-      comments_utterances.spec.ts
+      comments_giscus.spec.ts
       visual_regression.spec.ts
       accessibility.spec.ts
   docs/
-    moderation.md
 ```
 
 ---
@@ -739,7 +739,7 @@ Both themes must preserve minimalist look and readability.
 
 1. Final deploy artifact must be static files only (`HTML`, `CSS`, `JS`, assets).
 2. No custom server runtime, API, or middleware is allowed.
-3. Dynamic behavior is limited to client-side JS and third-party embeds (theme/menu/copy interactions, Mermaid client-side rendering, Kit form post; utterances script only when `comments.provider=utterances`).
+3. Dynamic behavior is limited to client-side JS and third-party embeds (theme/menu/copy interactions, Mermaid client-side rendering, Kit form post; giscus script only when `comments.provider=giscus`).
 4. Legacy URL redirects must be generated as static pages from `_data/redirects.yml` (no server-side redirect middleware).
 5. Baseline launch must include an explicit transport/security hardening decision record: either (a) direct GitHub Pages with documented residual header limitations, or (b) CDN/proxy edge enforcement of equivalent-or-stronger security headers.
 
@@ -791,15 +791,15 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    2. mobile viewport (`390x844`) with light/dark toggle
    3. asserts no horizontal overflow and header/menu controls remain reachable
 6. Progressive-enhancement smoke tests:
-   1. JS enabled: validates disclosure-menu interaction, theme persistence, code-copy behavior, Mermaid rendering on diagram posts, and comments behavior only when `comments.provider=utterances`.
+   1. JS enabled: validates disclosure-menu interaction, theme persistence, code-copy behavior, Mermaid rendering on diagram posts, and comments behavior only when `comments.provider=giscus`.
    2. JS disabled: validates fallback reading flow and recovery links (`Home`/`Blog`) on `/`, `/blog/`, `/tags/`, `/subscribe/`, and `/privacy/`.
 7. Comments-mode validation (required):
-   1. run with `comments.provider=none` (default): placeholder renders, no utterances script/frame requests, privacy disclosure present
-   2. run with `comments.provider=utterances`: explicit `Show comments` control renders and lazily injects utterances only after user action
-   3. verify no duplicate utterances mounts on repeated interactions and keyboard activation works (`Enter`/`Space`)
-   4. verify no utterances network/script/frame activity occurs before explicit user action in `provider=utterances` mode
-   5. CI must stub/intercept utterances host traffic (`utteranc.es`, `github.com`, `api.github.com`) and run fully deterministic without external network dependency
-   6. production utterances activation remains optional in current release
+   1. run with `comments.provider=none` (default): placeholder renders, no giscus script/frame requests, privacy disclosure present
+   2. run with `comments.provider=giscus`: comments auto-load when the comments section enters viewport
+   3. verify no duplicate giscus mounts on repeated scroll/viewport entry
+   4. verify no giscus network/script/frame activity occurs before the comments section enters viewport
+   5. CI must stub/intercept giscus host traffic (`giscus.app`, `github.com`, `api.github.com`) and run fully deterministic without external network dependency
+   6. production giscus activation remains optional in current release
 8. Visual hierarchy regression (Playwright snapshots, required):
    1. compares canonical post fixture route (derived from `docs/mockup.html`) in desktop (`1366x900`) and mobile (`390x844`)
    2. checks both light and dark themes
@@ -948,56 +948,55 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 
 ---
 
-## 13) Comments integration (utterances)
+## 13) Comments integration (giscus)
 
-Status: deferred live activation. Current release does not require production utterances enablement, but does require deterministic provider-mode contract/e2e coverage (with stubbed utterances traffic) so future activation is safe.
+Status: deferred live activation. Current release does not require production giscus enablement, but does require deterministic provider-mode contract/e2e coverage (with stubbed giscus traffic) so future activation is safe.
 
 1. Activation/config contract (required):
    1. `_config.yml` must define:
-      1. `comments.provider` with allowed values: `none`, `utterances`
+      1. `comments.provider` with allowed values: `none`, `giscus`
       2. `comments.provider` default: `none`
-      3. when `utterances`, require `comments.utterances.repo` and `comments.utterances.issue_term`
-   2. templates/scripts must branch behavior only from `comments.provider` to keep tests deterministic
+      3. when `giscus`, require `comments.giscus.repo` and `comments.giscus.mapping`
+   2. post front matter may set `comments: true` to opt a post into comments; default behavior without this key is comments disabled for that post
+   3. templates/scripts must branch behavior from `comments.provider` and per-post `comments` metadata to keep tests deterministic
 2. Current release contract (`comments.provider=none`):
-   1. post pages render a comments placeholder/shell block that preserves layout and hierarchy
-   2. no utterances script/frame loads occur
+   1. opted-in post pages (`comments: true`) render a comments placeholder/shell block that preserves layout and hierarchy
+   2. no giscus script/frame loads occur
    3. privacy page discloses planned third-party comment processing
-3. Future utterances activation contract (`comments.provider=utterances`):
+3. Future giscus activation contract (`comments.provider=giscus`):
    1. store comments in a dedicated public repo
    2. embed only on post pages
    3. theme must follow active site theme (light/dark variants)
-   4. if utterances unavailable, page content still fully readable
-   5. load utterances lazily only after explicit user action (`Show comments`); do not auto-load on viewport entry
-   6. show a short privacy note near comments indicating third-party GitHub Issues-backed processing
+   4. if giscus unavailable, page content still fully readable
+   5. load giscus lazily only when the comments section enters viewport; do not eager-load on initial page render
+   6. show a short privacy note near comments indicating third-party GitHub Discussions-backed processing
 4. Testing requirements (required):
    1. contract tests (`comments_config.spec.ts`) validate:
-      1. allowed values for `comments.provider` (`none`, `utterances`)
+      1. allowed values for `comments.provider` (`none`, `giscus`)
       2. default `comments.provider=none`
-      3. required utterances keys (`repo`, `issue_term`) when `provider=utterances`
-      4. failure on invalid provider values or incomplete utterances config
+      3. required giscus keys (`repo`, `mapping`) when `provider=giscus`
+      4. failure on invalid provider values or incomplete giscus config
    2. e2e tests (`comments_disabled.spec.ts`) validate in `provider=none`:
-      1. comments placeholder/shell is rendered on post pages
-      2. no utterances script injection
-      3. no utterances iframe mount
-      4. no utterances host network activity
-   3. e2e tests (`comments_utterances.spec.ts`) validate in `provider=utterances`:
-      1. `Show comments` control is present with accessible name and keyboard activation (`Enter`/`Space`)
-      2. utterances resources are not requested before explicit user action
-      3. one user action injects exactly one utterances mount
-      4. repeated actions do not create duplicate mounts
-      5. fallback copy remains readable if utterances load fails
+      1. comments placeholder/shell is rendered on opted-in post pages
+      2. non-opted post pages do not render the comments shell
+      3. no giscus script injection
+      4. no giscus iframe mount
+      5. no giscus host network activity
+   3. e2e tests (`comments_giscus.spec.ts`) validate in `provider=giscus`:
+      1. giscus resources are not requested before the comments section enters viewport
+      2. first viewport entry injects exactly one giscus mount
+      3. repeated viewport entries do not create duplicate mounts
+      4. fallback copy remains readable if giscus script loads but no iframe mount appears
+      5. fallback copy remains readable if giscus load fails
    4. accessibility tests validate comments control names, focus order, and state announcement behavior in both provider modes
-   5. `provider=utterances` CI tests must use stubbed/intercepted utterances responses and must not depend on production comment activation
-5. On GitHub Pages, include a restrictive meta CSP and referrer policy compatible with Kit and utterances:
+   5. `provider=giscus` CI tests must use stubbed/intercepted giscus responses and must not depend on production comment activation
+5. On GitHub Pages, include a restrictive meta CSP and referrer policy compatible with Kit and giscus:
    1. baseline CSP allowlist must explicitly constrain `default-src`, `script-src`, `style-src`, `img-src`, `frame-src`, `connect-src`, `font-src`, `form-action`, and `base-uri`.
-   2. allowlist host scope must be minimum-required (`self`, `app.kit.com`, `utteranc.es`, `github.com`, `api.github.com`, `avatars.githubusercontent.com`) plus explicitly declared external asset hosts from `_data/external_asset_hosts.yml` when needed.
+   2. allowlist host scope must be minimum-required (`self`, `app.kit.com`, `giscus.app`, `github.com`, `api.github.com`, `avatars.githubusercontent.com`) plus explicitly declared external asset hosts from `_data/external_asset_hosts.yml` when needed.
    3. Mermaid runtime must be self-hosted (`self`) by default; adding CDN/script hosts for Mermaid requires an explicit security exception and documentation update.
    4. referrer policy must be `strict-origin-when-cross-origin`.
 6. Meta CSP is defense-in-depth only (not equivalent to response-header CSP); this residual risk must be documented in launch notes.
 7. If fronted by a proxy/CDN later, enforce equivalent or stricter header-based CSP/referrer-policy at the edge.
-8. Operational policy:
-   1. define comment moderation owners and response SLA in `docs/moderation.md`.
-   2. privacy request workflow includes comment deletion handling and links users to contact channel on `/privacy/`.
 
 ---
 
@@ -1020,7 +1019,7 @@ A release is done only if all items pass.
 13. Bottom-of-article subscribe form is present and working on post detail pages.
 14. Kit feed-based notification flow is configured and tested.
 15. CI and deploy workflows are green; production smoke checks pass with retry/backoff.
-16. Comments placeholder/privacy disclosures are present; provider-mode tests (`none` and `utterances`) pass in CI with stubbed utterances traffic (no production activation dependency).
+16. Comments placeholder/privacy disclosures are present; provider-mode tests (`none` and `giscus`) pass in CI with stubbed giscus traffic (no production activation dependency).
 17. Post code blocks use Monokai highlighting with copy action and highlighter-generated line numbers in both site themes (no hand-authored token markup).
 18. Blog visual language remains aligned with `docs/mockup.html`, using green/orange accents with neutral supporting tones.
 19. Header and code-copy controls pass keyboard and screen-reader interaction checks.
@@ -1030,9 +1029,8 @@ A release is done only if all items pass.
 23. Blog pagination canonicalization policy is enforced (`/blog/page/1/` normalization and page `>=2` self-canonical behavior).
 24. Feed strategy is valid (`/feed.xml`) and nav links route correctly.
 25. Workflow baseline hardening gates pass (least-privilege permissions and pinned action versions).
-26. Comment moderation/deletion operational policy is documented and linked from privacy route.
-27. Visual hierarchy token-contract tests pass with no tier-collapse regressions.
-28. Accent-role mapping remains consistent with mockup intent: green for chrome, orange for in-article links and subscribe actions.
+26. Visual hierarchy token-contract tests pass with no tier-collapse regressions.
+27. Accent-role mapping remains consistent with mockup intent: green for chrome, orange for in-article links and subscribe actions.
 
 ---
 
@@ -1073,10 +1071,9 @@ Phase order and individual tasks in this roadmap are implementation guidance and
 
 1. Integrate Kit form and labels on both `/subscribe/` and bottom of post detail pages.
 2. Integrate Kit RSS automation for new-post notifications.
-3. Keep utterances integration spec-complete but deferred (placeholder + activation contract + privacy disclosures + provider-mode tests).
+3. Keep giscus integration spec-complete but deferred (placeholder + activation contract + privacy disclosures + provider-mode tests).
 4. Wire privacy links and processor disclosures for subscription and planned comments.
 5. Add restrictive meta CSP/referrer policy with documented GitHub Pages limitations.
-6. Add comment moderation/deletion operations doc and contact workflow.
 
 ## Phase 4 - CI/CD and launch
 
@@ -1104,7 +1101,7 @@ Phase order and individual tasks in this roadmap are implementation guidance and
 9. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, `error_url` optional).
 10. Bottom-of-article subscribe form is present and functional on post detail pages.
 11. Kit new-post notifications are configured through RSS automation or validated manual fallback.
-12. utterances integration is fully specified for future activation (placeholder behavior, provider switch contract, privacy linkage, operational moderation/deletion policy), and comments-mode tests pass for both `provider=none` and `provider=utterances` in a deterministic stubbed CI harness.
+12. giscus integration is fully specified for future activation (placeholder behavior, provider switch contract, privacy linkage), and comments-mode tests pass for both `provider=none` and `provider=giscus` in a deterministic stubbed CI harness.
 13. RSS strategy is implemented and validated (`/feed.xml`) with nav integration.
 14. Permalink rules (immutable `slug`), blog page-1 canonicalization policy, and deterministic home latest-post computation are enforced by CI.
 15. Front matter/metadata contracts are enforced, including allowlisted optional keys and deterministic metadata derivation (`title`, `description/summary`, optional `cover_image`, optional `last_modified_at`).

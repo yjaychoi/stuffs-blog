@@ -46,30 +46,35 @@ layout: default
     {% include subscribe-form.html variant="compact" id=page.post_uid %}
   </section>
 
-  <section
-    class="comments-shell"
-    data-comments-provider="{{ site.comments.provider }}"
-    data-comments-repo="{{ site.comments.utterances.repo }}"
-    data-comments-issue-term="{{ site.comments.utterances.issue_term }}"
-  >
-    <h2>Comments</h2>
-    {% if site.comments.provider == "utterances" %}
-      <p class="comments-shell__note">Comments are planned with utterances and hosted on GitHub Issues.</p>
-      <button
-        type="button"
-        class="comments-shell__toggle"
-        data-comments-toggle
-        aria-expanded="false"
-        aria-controls="comments-mount-{{ page.post_uid }}"
-      >
-        Show comments
-      </button>
-      <div id="comments-mount-{{ page.post_uid }}" class="comments-shell__mount" data-comments-mount>
-        <p class="comments-shell__fallback">Comments load only when you choose to show them.</p>
-      </div>
-    {% else %}
-      <p class="comments-shell__note">Comments are currently unavailable.</p>
-      <div class="comments-shell__placeholder" aria-hidden="true"></div>
-    {% endif %}
-  </section>
+  {% if page.comments %}
+    <section
+      class="comments-shell"
+      aria-label="Comments"
+      data-comments-provider="{{ site.comments.provider }}"
+      data-comments-repo="{{ site.comments.giscus.repo }}"
+      data-comments-repo-id="{{ site.comments.giscus.repo_id }}"
+      data-comments-category="{{ site.comments.giscus.category }}"
+      data-comments-category-id="{{ site.comments.giscus.category_id }}"
+      data-comments-mapping="{{ site.comments.giscus.mapping }}"
+      data-comments-strict="{{ site.comments.giscus.strict }}"
+      data-comments-reactions-enabled="{{ site.comments.giscus.reactions_enabled }}"
+      data-comments-emit-metadata="{{ site.comments.giscus.emit_metadata }}"
+      data-comments-input-position="{{ site.comments.giscus.input_position }}"
+      data-comments-theme-light="{{ site.comments.giscus.theme_light }}"
+      data-comments-theme-dark="{{ site.comments.giscus.theme_dark }}"
+      data-comments-lang="{{ site.comments.giscus.lang }}"
+      data-comments-loading="{{ site.comments.giscus.loading }}"
+    >
+      {% if site.comments.provider == "giscus" %}
+        <div id="comments-mount-{{ page.post_uid }}" class="comments-shell__mount" data-comments-mount>
+          <p class="comments-shell__fallback" data-comments-loading>Comments will load when this section enters view.</p>
+          <noscript>
+            <p class="comments-shell__fallback">Enable JavaScript to view comments.</p>
+          </noscript>
+        </div>
+      {% else %}
+        <div class="comments-shell__placeholder" aria-hidden="true"></div>
+      {% endif %}
+    </section>
+  {% endif %}
 </article>

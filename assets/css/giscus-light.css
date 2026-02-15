@@ -1,0 +1,100 @@
+main {
+  --color-prettylights-syntax-comment: #6d7567;
+  --color-prettylights-syntax-constant: #5f4199;
+  --color-prettylights-syntax-entity: #1f6377;
+  --color-prettylights-syntax-storage-modifier-import: #353c35;
+  --color-prettylights-syntax-entity-tag: #2f7a00;
+  --color-prettylights-syntax-keyword: #9f2556;
+  --color-prettylights-syntax-string: #6f5d1f;
+  --color-prettylights-syntax-variable: #b46b1c;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #b24538;
+  --color-prettylights-syntax-invalid-illegal-text: #fcfaf2;
+  --color-prettylights-syntax-invalid-illegal-bg: #b24538;
+  --color-prettylights-syntax-carriage-return-text: #fcfaf2;
+  --color-prettylights-syntax-carriage-return-bg: #b24538;
+  --color-prettylights-syntax-string-regexp: #2f7a00;
+  --color-prettylights-syntax-markup-list: #b46b1c;
+  --color-prettylights-syntax-markup-heading: #2f7a00;
+  --color-prettylights-syntax-markup-italic: #353c35;
+  --color-prettylights-syntax-markup-bold: #353c35;
+  --color-prettylights-syntax-markup-deleted-text: #b24538;
+  --color-prettylights-syntax-markup-deleted-bg: #f7ddd8;
+  --color-prettylights-syntax-markup-inserted-text: #2f7a00;
+  --color-prettylights-syntax-markup-inserted-bg: #d9e9cc;
+  --color-prettylights-syntax-markup-changed-text: #b46b1c;
+  --color-prettylights-syntax-markup-changed-bg: #f8dfc2;
+  --color-prettylights-syntax-markup-ignored-text: #fcfaf2;
+  --color-prettylights-syntax-markup-ignored-bg: #2f7a00;
+  --color-prettylights-syntax-meta-diff-range: #1f6377;
+  --color-prettylights-syntax-brackethighlighter-angle: #616960;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #8a9188;
+  --color-prettylights-syntax-constant-other-reference-link: #1f6377;
+
+  --color-btn-text: #353c35;
+  --color-btn-bg: #fcfaf2;
+  --color-btn-border: #c7cdbf;
+  --color-btn-shadow: 0 1px 0 rgba(53, 60, 53, 0.08);
+  --color-btn-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --color-btn-hover-bg: #ebe7da;
+  --color-btn-hover-border: #b5bcad;
+  --color-btn-active-bg: #e2dece;
+  --color-btn-active-border: #aab1a2;
+  --color-btn-selected-bg: #ebe7da;
+
+  --color-btn-primary-text: #fcfaf2;
+  --color-btn-primary-bg: #2f7a00;
+  --color-btn-primary-border: #2f7a00;
+  --color-btn-primary-shadow: 0 1px 0 rgba(26, 38, 20, 0.22);
+  --color-btn-primary-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --color-btn-primary-hover-bg: #286700;
+  --color-btn-primary-hover-border: #286700;
+  --color-btn-primary-selected-bg: #235b00;
+  --color-btn-primary-selected-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.18);
+  --color-btn-primary-disabled-text: rgba(252, 250, 242, 0.8);
+  --color-btn-primary-disabled-bg: #88ab72;
+  --color-btn-primary-disabled-border: #88ab72;
+
+  --color-action-list-item-default-hover-bg: rgba(199, 205, 191, 0.3);
+  --color-segmented-control-bg: #ebe7da;
+  --color-segmented-control-button-bg: #fcfaf2;
+  --color-segmented-control-button-selected-border: #c7cdbf;
+
+  --color-fg-default: #353c35;
+  --color-fg-muted: #616960;
+  --color-fg-subtle: #6d7567;
+  --color-canvas-default: #f3f1e7;
+  --color-canvas-overlay: #fcfaf2;
+  --color-canvas-inset: #ebe7da;
+  --color-canvas-subtle: #ebe7da;
+  --color-border-default: #c7cdbf;
+  --color-border-muted: #d5dace;
+  --color-neutral-muted: rgba(97, 105, 96, 0.18);
+  --color-accent-fg: #2f7a00;
+  --color-accent-emphasis: #2f7a00;
+  --color-accent-muted: rgba(47, 122, 0, 0.35);
+  --color-accent-subtle: rgba(47, 122, 0, 0.11);
+  --color-success-fg: #2f7a00;
+  --color-attention-fg: #ea9d33;
+  --color-attention-muted: rgba(234, 157, 51, 0.35);
+  --color-attention-subtle: rgba(234, 157, 51, 0.15);
+  --color-danger-fg: #b24538;
+  --color-danger-muted: rgba(178, 69, 56, 0.34);
+  --color-danger-subtle: rgba(178, 69, 56, 0.14);
+  --color-primer-shadow-inset: inset 0 1px 0 rgba(199, 205, 191, 0.35);
+  --color-scale-gray-1: #ebe7da;
+  --color-scale-blue-1: rgba(47, 122, 0, 0.2);
+  --color-social-reaction-bg-hover: var(--color-scale-gray-1);
+  --color-social-reaction-bg-reacted-hover: var(--color-scale-blue-1);
+}
+
+main {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+main .gsc-comment-box-tabs {
+  background: #ebe7da;
+}
+
+main .gsc-comment-box-main {
+  background: #f3f1e7;
+}

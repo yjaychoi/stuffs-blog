@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { listPosts, parsePost, readRepoFile } from "./helpers";
 
 const REQUIRED_KEYS = ["layout", "post_uid", "slug", "title", "date", "tags", "summary"] as const;
-const OPTIONAL_KEYS = ["description", "cover_image", "cover_image_alt", "last_modified_at", "featured", "read_time"] as const;
+const OPTIONAL_KEYS = ["description", "cover_image", "cover_image_alt", "last_modified_at", "featured", "read_time", "comments"] as const;
 const ALLOWLIST = new Set([...REQUIRED_KEYS, ...OPTIONAL_KEYS]);
 
 const POST_UID_REGEX = /^[a-z0-9][a-z0-9-]*$/;
@@ -76,6 +76,10 @@ describe("front matter contract", () => {
 
       if (parsed.data.last_modified_at) {
         expect(String(parsed.data.last_modified_at)).toMatch(LAST_MODIFIED_REGEX);
+      }
+
+      if (Object.prototype.hasOwnProperty.call(parsed.data, "comments")) {
+        expect(typeof parsed.data.comments, `${postPath} comments must be boolean when provided`).toBe("boolean");
       }
     }
   });

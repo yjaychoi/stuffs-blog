@@ -1,19 +1,23 @@
 import { expect, test } from "@playwright/test";
 
-test("provider=none keeps placeholder and avoids utterances traffic", async ({ page }) => {
-  const utterancesRequests: string[] = [];
+test("provider=none keeps placeholder and avoids third-party comments traffic", async ({ page, baseURL }) => {
+  const giscusRequests: string[] = [];
   page.on("request", (request) => {
-    if (/utteranc\.es|github\.com|api\.github\.com/.test(request.url())) {
-      utterancesRequests.push(request.url());
+    if (/giscus\.app|github\.com|api\.github\.com/.test(request.url())) {
+      giscusRequests.push(request.url());
     }
   });
 
-  await page.goto("/blog/mysql-vector-search/");
+  await page.setContent(`
+    <section class="comments-shell" data-comments-provider="none">
+      <div class="comments-shell__placeholder" aria-hidden="true"></div>
+    </section>
+    <script src="${baseURL}/assets/js/comments.js"></script>
+  `);
 
-  await expect(page.getByRole("heading", { name: "Comments" })).toBeVisible();
   await expect(page.locator(".comments-shell__placeholder")).toBeVisible();
-  await expect(page.locator("iframe.utterances-frame")).toHaveCount(0);
+  await expect(page.locator("iframe.giscus-frame")).toHaveCount(0);
 
   await page.waitForTimeout(500);
-  expect(utterancesRequests).toHaveLength(0);
+  expect(giscusRequests).toHaveLength(0);
 });

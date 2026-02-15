@@ -1,0 +1,100 @@
+main {
+  --color-prettylights-syntax-comment: #8f8778;
+  --color-prettylights-syntax-constant: #ae81ff;
+  --color-prettylights-syntax-entity: #66d9ef;
+  --color-prettylights-syntax-storage-modifier-import: #f2eee3;
+  --color-prettylights-syntax-entity-tag: #a6e22e;
+  --color-prettylights-syntax-keyword: #f92672;
+  --color-prettylights-syntax-string: #e6db74;
+  --color-prettylights-syntax-variable: #fd971f;
+  --color-prettylights-syntax-brackethighlighter-unmatched: #e56c5a;
+  --color-prettylights-syntax-invalid-illegal-text: #f2eee3;
+  --color-prettylights-syntax-invalid-illegal-bg: #8d3025;
+  --color-prettylights-syntax-carriage-return-text: #f2eee3;
+  --color-prettylights-syntax-carriage-return-bg: #8d3025;
+  --color-prettylights-syntax-string-regexp: #a6e22e;
+  --color-prettylights-syntax-markup-list: #fd971f;
+  --color-prettylights-syntax-markup-heading: #a6e22e;
+  --color-prettylights-syntax-markup-italic: #f2eee3;
+  --color-prettylights-syntax-markup-bold: #f2eee3;
+  --color-prettylights-syntax-markup-deleted-text: #ffc3ba;
+  --color-prettylights-syntax-markup-deleted-bg: #611f19;
+  --color-prettylights-syntax-markup-inserted-text: #cff6a0;
+  --color-prettylights-syntax-markup-inserted-bg: #315612;
+  --color-prettylights-syntax-markup-changed-text: #ffd4a7;
+  --color-prettylights-syntax-markup-changed-bg: #6b3d0f;
+  --color-prettylights-syntax-markup-ignored-text: #f2eee3;
+  --color-prettylights-syntax-markup-ignored-bg: #a6e22e;
+  --color-prettylights-syntax-meta-diff-range: #66d9ef;
+  --color-prettylights-syntax-brackethighlighter-angle: #c5bcad;
+  --color-prettylights-syntax-sublimelinter-gutter-mark: #7d7364;
+  --color-prettylights-syntax-constant-other-reference-link: #66d9ef;
+
+  --color-btn-text: #f2eee3;
+  --color-btn-bg: #35312b;
+  --color-btn-border: #4a4338;
+  --color-btn-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+  --color-btn-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --color-btn-hover-bg: #3b362f;
+  --color-btn-hover-border: #5b5245;
+  --color-btn-active-bg: #403a33;
+  --color-btn-active-border: #665d4f;
+  --color-btn-selected-bg: #35312b;
+
+  --color-btn-primary-text: #25231f;
+  --color-btn-primary-bg: #a6e22e;
+  --color-btn-primary-border: #92c72a;
+  --color-btn-primary-shadow: 0 1px 0 rgba(0, 0, 0, 0.34);
+  --color-btn-primary-inset-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  --color-btn-primary-hover-bg: #b2eb45;
+  --color-btn-primary-hover-border: #b2eb45;
+  --color-btn-primary-selected-bg: #97cd2b;
+  --color-btn-primary-selected-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.25);
+  --color-btn-primary-disabled-text: rgba(37, 35, 31, 0.7);
+  --color-btn-primary-disabled-bg: rgba(166, 226, 46, 0.45);
+  --color-btn-primary-disabled-border: rgba(166, 226, 46, 0.45);
+
+  --color-action-list-item-default-hover-bg: rgba(74, 67, 56, 0.32);
+  --color-segmented-control-bg: rgba(74, 67, 56, 0.28);
+  --color-segmented-control-button-bg: #2d2a25;
+  --color-segmented-control-button-selected-border: #5b5245;
+
+  --color-fg-default: #f2eee3;
+  --color-fg-muted: #c5bcad;
+  --color-fg-subtle: #b2a896;
+  --color-canvas-default: #25231f;
+  --color-canvas-overlay: #2d2a25;
+  --color-canvas-inset: #25231f;
+  --color-canvas-subtle: #2d2a25;
+  --color-border-default: #4a4338;
+  --color-border-muted: #3d372f;
+  --color-neutral-muted: rgba(197, 188, 173, 0.2);
+  --color-accent-fg: #a6e22e;
+  --color-accent-emphasis: #a6e22e;
+  --color-accent-muted: rgba(166, 226, 46, 0.36);
+  --color-accent-subtle: rgba(166, 226, 46, 0.13);
+  --color-success-fg: #a6e22e;
+  --color-attention-fg: #fd971f;
+  --color-attention-muted: rgba(253, 151, 31, 0.34);
+  --color-attention-subtle: rgba(253, 151, 31, 0.15);
+  --color-danger-fg: #ff8f78;
+  --color-danger-muted: rgba(255, 143, 120, 0.35);
+  --color-danger-subtle: rgba(255, 143, 120, 0.15);
+  --color-primer-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --color-scale-gray-7: #3d372f;
+  --color-scale-blue-8: rgba(166, 226, 46, 0.3);
+  --color-social-reaction-bg-hover: var(--color-scale-gray-7);
+  --color-social-reaction-bg-reacted-hover: var(--color-scale-blue-8);
+}
+
+main {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+main .gsc-comment-box-tabs {
+  background: #2d2a25;
+}
+
+main .gsc-comment-box-main {
+  background: #25231f;
+}
