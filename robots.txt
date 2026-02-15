@@ -3,6 +3,48 @@ layout: null
 permalink: /robots.txt
 sitemap: false
 ---
+# Allow reference/citation crawling on public content paths.
+User-agent: OAI-SearchBot
+Allow: /blog/
+Allow: /tags/
+Allow: /feed.xml
+Allow: /sitemap.xml
+Disallow: /
+
+User-agent: ChatGPT-User
+Allow: /blog/
+Allow: /tags/
+Allow: /feed.xml
+Allow: /sitemap.xml
+Disallow: /
+
+# OpenAI training crawler: blocked.
+User-agent: GPTBot
+Disallow: /
+
+# Anthropic: currently blocked.
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+# Common Crawl: blocked.
+User-agent: CCBot
+Disallow: /
+
+# Google Extended: blocked (Gemini training/grounding control token).
+User-agent: Google-Extended
+Disallow: /
+
+# Perplexity reference crawler: allow content paths only.
+User-agent: PerplexityBot
+Allow: /blog/
+Allow: /tags/
+Allow: /feed.xml
+Allow: /sitemap.xml
+Disallow: /
+
 User-agent: *
 Allow: /
 

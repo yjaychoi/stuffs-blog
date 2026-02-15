@@ -1,0 +1,21 @@
+Stuffs Blog Repository License Notice
+
+This repository uses path-based licensing.
+
+1. For all files outside `_posts/`, the MIT license applies
+   (SPDX identifier: MIT; canonical terms at https://opensource.org/license/mit/).
+2. For all files under `_posts/`, all rights are reserved unless a specific
+   file explicitly states otherwise.
+
+Most files under `_posts/` are translations (derivative works) from other
+blogs, translated with permission. Rights for those works remain with the
+original blog owners and/or their respective rights holders.
+
+For `_posts/` files that are original content by this repository owner, all
+rights are reserved by the repository owner.
+
+No permission is granted to copy, redistribute, adapt, scrape, text/data-mine,
+or use `_posts/` content for AI/ML training or dataset creation without
+explicit written permission from the applicable rights holder.
+
+Additional details are in `NOTICE.md`.
