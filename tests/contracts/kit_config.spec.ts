@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { loadYaml, readRepoFile } from "./helpers";
+import { existsInRepo, loadYaml, readRepoFile } from "./helpers";
 
 type ConfigShape = {
   kit: {
@@ -14,8 +14,26 @@ type ConfigShape = {
 };
 
 describe("kit integration contract", () => {
-  it("contains required kit config values", () => {
-    const config = loadYaml("_config.yml") as ConfigShape;
+  it("keeps placeholder kit values in base config", () => {
+    const baseConfig = loadYaml("_config.yml") as ConfigShape;
+
+    expect(baseConfig.kit.form.form_id).toBe("KIT_FORM_ID");
+    expect(baseConfig.kit.form.form_uid).toBe("KIT_FORM_UID");
+    expect(baseConfig.kit.form.form_action).toBe("https://app.kit.com/forms/KIT_FORM_ID/subscriptions");
+  });
+
+  it("contains required concrete kit config values in CI/deploy builds", () => {
+    const hasGeneratedOverride = existsInRepo("_config.kit.generated.yml");
+
+    if (process.env.GITHUB_ACTIONS === "true") {
+      expect(hasGeneratedOverride).toBe(true);
+    }
+
+    if (!hasGeneratedOverride) {
+      return;
+    }
+
+    const config = loadYaml("_config.kit.generated.yml") as ConfigShape;
 
     expect(config.kit.form.form_id).toMatch(/^[0-9]+$/);
     expect(config.kit.form.form_id).not.toBe("0000000");

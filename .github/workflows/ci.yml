@@ -47,11 +47,18 @@ jobs:
           bundle install --jobs 4 --retry 3
           npm ci
 
+      - name: Generate Kit config override
+        env:
+          KIT_FORM_ID: ${{ vars.KIT_FORM_ID || secrets.KIT_FORM_ID }}
+          KIT_FORM_UID: ${{ vars.KIT_FORM_UID || secrets.KIT_FORM_UID }}
+          KIT_SUCCESS_URL: ${{ vars.KIT_SUCCESS_URL || secrets.KIT_SUCCESS_URL }}
+        run: node scripts/generate-kit-config.mjs
+
       - name: Generate build metadata
         run: npm run build:meta
 
       - name: Build static site
-        run: bundle exec jekyll build
+        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml
 
       - name: Contract tests
         run: npx vitest run tests/contracts
