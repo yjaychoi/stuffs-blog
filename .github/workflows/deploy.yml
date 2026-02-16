@@ -233,5 +233,5 @@ jobs:
         env:
           PLAYWRIGHT_BASE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
-          npx playwright test --grep @smoke
-          npx playwright test tests/e2e/no_js.spec.ts
+          npx playwright test --config playwright.deploy.config.ts --grep @smoke
+          npx playwright test --config playwright.deploy.config.ts tests/e2e/no_js.spec.ts
