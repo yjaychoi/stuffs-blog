@@ -10,7 +10,7 @@ test("provider=none keeps placeholder and avoids third-party comments traffic", 
 
   await page.setContent(`
     <section class="comments-shell" data-comments-provider="none">
-      <div class="comments-shell__placeholder" aria-hidden="true"></div>
+      <div class="comments-shell__placeholder" aria-hidden="true" style="min-height: 120px;"></div>
     </section>
     <script src="${baseURL}/assets/js/comments.js"></script>
   `);

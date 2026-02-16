@@ -1,7 +1,16 @@
 import { expect, test } from "@playwright/test";
 
-function commentsShellFixture(baseURL: string, themeLight = "light", themeDark = "dark_dimmed"): string {
+function commentsShellFixture(
+  baseURL: string,
+  themeLight = "light",
+  themeDark = "dark_dimmed",
+  initialTheme?: "light" | "dark"
+): string {
+  const initialThemeScript = initialTheme
+    ? `<script>document.documentElement.setAttribute("data-theme", "${initialTheme}");</script>`
+    : "";
   return `
+    ${initialThemeScript}
     <div style="height: 2000px;" aria-hidden="true"></div>
     <section
       class="comments-shell"
@@ -44,11 +53,8 @@ test("provider=giscus falls back to built-in theme keys for localhost custom the
   await expect(script).toHaveCount(1);
   await expect(script).toHaveAttribute("data-theme", "light");
 
-  await page.setContent(commentsShellFixture(baseURL, "/assets/css/giscus-light.css", "/assets/css/giscus-dark.css"));
-  await page.evaluate(() => {
-    document.documentElement.setAttribute("data-theme", "dark");
-    window.scrollTo(0, document.body.scrollHeight);
-  });
+  await page.setContent(commentsShellFixture(baseURL, "/assets/css/giscus-light.css", "/assets/css/giscus-dark.css", "dark"));
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
   const darkScript = page.locator("script[data-comments-client='giscus']");
   await expect(darkScript).toHaveCount(1);
