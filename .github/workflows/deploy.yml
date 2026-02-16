@@ -16,14 +16,15 @@ permissions:
   id-token: write
 
 concurrency:
-  group: production
+  group: github-pages
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment:
-      name: production
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     env:
       TZ: UTC
     steps:
@@ -160,7 +161,7 @@ jobs:
             request_ok "${BASE_URL}/subscribe/success/" 200 >/tmp/subscribe_success.html
             request_ok "${BASE_URL}/privacy/" 200 >/tmp/privacy.html
             request_ok "${BASE_URL}/feed.xml" 200 >/tmp/feed.xml
-            request_ok "${BASE_URL}/blog/2026/02/08/mysql-vector-search/" 200 >/tmp/post.html
+            request_ok "${BASE_URL}/blog/mysql-vector-search/" 200 >/tmp/post.html
             request_ok "${BASE_URL}/blog/page/1/" 200 >/tmp/blog_page_one.html
             request_ok "${BASE_URL}/this-route-should-not-exist/" 404 >/tmp/unknown_404.html
 

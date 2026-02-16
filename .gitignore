@@ -9,3 +9,5 @@ node_modules/
 playwright-report/
 test-results/
 vendor/
+!assets/js/vendor/
+!assets/js/vendor/mermaid.min.js
