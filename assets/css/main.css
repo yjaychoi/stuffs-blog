@@ -71,6 +71,8 @@ html {
   color-scheme: light;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html[data-theme="dark"] {
@@ -793,6 +795,11 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
 .code-panel .highlight {
   color: var(--code-fg);
   padding: 0.85rem;
+  font-family: var(--font-display);
+  font-size: 0.93rem;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .code-panel .rouge-table {
