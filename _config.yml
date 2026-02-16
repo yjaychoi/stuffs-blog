@@ -58,6 +58,11 @@ kit:
     form_action: "https://app.kit.com/forms/KIT_FORM_ID/subscriptions"
     form_uid: "KIT_FORM_UID"
 
+cloudflare:
+  analytics:
+    # Inject concrete value in CI/deploy via `_config.cloudflare.generated.yml`.
+    token: ""
+
 comments:
   provider: giscus
   giscus:

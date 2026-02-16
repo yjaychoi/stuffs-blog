@@ -6,6 +6,7 @@ _site/
 .jekyll-metadata
 .sass-cache/
 _config.kit.generated.yml
+_config.cloudflare.generated.yml
 node_modules/
 playwright-report/
 test-results/

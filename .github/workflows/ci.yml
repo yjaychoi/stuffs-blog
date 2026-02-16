@@ -53,11 +53,16 @@ jobs:
           KIT_FORM_UID: ${{ vars.KIT_FORM_UID || secrets.KIT_FORM_UID }}
         run: node scripts/generate-kit-config.mjs
 
+      - name: Generate Cloudflare analytics config override
+        env:
+          CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN || secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
+        run: node scripts/generate-cloudflare-config.mjs
+
       - name: Generate build metadata
         run: npm run build:meta
 
       - name: Build static site
-        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml
+        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml,_config.cloudflare.generated.yml
 
       - name: Contract tests
         run: npx vitest run tests/contracts

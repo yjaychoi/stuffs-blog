@@ -137,6 +137,11 @@ jobs:
           KIT_FORM_UID: ${{ vars.KIT_FORM_UID || secrets.KIT_FORM_UID }}
         run: node scripts/generate-kit-config.mjs
 
+      - name: Generate Cloudflare analytics config override
+        env:
+          CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN || secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
+        run: node scripts/generate-cloudflare-config.mjs
+
       - name: Derive deterministic build metadata
         run: |
           echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct ${{ steps.resolve.outputs.deploy_sha }})" >> "$GITHUB_ENV"
@@ -146,7 +151,7 @@ jobs:
         run: npm run build:meta
 
       - name: Build site
-        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml
+        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml,_config.cloudflare.generated.yml
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
