@@ -64,15 +64,38 @@ jobs:
         with:
           script: |
             const sha = process.env.DEPLOY_SHA;
-            const { data } = await github.rest.repos.getCombinedStatusForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
+            const maxAttempts = 90; // 30 minutes at 20s intervals
+            const intervalMs = 20_000;
+            const terminalFailureStates = new Set(["failure", "error"]);
 
-            if (data.state !== "success") {
-              core.setFailed(`Combined status for ${sha} is ${data.state}; deploy requires success.`);
+            for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+              const { data } = await github.rest.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: sha
+              });
+
+              core.info(`CI combined status for ${sha} is '${data.state}' (attempt ${attempt}/${maxAttempts}).`);
+
+              if (data.state === "success") {
+                return;
+              }
+
+              if (terminalFailureStates.has(data.state)) {
+                core.setFailed(`Combined status for ${sha} is ${data.state}; deploy requires success.`);
+                return;
+              }
+
+              if (attempt < maxAttempts) {
+                await new Promise((resolve) => setTimeout(resolve, intervalMs));
+              }
             }
+
+            core.setFailed(
+              `Timed out waiting for CI success on ${sha}. Combined status stayed pending for ${Math.floor(
+                (maxAttempts * intervalMs) / 60_000
+              )} minutes.`
+            );
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
