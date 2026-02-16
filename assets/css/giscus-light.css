@@ -1,4 +1,6 @@
-main {
+:root {
+  color-scheme: light;
+
   --color-prettylights-syntax-comment: #6d7567;
   --color-prettylights-syntax-constant: #5f4199;
   --color-prettylights-syntax-entity: #1f6377;
@@ -85,16 +87,32 @@ main {
   --color-scale-blue-1: rgba(47, 122, 0, 0.2);
   --color-social-reaction-bg-hover: var(--color-scale-gray-1);
   --color-social-reaction-bg-reacted-hover: var(--color-scale-blue-1);
+
+  --bgColor-default: var(--color-canvas-default);
+  --bgColor-muted: var(--color-canvas-subtle);
+  --bgColor-emphasis: var(--color-canvas-overlay);
+  --fgColor-default: var(--color-fg-default);
+  --fgColor-muted: var(--color-fg-muted);
+  --borderColor-default: var(--color-border-default);
+  --borderColor-muted: var(--color-border-muted);
 }
 
+html,
+body {
+  background: var(--color-canvas-default);
+  color: var(--color-fg-default);
+}
+
+html,
+body,
 main {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
-main .gsc-comment-box-tabs {
+.gsc-comment-box-tabs {
   background: #ebe7da;
 }
 
-main .gsc-comment-box-main {
+.gsc-comment-box-main {
   background: #f3f1e7;
 }
