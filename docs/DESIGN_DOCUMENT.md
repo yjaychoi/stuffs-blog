@@ -808,8 +808,7 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    1. subscribe page contains Kit form include
    2. post detail layout/pages contain bottom-of-article Kit form embed (or include wrapper)
    3. required config values are present
-   4. `success_url` is absolute `https://stuffs.blog/...` and route-matched
-   5. no client-side `error_url` redirect parameter is used
+   4. no client-side `error_url` redirect parameter is used
 13. Tag/slug/redirect validation:
    1. fails on tag slug collisions
    2. redirect mappings are duplicate-free and syntactically valid
@@ -889,7 +888,6 @@ kit:
     form_id: "<FORM_ID>"
     form_action: "https://app.kit.com/forms/<FORM_ID>/subscriptions"
     form_uid: "<FORM_UID>"
-    success_url: "https://stuffs.blog/subscribe/success/"
 ```
 
 Only public Kit form identifiers are allowed in repo. Do not commit Kit API secrets or tokens.
@@ -922,9 +920,8 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 2. CI fails if subscribe page omits the form include.
 3. CI fails if any post detail page/layout omits the bottom-of-article form include.
 4. CI fails if form action URL is not on Kit host allowlist.
-5. CI fails if `success_url` is not absolute `https://stuffs.blog/...`.
-6. CI fails if external Kit embed scripts are added.
-7. Manual QA verifies:
+5. CI fails if external Kit embed scripts are added.
+6. Manual QA verifies:
    1. successful subscription flow
    2. confirmation email delivery
    3. unsubscribe works
@@ -1055,7 +1052,7 @@ Most foundation items in this roadmap are already implemented; remaining work is
 6. Canonical post-detail visual regression passes in desktop/mobile and light/dark snapshots when visual-regression runs are enabled.
 7. Visual hierarchy token-contract gates pass, proving non-flat tiered typography/spacing comparable to `docs/mockup.html`.
 8. Post-detail page composition matches section 5.7 (title dominance, accent rule, body cadence, code chrome, prev/next block, comments shell).
-9. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, no client-side `error_url`).
+9. Kit email integration is configured, validated, and tested with static-safe constraints and no client-side `error_url`.
 10. Bottom-of-article subscribe form is present and functional on post detail pages.
 11. Kit new-post notifications can be driven from `/feed.xml` via Kit-side automation or manual fallback.
 12. giscus integration is implemented with per-post opt-in and provider gating; comments-mode behavior is covered by deterministic stubbed e2e harnesses.

@@ -4,7 +4,6 @@ import path from "node:path";
 const OUTPUT_PATH = "_config.kit.generated.yml";
 const formId = process.env.KIT_FORM_ID?.trim() ?? "";
 const formUid = process.env.KIT_FORM_UID?.trim() ?? "";
-const successUrl = process.env.KIT_SUCCESS_URL?.trim() || "https://stuffs.blog/subscribe/success/";
 
 const errors = [];
 
@@ -14,17 +13,6 @@ if (!/^[0-9]+$/.test(formId)) {
 
 if (!/^[a-z0-9]+$/.test(formUid)) {
   errors.push("KIT_FORM_UID must be lowercase alphanumeric (e.g. 7a2ec6f819).");
-}
-
-let parsedSuccessUrl;
-try {
-  parsedSuccessUrl = new URL(successUrl);
-} catch {
-  errors.push("KIT_SUCCESS_URL must be a valid absolute URL.");
-}
-
-if (parsedSuccessUrl && parsedSuccessUrl.protocol !== "https:") {
-  errors.push("KIT_SUCCESS_URL must use https://.");
 }
 
 if (errors.length > 0) {
@@ -40,7 +28,6 @@ const yaml = [
   `    form_id: "${formId}"`,
   `    form_action: "https://app.kit.com/forms/${formId}/subscriptions"`,
   `    form_uid: "${formUid}"`,
-  `    success_url: "${successUrl}"`,
   ""
 ].join("\n");
 

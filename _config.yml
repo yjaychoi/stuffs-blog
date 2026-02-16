@@ -57,7 +57,6 @@ kit:
     form_id: "KIT_FORM_ID"
     form_action: "https://app.kit.com/forms/KIT_FORM_ID/subscriptions"
     form_uid: "KIT_FORM_UID"
-    success_url: "https://stuffs.blog/subscribe/success/"
 
 comments:
   provider: giscus

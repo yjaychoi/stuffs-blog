@@ -8,7 +8,6 @@ type ConfigShape = {
       form_id: string;
       form_action: string;
       form_uid: string;
-      success_url: string;
     };
   };
 };
@@ -40,7 +39,6 @@ describe("kit integration contract", () => {
     expect(config.kit.form.form_uid).toMatch(/^[a-z0-9]+$/);
     expect(config.kit.form.form_uid).not.toBe("0000000");
     expect(config.kit.form.form_action).toBe(`https://app.kit.com/forms/${config.kit.form.form_id}/subscriptions`);
-    expect(config.kit.form.success_url).toBe("https://stuffs.blog/subscribe/success/");
     expect((config.kit.form as Record<string, unknown>).error_url).toBeUndefined();
   });
 
