@@ -32,7 +32,7 @@ ORDER BY distance ASC
 LIMIT 5;
 ```
 
-The native syntax is clean and integrated. For small-to-mid datasets it can be enough, but once row counts enter eight digits you start feeling the absence of stronger ANN index options.
+The native syntax is clean and integrated. For small-to-mid datasets it can be enough, but once row counts enter eight digits you start feeling the absence of stronger ANN index options. For baseline SQL behavior and engine details, the [MySQL Reference Manual](https://dev.mysql.com/doc/) is still the canonical source.
 
 ## Operational Topology
 

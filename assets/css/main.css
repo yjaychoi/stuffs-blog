@@ -11,7 +11,7 @@
   --accent: #2f7a00;
   --accent-ink: #2f7a00;
   --accent-alt: #ea9d33;
-  --focus: #2f7a00;
+  --focus: var(--accent-alt);
 
   --code-bg: #f3f1e7;
   --code-fg: #242823;
