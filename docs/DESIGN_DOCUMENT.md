@@ -4,11 +4,11 @@
 **Blog title (exact):** `Stuff of Thoughts`  
 **Hosting:** GitHub Pages (Jekyll)  
 **Email subscriptions:** Kit (newsletter/free plan)  
-**Comments:** planned giscus integration (GitHub Discussions-backed; spec defined, activation deferred)  
-**Infrastructure boundary:** static GitHub Pages output + third-party Kit now, with giscus reserved for future activation (no custom backend/runtime)  
+**Comments:** giscus integration (GitHub Discussions-backed) is implemented, with per-post opt-in via front matter `comments: true`  
+**Infrastructure boundary:** static GitHub Pages output + third-party Kit/giscus integrations (no custom backend/runtime)  
 **Repo visibility:** private source repo (GitHub Plus) with GitHub Pages deployment via Actions  
 **Localization scope:** none (English-only UI and posts)  
-**Primary visual reference (required):** `docs/mockup.html` in this repository is the canonical quality baseline for hierarchy, spacing rhythm, and component polish; screenshot captures are supplemental only. Visual determinism is satisfied by this canonical reference.
+**Primary visual reference (required):** `docs/mockup.html` remains a visual direction reference; implementation quality gates are enforced by production CSS/layout contracts and automated tests.
 
 ## Platform prerequisites
 
@@ -30,7 +30,7 @@
 6. Keep implementation and operations simple enough for solo maintenance.
 7. Deploy automatically through CI/CD, including validated Kit email integration.
 8. Support subscriber signup and automated new-post notifications via Kit.
-9. Allow high-fidelity, JS-enabled UI behavior (theme init, menu interaction, code-copy; comments reveal when future giscus phase is enabled) while keeping static hosting constraints.
+9. Allow high-fidelity, JS-enabled UI behavior (theme init, menu interaction, code-copy, and lazy comments load on opted-in posts) while keeping static hosting constraints.
 
 ### Non-goals
 
@@ -71,7 +71,7 @@ This section defines implementation guidance anchored to `docs/mockup.html`.
    1. theme bootstrap and user preference persistence
    2. responsive/disclosure navigation
    3. code-block copy interactions
-   4. comments viewport-triggered load interactions (future giscus phase)
+   4. comments viewport-triggered load interactions (when provider/post settings enable giscus)
    5. small purposeful motion (e.g., hover/focus/state transitions)
 2. JS-dependent controls must have accessible semantics (`button`, `aria-expanded`, `aria-controls`, keyboard support).
 3. If JS fails, content reading must still work (header brand/home link, article body, footer links, and subscribe route remain discoverable), but parity with enhanced interactions is not required.
@@ -100,14 +100,15 @@ This section defines implementation guidance anchored to `docs/mockup.html`.
 
 1. `/` home with short about paragraph + latest posts list.
 2. `/blog/` and `/blog/page/<n>/` reverse-chronological list with pagination.
-3. `/blog/YYYY/MM/DD/slug/` post detail route.
+3. `/blog/<slug>/` post detail route.
 4. `/tags/` tag index.
 5. `/tags/<tag-slug>/` canonical tag-filtered page.
 6. `/subscribe/` Kit subscription page.
 7. `/subscribe/success/` subscribe success page.
-8. `/privacy/` privacy notice page.
-9. `/feed.xml` RSS feed.
-10. `/404.html` not-found page (GitHub Pages canonical 404 entrypoint).
+8. `/subscribe/confirmed/` subscribe confirmed page.
+9. `/privacy/` privacy notice page.
+10. `/feed.xml` feed endpoint (Atom payload; linked as RSS in UI).
+11. `/404.html` not-found page (GitHub Pages canonical 404 entrypoint).
 
 ### Route generation implementation contract (required)
 
@@ -156,7 +157,7 @@ featured: false
 3. `slug` is required, immutable after publish, and URL-safe (`[a-z0-9][a-z0-9-]*`).
 4. Permalink generation strategy (required):
    1. posts live under `_posts/`.
-   2. `_config.yml` defaults map `_posts/*` to `/blog/:year/:month/:day/:slug/`.
+   2. `_config.yml` defaults map `_posts/*` to `/blog/:slug/`.
    3. Manual `permalink` overrides are forbidden.
 5. URL change policy (rare):
    1. if a published URL must change, add one static redirect entry to `_data/redirects.yml`.
@@ -176,6 +177,8 @@ featured: false
    3. `cover_image_alt` (required when `cover_image` is present)
    4. `last_modified_at` (`YYYY-MM-DD HH:MM:SS +/-TTTT`)
    5. `comments` (boolean per-post opt-in for comments shell/embed)
+   6. `featured` (boolean)
+   7. `read_time` (optional explicit override)
 5. Forbidden keys inside post front matter:
    1. `permalink`
    2. `redirect_from`
@@ -218,52 +221,39 @@ featured: false
 
 ### Heading/title stack
 
-1. Primary: `Courier Prime` (self-hosted or provider-hosted).
-2. Fallbacks: `ui-monospace`, `SFMono-Regular`, `Menlo`, `Monaco`, `Consolas`, `monospace`.
+1. Current implementation primary stack: `ui-monospace`, `SFMono-Regular`, `Menlo`, `Monaco`, `Consolas`, `Liberation Mono`, `Courier New`, `monospace`.
+2. Production templates do not load hosted webfont providers for this stack.
 
 ### Body stack
 
-1. Primary: `Noto Sans KR`.
-2. Fallbacks: `system-ui`, `-apple-system`, `Segoe UI`, `Roboto`, `Helvetica Neue`, `Arial`, `sans-serif`.
+1. Current implementation primary stack: `system-ui`, `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `Roboto`, `Noto Sans`, `Helvetica Neue`, `Arial`, `sans-serif`.
+2. This stack is used across body copy and supporting UI text.
 
 ### Font loading and performance
 
-1. Font loading must use `font-display: swap` behavior (via `@font-face` or provider configuration).
-2. If self-hosting, provide subset files using `unicode-range` to reduce first paint cost.
-3. Preload only self-hosted fonts used above the fold on first view; avoid unnecessary preload of third-party hosted fonts.
-4. CI must enforce first-view font budgets for critical routes (before caching), independent of hosting strategy:
-   1. critical routes (`/`, `/blog/`, one post): <= `350KB` combined WOFF2 transfer.
+1. Production templates avoid external webfont CDN dependencies.
+2. If self-hosted fonts are introduced later, use `font-display: swap` and subset/preload selectively.
+3. CI enforces a first-view self-hosted font budget:
+   1. total `assets/fonts/**/*.woff2` size must remain <= `350KB`.
 
 ### Type scale
 
-1. Desktop:
-   1. Site title: `36-46px`
-   2. Section title: `24-32px`
-   3. Post title: `44-52px` (canonical post-detail route), `34-42px` (other routes)
-   4. Body: `17-19px`
-2. Mobile:
-   1. Site title: `28-34px`
-   2. Section title: `22-26px`
-   3. Post title: `34-40px` (canonical post-detail route), `28-34px` (other routes)
-   4. Body: `16-18px`
+1. Route/page title scale: `--title-size-page: clamp(1.42rem, 1.08rem + 1vw, 1.78rem)`.
+2. Post title scale: `clamp(1.65rem, 1.25rem + 1.15vw, 2.05rem)`.
+3. Post body scale: `clamp(1rem, 0.95rem + 0.3vw, 1.12rem)`.
 
 ### Editorial hierarchy lock values (post detail, required)
 
-1. Desktop (`>=1024px`) lock values:
-   1. metadata row: `11-12px`, uppercase, letter spacing `>=0.12em`, muted tone
-   2. post title: `44-52px`, weight `700`, line-height `1.1-1.2`
-   3. lead/body paragraphs: `28-34px` line-height with `17-19px` size equivalent
-   4. section heading `h2`: `24-32px` equivalent with clear top spacing step-up from body
-   5. subsection heading `h3`: `20-24px` equivalent
-   6. content measure: `62-72ch`
-2. Mobile (`<640px`) lock values:
-   1. metadata row: `10-11px`, uppercase, readable tracking
-   2. post title: `34-40px`, weight `700`, line-height `1.1-1.2`
-   3. body paragraphs: `16-18px` with line-height `1.65-1.85`
-   4. heading reductions preserve tier gaps (title > h2 > h3 > body) without collapsing into near-equal sizes
-3. Hierarchy invariants:
-   1. each tier transition (meta -> title -> lead/body -> h2/h3 -> support text) must be obvious in both size and spacing, not color-only
-   2. no adjacent tiers may differ by less than `10%` effective size on desktop or `8%` on mobile
+1. Current lock selectors are contract-tested in CSS:
+   1. `.meta-row`
+   2. `.post-title`
+   3. `.post-content`
+   4. `.post-content h2`
+   5. `.post-content h3`
+2. Current token/spacing lock values:
+   1. `.post-title` clamp scale and weight are fixed by contract tests
+   2. `.post-title-rule` is fixed at `96px` width and `4px` height
+   3. `.post-divider`, `.post-subscribe`, and `.comments-shell` spacing values are contract-tested
 
 ## 5.2 Theme system (light + dark required)
 
@@ -281,23 +271,23 @@ Both themes must preserve minimalist look and readability.
 
 ### Light mode tokens
 
-1. `--bg: #f8f8f2`
-2. `--surface: #f3f1e8`
-3. `--surface-subtle: #ffffff`
-4. `--text: #272822`
-5. `--muted-text: #6b7280`
-6. `--border: #d1d5db`
-7. `--accent: #6f9020`
-8. `--accent-alt: #c77418`
+1. `--bg: #f3f1e7`
+2. `--surface: #ebe7da`
+3. `--surface-subtle: #fcfaf2`
+4. `--text: #353c35`
+5. `--muted-text: #616960`
+6. `--border: #c7cdbf`
+7. `--accent: #2f7a00`
+8. `--accent-alt: #ea9d33`
 
 ### Dark mode tokens
 
-1. `--bg: #272822`
-2. `--surface: #1e1f1c`
-3. `--surface-subtle: #272822`
-4. `--text: #f8f8f2`
-5. `--muted-text: #9ca3af`
-6. `--border: #374151`
+1. `--bg: #25231f`
+2. `--surface: #2d2a25`
+3. `--surface-subtle: #35312b`
+4. `--text: #f2eee3`
+5. `--muted-text: #c5bcad`
+6. `--border: #4a4338`
 7. `--accent: #a6e22e`
 8. `--accent-alt: #fd971f`
 
@@ -306,7 +296,7 @@ Both themes must preserve minimalist look and readability.
 1. Default follows `prefers-color-scheme`.
 2. User toggle persists to `localStorage.stuffs_theme`.
 3. Toggle is compact text or icon button in header.
-4. No theme transition animation longer than `150ms`.
+4. Theme/UI transition durations are subtle and currently capped around `180ms` in interactive controls.
 5. If `localStorage` is unavailable, theme still follows `prefers-color-scheme` and toggle works for the current page session without uncaught errors.
 
 ## 5.3 Minimal component styling rules
@@ -325,20 +315,19 @@ Both themes must preserve minimalist look and readability.
 1. Embedded code in post bodies (fenced blocks and Liquid `highlight` blocks) must render with Monokai syntax highlighting in both site themes.
 2. Syntax highlighting must use a real highlighter integration and plugin pipeline, not manual token spans:
    1. Jekyll baseline: `rouge` for fenced/Liquid blocks with line numbers enabled through formatter/config.
-   2. Reference implementation pattern: `/website/astro.config.mjs` uses `astro-expressive-code` + `@expressive-code/plugin-line-numbers` (Shiki-backed).
+   2. Runtime enhancement (`assets/js/code-copy.js`) wraps highlighter output for copy UI without replacing tokenization.
    3. Hand-authored per-token markup inside post content/templates is forbidden.
 3. Language coverage must be broad out of the box (at minimum): `bash`, `c`, `cpp`, `csharp`, `css`, `diff`, `go`, `graphql`, `html`, `java`, `javascript`, `json`, `kotlin`, `markdown`, `php`, `python`, `ruby`, `rust`, `sql`, `swift`, `toml`, `typescript`, and `yaml`.
-4. Required code tokens:
-   1. surfaces/foreground: `--code-bg-light: #f8f8f2`, `--code-fg-light: #272822`, `--code-bg-dark: #272822`, `--code-fg-dark: #f8f8f2`
-   2. shared comment token: `--code-comment: #75715e`
-   3. dark-mode syntax tokens: `--code-keyword-dark: #f92672`, `--code-string-dark: #e6db74`, `--code-number-dark: #ae81ff`, `--code-function-dark: #a6e22e`, `--code-type-dark: #66d9ef`, `--code-meta-dark: #fd971f`
-   4. light-mode syntax tokens (darker Monokai ink variants for contrast): `--code-keyword-light: #a31955`, `--code-string-light: #7a6a28`, `--code-number-light: #5f3c99`, `--code-function-light: #6f9020`, `--code-type-light: #1f5d73`, `--code-meta-light: #c77418`
+4. Required code tokens (current implementation):
+   1. shared token names: `--code-bg`, `--code-fg`, `--code-comment`, `--code-keyword`, `--code-string`, `--code-number`, `--code-function`, `--code-type`, `--code-meta`
+   2. light-mode values: `--code-bg: #f3f1e7`, `--code-fg: #242823`, `--code-comment: #6d7567`, `--code-keyword: #9f2556`, `--code-string: #6f5d1f`, `--code-number: #5f4199`, `--code-function: #4f7b28`, `--code-type: #1f6377`, `--code-meta: #b46b1c`
+   3. dark-mode values: `--code-bg: #25231f`, `--code-fg: #f2eee3`, `--code-comment: #8f8778`, `--code-keyword: #f92672`, `--code-string: #e6db74`, `--code-number: #ae81ff`, `--code-function: #a6e22e`, `--code-type: #66d9ef`, `--code-meta: #fd971f`
 5. Code blocks must include visible line numbers generated by the highlighter/plugin output (`rouge` linenos or equivalent plugin behavior), not by hand-authored HTML.
 6. Code block chrome includes a compact language/filename label row and copy button, styled minimally.
 7. Inline code uses a muted surface treatment and must remain visually distinct from links.
 8. Code theme treatment should remain Monokai-inspired and visually consistent with `docs/mockup.html`.
 9. Accessibility policy for code:
-   1. `--code-fg-light` and `--code-fg-dark` must each meet WCAG AA against their respective code backgrounds.
+   1. `--code-fg` must meet WCAG AA against active `--code-bg` in each theme.
    2. Syntax token colors follow a separate policy from body text and must maintain at least `3:1` against the active code background.
    3. Syntax meaning must not rely on color alone; weight/italic/underline or token category structure must remain present.
    4. Accessibility gates must treat code-token contrast policy and body-text AA policy as separate checks to avoid conflicting outcomes.
@@ -347,8 +336,8 @@ Both themes must preserve minimalist look and readability.
 
 1. Authoring format for diagrams is fenced Markdown blocks using `mermaid` language fences.
 2. Runtime implementation contract (Jekyll-compatible):
-   1. include a self-hosted Mermaid runtime in `assets/js/vendor/mermaid.min.js` (or equivalent pinned local bundle).
-   2. include `assets/js/mermaid-init.js` to transform Mermaid code fences into render targets and render SVG output.
+   1. keep a self-hosted Mermaid runtime in `assets/js/vendor/mermaid.min.js` (or equivalent pinned local bundle).
+   2. include `assets/js/mermaid-init.js` to detect Mermaid fences and load the vendor runtime on demand before rendering SVG output.
    3. process unrendered Mermaid blocks idempotently (`data-processed` guard) on `DOMContentLoaded`.
 3. Theme contract:
    1. Mermaid theme must follow active site theme (light/dark parity).
@@ -364,19 +353,18 @@ Both themes must preserve minimalist look and readability.
 
 1. Critical CSS budget (home/blog/post route first view, gzip): <= `60KB`.
 2. Critical JS budget (theme + code-copy + optional comments loader, gzip): <= `60KB`.
-3. First-view non-font image transfer budget:
-   1. home/blog routes: <= `150KB`.
-   2. post route (excluding article body images): <= `100KB`.
-4. Post body images:
+3. Current image-transfer budget gate:
+   1. built-site image assets (`_site/assets/**/*.{png,jpg,jpeg,webp,gif,avif,svg}`) total <= `150KB`.
+4. Post body images (authoring guidance + partial CI enforcement):
    1. must provide responsive `srcset`/`sizes`.
    2. must include intrinsic dimensions (`width`/`height`) or explicit `aspect-ratio`.
    3. non-critical images must use lazy loading.
-   4. external asset hosts (if any) must be declared in `_data/external_asset_hosts.yml`; CI fails if rendered image/script/frame hosts are outside the explicit allowlist.
+   4. external asset hosts (if any) must be declared in `_data/external_asset_hosts.yml` and reflected in CSP allowlists.
 5. Budget measurement policy (deterministic):
    1. CI uses `size-limit` for CSS/JS gzip budgets and deterministic Vitest file-size checks for image/font budgets.
    2. Allowed overage tolerance is `0KB` (hard fail) to keep behavior predictable.
 6. Mermaid payload policy:
-   1. Mermaid runtime must be loaded only on pages that contain Mermaid diagrams.
+   1. `mermaid-init.js` is loaded globally, but vendor Mermaid runtime is loaded only when Mermaid fences are detected.
    2. Mermaid JS payload budget (gzip) is capped at `<= 350KB` for the optional route-level bundle.
    3. CI fails if Mermaid runtime is included on routes with no Mermaid diagrams.
 
@@ -436,10 +424,10 @@ Both themes must preserve minimalist look and readability.
 
 ## 6.2 Container and spacing
 
-1. Desktop content width: `680-760px`.
-2. Tablet content width: `90vw`, max `760px`.
-3. Mobile content width: `92vw`.
-4. Vertical rhythm uses `8px` base spacing scale.
+1. Shared shell width: `min(var(--content-max), calc(100% - (var(--shell-gutter) * 2)))`.
+2. `--content-max` is currently `clamp(60rem, 58vw, 82rem)`.
+3. `--shell-gutter` is currently `clamp(24px, 2.4vw, 52px)`.
+4. Vertical rhythm is tokenized in CSS and contract-tested for key post-detail sections.
 
 ## 6.3 Header behavior
 
@@ -460,7 +448,7 @@ Both themes must preserve minimalist look and readability.
 1. Post list remains one-column on all breakpoints.
 2. Code blocks scroll horizontally on mobile.
 3. Touch targets minimum `44px` height for tappable controls.
-4. Font sizes never below `16px` body on mobile.
+4. Mobile body typography is controlled by `clamp(...)` scales and readability checks (current minimum rendered post body size is `1rem` at root font size).
 5. Post body images must reserve layout space (`width`/`height` or `aspect-ratio`) to prevent CLS.
 6. Non-critical images must use lazy loading; above-the-fold images may opt out.
 7. Every content image must include appropriate `alt` text (`alt=""` only for decorative images).
@@ -539,14 +527,14 @@ Both themes must preserve minimalist look and readability.
 
 1. Meta line:
    1. includes date (`MMM d, yyyy`) and reading time (optional override)
-   2. compact uppercase treatment with widened tracking
+   2. compact muted treatment with restrained tracking
    3. metadata separators and active tag accent must be visible without dominating title/body
 2. Title block:
    1. uses locked hierarchy values from section 5.1
    2. must visually dominate the viewport above the fold
    3. includes a short accent rule below title
 3. Body content:
-   1. readable editorial measure (`62-72ch` desktop)
+   1. readable one-column measure within the shared shell container
    2. paragraph spacing and line-height tuned for sustained reading
    3. `h2`/`h3` spacing must clearly reestablish hierarchy after dense paragraphs
 4. Code experience:
@@ -556,9 +544,10 @@ Both themes must preserve minimalist look and readability.
 5. Post-navigation block:
    1. previous/next links follow chronological order
    2. direction labels are muted and linked titles are typographically stronger
-6. Comments block (current + future contract):
-   1. current release must render an intentional placeholder/shell block on post pages
-   2. giscus activation is deferred; future behavior is specified in section 13
+6. Comments block (current contract):
+   1. comments shell renders only on posts with `comments: true`
+   2. with `comments.provider=giscus`, comments load lazily when the section enters viewport and show fallback copy on load failure
+   3. with `comments.provider=none`, placeholder shell renders with no third-party comments requests
 7. Bottom-of-article subscribe form (required):
    1. include the actual Kit-managed subscribe form embed (or `subscribe-form.html` wrapper around that embed) at the end of each post detail page (not just a link/CTA)
    2. form appears below article content and post-navigation, before footer
@@ -591,7 +580,7 @@ Both themes must preserve minimalist look and readability.
 
 ### Visual detail requirements
 
-1. Primary subscribe action uses `--accent-alt` (orange) for border/text/hover treatment; when small-text contrast would fail, keep glyph color at `--text` and apply orange via border/underline/background emphasis.
+1. Primary subscribe action currently uses neutral border/text treatment by default and applies chrome accent emphasis on hover/focus.
 2. Ancillary chrome (dividers, info markers, subtle highlights) uses `--accent` (green) sparingly.
 3. Form layout must prioritize clarity:
    1. single dominant email input
@@ -600,7 +589,7 @@ Both themes must preserve minimalist look and readability.
 
 ## 7.6 Privacy page
 
-1. Explains data processing for Kit form submissions and planned giscus comments.
+1. Explains data processing for Kit form submissions and giscus comments when comments are enabled.
 2. Lists third-party processors and links to their privacy policies.
 3. Provides contact channel for privacy-related requests.
 4. Keeps copy concise.
@@ -629,7 +618,7 @@ Both themes must preserve minimalist look and readability.
 9. Code syntax token contrast follows section 5.4 policy (Monokai-preserving minimum `3:1`), while default code text remains AA.
 10. Provide a visible skip link that moves focus to main content.
 11. Use semantic landmarks (`header`, `nav`, `main`, `footer`) with consistent accessible names where needed.
-12. Form validation errors (subscribe workflows) must be programmatically associated (`aria-describedby`), announced, and focus-directed to the first invalid field on submit failure.
+12. Subscribe workflows currently rely on native browser validation; if custom validation is introduced, errors must be programmatically associated (`aria-describedby`), announced, and focus-directed to the first invalid field.
 
 ---
 
@@ -779,13 +768,12 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    1. fails if templates introduce internal API calls or server-only dependencies
    2. validates Mermaid and embedded media contracts (`tests/contracts/mermaid_rendering.spec.ts`, `tests/contracts/image_embed.spec.ts`) including fallback behavior, host allowlists, and required image attributes
 4. HTML/link/SEO checks:
-   1. no broken internal links
-   2. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`, `/subscribe/success/`, `/privacy/`, `/feed.xml`, `/404.html`)
-   3. canonical tags are present and consistent
-   4. blog pagination canonicalization policy is enforced (`/blog/page/1/` normalization and page `>=2` self-canonical)
-   5. RSS endpoint returns valid XML
-   6. `url`, `baseurl`, and `CNAME` values are consistent with `https://stuffs.blog`
-   7. page metadata mapping (`title`, `description/summary`, `cover_image`, optional `last_modified_at`) is present and deterministic
+   1. key pages exist (`/`, `/blog/`, `/tags/`, `/subscribe/`, `/subscribe/success/`, `/privacy/`, `/feed.xml`, `/404.html`)
+   2. canonical tags are present and consistent
+   3. blog page-1 canonicalization policy is enforced (`/blog/page/1/` normalization)
+   4. feed endpoint returns valid XML
+   5. `url`, `baseurl`, and `CNAME` values are consistent with `https://stuffs.blog`
+   6. page metadata mapping (`title`, `description/summary`, `cover_image`, optional `last_modified_at`) is present and deterministic
 5. UI smoke tests (Playwright):
    1. desktop viewport (`1366x900`) with light/dark toggle
    2. mobile viewport (`390x844`) with light/dark toggle
@@ -793,17 +781,15 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
 6. Progressive-enhancement smoke tests:
    1. JS enabled: validates disclosure-menu interaction, theme persistence, code-copy behavior, Mermaid rendering on diagram posts, and comments behavior only when `comments.provider=giscus`.
    2. JS disabled: validates fallback reading flow and recovery links (`Home`/`Blog`) on `/`, `/blog/`, `/tags/`, `/subscribe/`, and `/privacy/`.
-7. Comments-mode validation (required):
-   1. run with `comments.provider=none` (default): placeholder renders, no giscus script/frame requests, privacy disclosure present
-   2. run with `comments.provider=giscus`: comments auto-load when the comments section enters viewport
-   3. verify no duplicate giscus mounts on repeated scroll/viewport entry
-   4. verify no giscus network/script/frame activity occurs before the comments section enters viewport
-   5. CI must stub/intercept giscus host traffic (`giscus.app`, `github.com`, `api.github.com`) and run fully deterministic without external network dependency
-   6. production giscus activation remains optional in current release
-8. Visual hierarchy regression (Playwright snapshots, required):
+7. Comments behavior validation (required):
+   1. contract tests validate allowed provider values and required giscus keys when provider is `giscus`
+   2. contract tests validate per-post opt-in template gating and script-load gating
+   3. e2e `comments_disabled.spec.ts` validates provider-none behavior with placeholder/no giscus requests using a deterministic fixture
+   4. e2e `comments_giscus.spec.ts` validates lazy mount, no duplicate mounts, and fallback behavior with intercepted giscus traffic
+8. Visual hierarchy regression (Playwright snapshots, opt-in):
    1. compares canonical post fixture route (derived from `docs/mockup.html`) in desktop (`1366x900`) and mobile (`390x844`)
    2. checks both light and dark themes
-   3. diff threshold hard cap: `<= 0.8%` pixel delta per snapshot
+   3. diff threshold hard cap: `<= 0.8%` pixel delta per snapshot (when enabled)
    4. canonical fixture route must use deterministic content derived from `docs/mockup.html` with stable rendering harness settings (fixed viewport, locale, timezone, and test tooling versions)
    5. snapshot harness disables non-essential animation and time-variant effects to prevent flaky diffs
    6. fails if title prominence, section spacing cadence, code-panel chrome, prev/next block, or comments shell diverges from baseline capture
@@ -867,7 +853,7 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    6. JS-disabled fallback probes on `/`, `/tags/`, and `/privacy/` succeed
    7. page-1 canonicalization checks pass (`/blog/page/1/` non-indexable and normalized)
    8. unknown-route probe returns `404` and renders readable fallback copy
-   9. canonical post-detail visual-regression snapshots (desktop/mobile, light/dark) pass against the approved baseline
+   9. current workflow probe path should track canonical permalink strategy (`/blog/:slug/`); keep probe route in sync when permalink rules change
 
 ### Environment controls
 
@@ -900,6 +886,7 @@ Add to `_config.yml`:
 ```yaml
 kit:
   form:
+    form_id: "<FORM_ID>"
     form_action: "https://app.kit.com/forms/<FORM_ID>/subscriptions"
     form_uid: "<FORM_UID>"
     success_url: "https://stuffs.blog/subscribe/success/"
@@ -948,46 +935,27 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 
 ## 13) Comments integration (giscus)
 
-Status: deferred live activation. Current release does not require production giscus enablement, but does require deterministic provider-mode contract/e2e coverage (with stubbed giscus traffic) so future activation is safe.
+Status: active implementation with provider-level and post-level gating.
 
 1. Activation/config contract (required):
-   1. `_config.yml` must define:
-      1. `comments.provider` with allowed values: `none`, `giscus`
-      2. `comments.provider` default: `none`
-      3. when `giscus`, require `comments.giscus.repo` and `comments.giscus.mapping`
-   2. post front matter may set `comments: true` to opt a post into comments; default behavior without this key is comments disabled for that post
-   3. templates/scripts must branch behavior from `comments.provider` and per-post `comments` metadata to keep tests deterministic
-2. Current release contract (`comments.provider=none`):
-   1. opted-in post pages (`comments: true`) render a comments placeholder/shell block that preserves layout and hierarchy
-   2. no giscus script/frame loads occur
-   3. privacy page discloses planned third-party comment processing
-3. Future giscus activation contract (`comments.provider=giscus`):
-   1. store comments in a dedicated public repo
-   2. embed only on post pages
-   3. theme must follow active site theme (light/dark variants)
-   4. if giscus unavailable, page content still fully readable
-   5. load giscus lazily only when the comments section enters viewport; do not eager-load on initial page render
-   6. show a short privacy note near comments indicating third-party GitHub Discussions-backed processing
+   1. `_config.yml` defines `comments.provider` with allowed values `none` and `giscus`
+   2. current repository config sets `comments.provider: giscus`
+   3. when provider is `giscus`, required keys include repo/category/mapping identifiers used by `comments.js`
+   4. post front matter `comments: true` opt-ins are required before any comments shell/script is rendered
+2. Current runtime contract (`comments.provider=giscus` in this repository):
+   1. only opted-in post pages render comments shell markup
+   2. giscus script is not loaded until comments section enters viewport (lazy load)
+   3. repeated viewport entry does not create duplicate mounts
+   4. if giscus fails to load or mount, readable fallback copy remains visible
+   5. theme updates are propagated to giscus via `postMessage` config update
+3. `comments.provider=none` contract (supported mode):
+   1. comments shell can render placeholder variant without third-party script/frame requests
+   2. no giscus network activity should occur
 4. Testing requirements (required):
-   1. contract tests (`comments_config.spec.ts`) validate:
-      1. allowed values for `comments.provider` (`none`, `giscus`)
-      2. default `comments.provider=none`
-      3. required giscus keys (`repo`, `mapping`) when `provider=giscus`
-      4. failure on invalid provider values or incomplete giscus config
-   2. e2e tests (`comments_disabled.spec.ts`) validate in `provider=none`:
-      1. comments placeholder/shell is rendered on opted-in post pages
-      2. non-opted post pages do not render the comments shell
-      3. no giscus script injection
-      4. no giscus iframe mount
-      5. no giscus host network activity
-   3. e2e tests (`comments_giscus.spec.ts`) validate in `provider=giscus`:
-      1. giscus resources are not requested before the comments section enters viewport
-      2. first viewport entry injects exactly one giscus mount
-      3. repeated viewport entries do not create duplicate mounts
-      4. fallback copy remains readable if giscus script loads but no iframe mount appears
-      5. fallback copy remains readable if giscus load fails
-   4. accessibility tests validate comments control names, focus order, and state announcement behavior in both provider modes
-   5. `provider=giscus` CI tests must use stubbed/intercepted giscus responses and must not depend on production comment activation
+   1. contract tests (`comments_config.spec.ts`) validate provider values, required keys, and template/script gating
+   2. e2e `comments_disabled.spec.ts` validates provider-none fixture behavior
+   3. e2e `comments_giscus.spec.ts` validates lazy load, duplicate-mount prevention, theme fallback behavior, and failure fallback messaging with intercepted giscus traffic
+   4. accessibility checks are covered by route-level axe scans in `accessibility.spec.ts`
 5. On GitHub Pages, include a restrictive meta CSP and referrer policy compatible with Kit and giscus:
    1. baseline CSP allowlist must explicitly constrain `default-src`, `script-src`, `style-src`, `img-src`, `frame-src`, `connect-src`, `font-src`, `form-action`, and `base-uri`.
    2. allowlist host scope must be minimum-required (`self`, `app.kit.com`, `giscus.app`, `github.com`, `api.github.com`, `avatars.githubusercontent.com`) plus explicitly declared external asset hosts from `_data/external_asset_hosts.yml` when needed.
@@ -1005,7 +973,7 @@ A release is done only if all items pass.
 1. Header controls follow the breakpoint matrix in section 2/6, with no horizontal overflow at required smoke viewports `1366x900` and `390x844` (plus manual verification at `768x1024` and `360x780`).
 2. Mobile layout remains one-column and readable without overlap.
 3. Light and dark themes pass automated WCAG AA checks for body/UI text with zero critical/serious keyboard-focus failures; code syntax tokens pass section 5.4 policy.
-4. Text-role tokens (`--text`, `--muted-text`, `--tag-text`) pass AA contrast validation in both themes.
+4. Text-role tokens (`--text`, `--muted-text`) pass AA contrast validation in both themes.
 5. JS-enabled interactions (menu/theme/copy, Mermaid render on diagram posts, and comments only when enabled) work at required smoke viewports; JS-disabled fallback reading flow still works for core routes.
 6. Mermaid fences render to readable SVG output in both themes and do not cause page-level horizontal overflow.
 7. Mermaid failure and no-JS states preserve readable source fallback (no blank content blocks).
@@ -1015,14 +983,14 @@ A release is done only if all items pass.
 11. Metadata mapping is deterministic (`title`, `description/summary`, optional `cover_image`, optional `last_modified_at`) across rendered pages and feeds.
 12. Subscribe form works end-to-end with success handling and clear check-your-inbox guidance.
 13. Bottom-of-article subscribe form is present and working on post detail pages.
-14. Kit feed-based notification flow is configured and tested.
+14. Feed endpoint (`/feed.xml`) is available for Kit automation; operational send verification is handled outside this repository.
 15. CI and deploy workflows are green; production smoke checks pass with retry/backoff.
-16. Comments placeholder/privacy disclosures are present; provider-mode tests (`none` and `giscus`) pass in CI with stubbed giscus traffic (no production activation dependency).
+16. Comments/privacy disclosures are present; provider-mode behavior is covered by deterministic e2e fixtures with stubbed/intercepted giscus traffic.
 17. Post code blocks use Monokai highlighting with copy action and highlighter-generated line numbers in both site themes (no hand-authored token markup).
 18. Blog visual language remains aligned with `docs/mockup.html`, using green/orange accents with neutral supporting tones.
 19. Header and code-copy controls pass keyboard and screen-reader interaction checks.
 20. Home latest-post list and other list outputs are reproducible for the same content set (deterministic `SITE_BUILD_DATE_UTC` policy).
-21. Canonical visual-regression baselines are versioned and approved for post detail (desktop/mobile, light/dark), and CI pixel-diff thresholds pass.
+21. Canonical visual-regression baselines are available for post detail (desktop/mobile, light/dark) and run when `ENABLE_VISUAL_REGRESSION` is enabled.
 22. `404.html` provides readable fallback copy and unknown routes return `404`.
 23. Blog pagination canonicalization policy is enforced (`/blog/page/1/` normalization and page `>=2` self-canonical behavior).
 24. Feed strategy is valid (`/feed.xml`) and nav links route correctly.
@@ -1034,55 +1002,46 @@ A release is done only if all items pass.
 
 ## 15) Execution roadmap (adjustable)
 
-Phase order and individual tasks in this roadmap are implementation guidance and may be reordered, merged, or simplified as needed while preserving the product goals.
+Most foundation items in this roadmap are already implemented; remaining work is maintenance and drift cleanup, and tasks may be reordered or simplified while preserving product goals.
 
 ## Phase 0 - foundation
 
-1. Create file structure and base layouts.
-2. Add typography delivery and font-loading strategy (`font-display`, optional subset plan when self-hosting), and CSS token system.
-3. Implement minimal header/footer shells and add `CNAME`.
-4. Add route-generation foundation (`jekyll-paginate-v2`) and page-1 canonicalization strategy.
-5. Add canonical post-detail fixture content used for deterministic visual hierarchy tests.
-6. Add CI skeleton early so each subsequent phase is validated incrementally.
+1. Keep route/permalink documentation synchronized with `_config.yml` and generated output.
+2. Keep design-token documentation synchronized with `assets/css/main.css`.
+3. Preserve deterministic build metadata generation and cache-busting behavior.
+4. Keep plugin contracts (`deterministic_filters`, redirects, tag pages) aligned with tests.
+5. Maintain repository structure section as files evolve.
+6. Track and document known implementation mismatches (for example deploy probe routes).
 
 ## Phase 1 - core UI and responsiveness
 
-1. Build home/blog/post/tags/subscribe layouts (home = about paragraph + latest posts list, no year grouping).
-2. Implement responsive rules for mobile/tablet/desktop.
-3. Add `privacy` page.
-4. Match the minimalist spacing and typography contract.
-5. Implement responsive header/menu behavior (inline or disclosure by breakpoint) and verify keyboard + fallback behavior.
-6. Match canonical post-detail composition/chrome requirements from section 5.7.
+1. Maintain current home/blog/post/tags/subscribe layouts with no regression in hierarchy/spacing.
+2. Keep responsive behavior and mobile disclosure navigation aligned with smoke tests.
+3. Keep keyboard/fallback behavior aligned with no-JS and accessibility tests.
+4. Preserve post-detail composition contract (`meta/title/body/code/nav/subscribe/comments shell`).
 
 ## Phase 2 - core content and theming
 
-1. Enforce post front matter contract (`post_uid`, timezone-aware `date`, required core fields).
-2. Enforce permalink strategy with immutable `slug` and simple static-redirect policy.
-3. Implement markdown heading/body validation (no duplicate body `h1`, deterministic heading IDs).
-4. Add light/dark toggle and persistence.
-5. Enforce AA-safe text token usage rules and code-token contrast policy.
-6. Add embedded image include/component pattern (`markdown-image.html`) with alt, intrinsic size, and caption behavior.
-7. Implement Mermaid authoring/rendering pipeline (`mermaid` fenced blocks -> client render) with JS fallback handling.
-8. Add tag slug validation.
+1. Keep post front matter/heading/permalink/tag contracts aligned with `tests/contracts/*`.
+2. Maintain light/dark theme behavior, persistence, and contrast guarantees.
+3. Maintain code highlighting/copy behavior and Mermaid render/fallback behavior.
+4. Keep image include usage/alt-text constraints and host-policy guidance aligned with tests/CSP.
 
 ## Phase 3 - integrations
 
-1. Integrate Kit form and labels on both `/subscribe/` and bottom of post detail pages.
-2. Integrate Kit RSS automation for new-post notifications.
-3. Keep giscus integration spec-complete but deferred (placeholder + activation contract + privacy disclosures + provider-mode tests).
-4. Wire privacy links and processor disclosures for subscription and planned comments.
-5. Add restrictive meta CSP/referrer policy with documented GitHub Pages limitations.
+1. Keep Kit form integration/config/tests aligned (`subscribe` page + post footer include).
+2. Keep feed endpoint and notification guidance aligned with external Kit automation usage.
+3. Keep giscus provider/post gating, lazy-load, and fallback behavior aligned with tests.
+4. Keep privacy disclosures and processor links accurate.
+5. Keep meta CSP/referrer policy and external host allowlists synchronized.
 
 ## Phase 4 - CI/CD and launch
 
-1. Complete CI workflow checks (build, front matter/permalink, link/SEO, desktop+mobile smoke, progressive-enhancement smoke, comments-mode validation, visual regression, hierarchy token contract, accessibility audit, Kit config, slug/redirect validation, performance budgets).
-2. Add deploy workflow to GitHub Pages with restricted `workflow_dispatch deploy_ref` (commit SHA from `main` ancestry only).
-3. Configure branch protection and production environment.
-4. Add workflow baseline hardening (pinned action versions and least-privilege permissions).
-5. Require deploy-time revalidation of the exact target commit.
-6. Add post-deploy smoke checks with retry/backoff, blog pagination canonicalization probes, visual-baseline probes, and single-flight deploy concurrency.
-7. Version and approve baseline snapshots for canonical post detail before release.
-8. Run smoke tests and publish.
+1. Keep CI checks green and synchronized with actual contract/e2e coverage.
+2. Keep deploy workflow target resolution/revalidation behavior intact.
+3. Keep workflow permissions/concurrency hardening intact.
+4. Keep post-deploy smoke coverage accurate and probe routes aligned with actual permalinks.
+5. Run visual-regression gates when `ENABLE_VISUAL_REGRESSION` is enabled.
 
 ---
 
@@ -1093,13 +1052,13 @@ Phase order and individual tasks in this roadmap are implementation guidance and
 3. Supports light mode and dark mode with persistent preference.
 4. Is English-only (no localization or multilingual requirements).
 5. CI/CD deploy pipeline is active, enforced, and includes desktop/mobile smoke checks, progressive-enhancement checks (JS-enabled behaviors + JS-disabled fallback), accessibility audit gates, and workflow hardening gates.
-6. Canonical post-detail visual regression passes in desktop/mobile and light/dark snapshots within configured pixel-diff threshold.
+6. Canonical post-detail visual regression passes in desktop/mobile and light/dark snapshots when visual-regression runs are enabled.
 7. Visual hierarchy token-contract gates pass, proving non-flat tiered typography/spacing comparable to `docs/mockup.html`.
 8. Post-detail page composition matches section 5.7 (title dominance, accent rule, body cadence, code chrome, prev/next block, comments shell).
 9. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, no client-side `error_url`).
 10. Bottom-of-article subscribe form is present and functional on post detail pages.
-11. Kit new-post notifications are configured through RSS automation or validated manual fallback.
-12. giscus integration is fully specified for future activation (placeholder behavior, provider switch contract, privacy linkage), and comments-mode tests pass for both `provider=none` and `provider=giscus` in a deterministic stubbed CI harness.
+11. Kit new-post notifications can be driven from `/feed.xml` via Kit-side automation or manual fallback.
+12. giscus integration is implemented with per-post opt-in and provider gating; comments-mode behavior is covered by deterministic stubbed e2e harnesses.
 13. RSS strategy is implemented and validated (`/feed.xml`) with nav integration.
 14. Permalink rules (immutable `slug`), blog page-1 canonicalization policy, and deterministic home latest-post computation are enforced by CI.
 15. Front matter/metadata contracts are enforced, including allowlisted optional keys and deterministic metadata derivation (`title`, `description/summary`, optional `cover_image`, optional `last_modified_at`).
@@ -1116,4 +1075,4 @@ Phase order and individual tasks in this roadmap are implementation guidance and
 
 ---
 
-If needed, next step is converting this plan into exact files and workflows (`_layouts/*`, `assets/*`, `.github/workflows/*`, and Kit form include) with concrete code.
+If needed, next step is maintaining this document in lockstep with implementation and test-contract changes (`_layouts/*`, `assets/*`, `.github/workflows/*`, and `tests/*`).
