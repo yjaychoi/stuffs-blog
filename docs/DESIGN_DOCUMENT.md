@@ -104,7 +104,7 @@ This section defines implementation guidance anchored to `docs/mockup.html`.
 4. `/tags/` tag index.
 5. `/tags/<tag-slug>/` canonical tag-filtered page.
 6. `/subscribe/` Kit subscription page.
-7. `/subscribe/success/` subscribe success page (`/subscribe/error/` optional).
+7. `/subscribe/success/` subscribe success page.
 8. `/privacy/` privacy notice page.
 9. `/feed.xml` RSS feed.
 10. `/404.html` not-found page (GitHub Pages canonical 404 entrypoint).
@@ -587,7 +587,7 @@ Both themes must preserve minimalist look and readability.
 3. Privacy line (`unsubscribe anytime`).
 4. Minimal confirmation/success messaging.
 5. Success uses dedicated status route (`/subscribe/success/`).
-6. Error handling may use optional `/subscribe/error/` route when supported by provider; otherwise keep concise inline recovery copy on `/subscribe/`.
+6. Keep concise inline recovery copy on `/subscribe/` for non-success states.
 
 ### Visual detail requirements
 
@@ -823,7 +823,7 @@ All validation logic must live in Node-based test frameworks (`Vitest` + `Playwr
    2. post detail layout/pages contain bottom-of-article Kit form embed (or include wrapper)
    3. required config values are present
    4. `success_url` is absolute `https://stuffs.blog/...` and route-matched
-   5. if `error_url` is configured, it must be absolute `https://stuffs.blog/...` and route-matched
+   5. no client-side `error_url` redirect parameter is used
 13. Tag/slug/redirect validation:
    1. fails on tag slug collisions
    2. redirect mappings are duplicate-free and syntactically valid
@@ -901,10 +901,8 @@ Add to `_config.yml`:
 kit:
   form:
     form_action: "https://app.kit.com/forms/<FORM_ID>/subscriptions"
-    form_uid: "<FORM_ID>"
+    form_uid: "<FORM_UID>"
     success_url: "https://stuffs.blog/subscribe/success/"
-    # Optional if your Kit plan/flow supports custom error redirects:
-    # error_url: "https://stuffs.blog/subscribe/error/"
 ```
 
 Only public Kit form identifiers are allowed in repo. Do not commit Kit API secrets or tokens.
@@ -915,7 +913,7 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 2. Form includes:
    1. email field
    2. submit button
-   3. honeypot field (hidden)
+   3. no client-side redirect or error callback hidden fields
 3. Include `subscribe-form.html` on:
    1. `/subscribe/` page
    2. bottom of every post detail page (`post.html`) as a compact variant
@@ -937,7 +935,7 @@ Only public Kit form identifiers are allowed in repo. Do not commit Kit API secr
 2. CI fails if subscribe page omits the form include.
 3. CI fails if any post detail page/layout omits the bottom-of-article form include.
 4. CI fails if form action URL is not on Kit host allowlist.
-5. CI fails if `success_url` is not absolute `https://stuffs.blog/...`; if `error_url` exists, it must also be absolute `https://stuffs.blog/...`.
+5. CI fails if `success_url` is not absolute `https://stuffs.blog/...`.
 6. CI fails if external Kit embed scripts are added.
 7. Manual QA verifies:
    1. successful subscription flow
@@ -1015,7 +1013,7 @@ A release is done only if all items pass.
 9. Content-image `alt` requirements are enforced and CI rejects missing/invalid alt usage.
 10. Front matter and markdown heading contracts are enforced (required keys, allowlisted optionals, no in-body duplicate H1 behavior, stable heading IDs).
 11. Metadata mapping is deterministic (`title`, `description/summary`, optional `cover_image`, optional `last_modified_at`) across rendered pages and feeds.
-12. Subscribe form works end-to-end with success handling and clear error fallback behavior.
+12. Subscribe form works end-to-end with success handling and clear check-your-inbox guidance.
 13. Bottom-of-article subscribe form is present and working on post detail pages.
 14. Kit feed-based notification flow is configured and tested.
 15. CI and deploy workflows are green; production smoke checks pass with retry/backoff.
@@ -1098,7 +1096,7 @@ Phase order and individual tasks in this roadmap are implementation guidance and
 6. Canonical post-detail visual regression passes in desktop/mobile and light/dark snapshots within configured pixel-diff threshold.
 7. Visual hierarchy token-contract gates pass, proving non-flat tiered typography/spacing comparable to `docs/mockup.html`.
 8. Post-detail page composition matches section 5.7 (title dominance, accent rule, body cadence, code chrome, prev/next block, comments shell).
-9. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, `error_url` optional).
+9. Kit email integration is configured, validated, and tested with static-safe constraints and absolute redirect URLs (`success_url` required, no client-side `error_url`).
 10. Bottom-of-article subscribe form is present and functional on post detail pages.
 11. Kit new-post notifications are configured through RSS automation or validated manual fallback.
 12. giscus integration is fully specified for future activation (placeholder behavior, provider switch contract, privacy linkage), and comments-mode tests pass for both `provider=none` and `provider=giscus` in a deterministic stubbed CI harness.

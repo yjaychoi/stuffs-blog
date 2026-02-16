@@ -53,10 +53,10 @@ defaults:
 
 kit:
   form:
-    form_action: "https://app.kit.com/forms/0000000/subscriptions"
-    form_uid: "0000000"
+    form_id: "9091622"
+    form_action: "https://app.kit.com/forms/9091622/subscriptions"
+    form_uid: "7a2ec6f819"
     success_url: "https://stuffs.blog/subscribe/success/"
-    error_url: "https://stuffs.blog/subscribe/error/"
 
 comments:
   provider: giscus

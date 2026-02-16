@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Subscription Confirmed
+title: Check Your Inbox
 permalink: /subscribe/success/
 ---
 <section class="route-header">

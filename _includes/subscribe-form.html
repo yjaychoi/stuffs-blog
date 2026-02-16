@@ -15,12 +15,16 @@
   {% else %}
     <p class="subscribe-block__lede">Practical notes on delivery and architecture, sent when new posts are published.</p>
   {% endif %}
-  <form action="{{ form.form_action }}" class="subscribe-form" method="post" accept-charset="utf-8" novalidate>
-    <input type="hidden" name="redirect_to" value="{{ form.success_url }}">
-    {% if form.error_url %}
-      <input type="hidden" name="error_redirect_to" value="{{ form.error_url }}">
-    {% endif %}
-
+  <form
+    action="{{ form.form_action }}"
+    class="subscribe-form seva-form formkit-form"
+    method="post"
+    accept-charset="utf-8"
+    data-sv-form="{{ form.form_id }}"
+    data-uid="{{ form.form_uid }}"
+    data-format="inline"
+    data-version="5"
+  >
     <div class="subscribe-form__field">
       <label class="subscribe-form__label" for="{{ instance_id }}-email">Email address</label>
       <input
@@ -33,11 +37,6 @@
         placeholder="you@example.com"
         aria-describedby="{{ instance_id }}-privacy"
       >
-    </div>
-
-    <div class="sr-only" aria-hidden="true">
-      <label for="{{ instance_id }}-trap">Leave this blank</label>
-      <input id="{{ instance_id }}-trap" type="text" name="fields[website]" tabindex="-1" autocomplete="off">
     </div>
 
     <button type="submit">Subscribe</button>
