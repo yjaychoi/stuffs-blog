@@ -11,6 +11,7 @@ on:
         type: string
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -66,24 +67,39 @@ jobs:
             const sha = process.env.DEPLOY_SHA;
             const maxAttempts = 90; // 30 minutes at 20s intervals
             const intervalMs = 20_000;
-            const terminalFailureStates = new Set(["failure", "error"]);
+            const workflowId = "ci.yml";
 
             for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-              const { data } = await github.rest.repos.getCombinedStatusForRef({
+              const { data } = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: sha
+                workflow_id: workflowId,
+                head_sha: sha,
+                per_page: 20
               });
 
-              core.info(`CI combined status for ${sha} is '${data.state}' (attempt ${attempt}/${maxAttempts}).`);
+              const runs = data.workflow_runs
+                .filter((run) => run.head_sha === sha)
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-              if (data.state === "success") {
-                return;
-              }
+              if (!runs.length) {
+                core.info(`No CI workflow runs found for ${sha} yet (attempt ${attempt}/${maxAttempts}).`);
+              } else {
+                const latest = runs[0];
+                core.info(
+                  `CI workflow run ${latest.id} for ${sha}: status='${latest.status}' conclusion='${latest.conclusion || "n/a"}' (attempt ${attempt}/${maxAttempts}).`
+                );
 
-              if (terminalFailureStates.has(data.state)) {
-                core.setFailed(`Combined status for ${sha} is ${data.state}; deploy requires success.`);
-                return;
+                if (latest.status === "completed") {
+                  if (latest.conclusion === "success") {
+                    return;
+                  }
+
+                  core.setFailed(
+                    `CI workflow ${workflowId} for ${sha} completed with conclusion '${latest.conclusion}'. ${latest.html_url}`
+                  );
+                  return;
+                }
               }
 
               if (attempt < maxAttempts) {
@@ -92,7 +108,7 @@ jobs:
             }
 
             core.setFailed(
-              `Timed out waiting for CI success on ${sha}. Combined status stayed pending for ${Math.floor(
+              `Timed out waiting for CI workflow ${workflowId} to complete successfully for ${sha} after ${Math.floor(
                 (maxAttempts * intervalMs) / 60_000
               )} minutes.`
             );
