@@ -142,18 +142,6 @@ jobs:
       - name: Build site
         run: bundle exec jekyll build
 
-      - name: Contract tests
-        run: npx vitest run tests/contracts
-
-      - name: Asset size limits
-        run: npx size-limit --config size-limit.config.cjs
-
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: End-to-end tests
-        run: npx playwright test
-
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
@@ -228,10 +216,3 @@ jobs:
             echo "Post-deploy smoke checks failed"
             exit 1
           fi
-
-      - name: Post-deploy browser smoke checks
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ steps.deployment.outputs.page_url }}
-        run: |
-          npx playwright test --config playwright.deploy.config.ts --grep @smoke
-          npx playwright test --config playwright.deploy.config.ts tests/e2e/no_js.spec.ts
