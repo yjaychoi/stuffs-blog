@@ -145,17 +145,6 @@
       setMenuState(nav.dataset.open !== "true");
     });
 
-    nav.addEventListener("click", function (event) {
-      if (!window.matchMedia("(max-width: 639px)").matches) {
-        return;
-      }
-
-      var link = event.target && event.target.closest ? event.target.closest("a") : null;
-      if (link) {
-        setMenuState(false);
-      }
-    });
-
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && nav.dataset.open === "true" && window.matchMedia("(max-width: 639px)").matches) {
         setMenuState(false);
