@@ -2,8 +2,8 @@
 layout: default
 ---
 <section class="route-header">
-  <h1>Blog</h1>
-  <p>Notes on software delivery, architecture tradeoffs, and practical implementation work.</p>
+  <h1>블로그</h1>
+  <p>개발 분야 AI 활용법 트렌드를 "유명 테크 블로그 번역본"으로 빠르게 접해보세요</p>
 </section>
 
 <section class="route-section">
@@ -13,7 +13,7 @@ layout: default
     {% for post in ordered_posts %}
       <li class="post-row post-row--detail">
         <div class="post-row__meta">
-          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+          <time datetime="{{ post.date | date_to_xmlschema }}">{% include formatted-date.html value=post.date %}</time>
           {% if post.tags and post.tags.size > 0 %}
             <span class="tag-row">
               {% for tag in post.tags %}

@@ -4,9 +4,10 @@ layout: default
 <article class="post-detail">
   <header class="post-header">
     <div class="meta-row">
-      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%b %-d, %Y" }}</time>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y년 %m월 %d일" }}</time>
       <span aria-hidden="true">•</span>
-      <span>{{ page.read_time | default: content | reading_time }}</span>
+      {% assign read_minutes = page.read_time | default: content | reading_time | split: " " | first %}
+      <span>읽는데 {{ read_minutes }}분</span>
       {% if page.tags and page.tags.size > 0 %}
         <span aria-hidden="true">•</span>
         <span class="meta-row__tags">
@@ -29,14 +30,14 @@ layout: default
   <nav class="post-navigation{% if page.previous and page.next %} post-navigation--split{% endif %}" aria-label="Post navigation">
     {% if page.previous %}
       <a class="post-navigation__item" href="{{ page.previous.url }}">
-        <span>← Previous</span>
+        <span>← 뒤로</span>
         <strong>{{ page.previous.title }}</strong>
       </a>
     {% endif %}
 
     {% if page.next %}
       <a class="post-navigation__item post-navigation__item--next" href="{{ page.next.url }}">
-        <span>Next →</span>
+        <span>다음 →</span>
         <strong>{{ page.next.title }}</strong>
       </a>
     {% endif %}

@@ -80,7 +80,7 @@ comments:
     # because custom theme URLs from the giscus iframe require HTTPS+CORS.
     theme_light: "/assets/css/giscus-light.css"
     theme_dark: "/assets/css/giscus-dark.css"
-    lang: "en"
+    lang: "ko"
     loading: "lazy"
 
 external_asset_hosts: []

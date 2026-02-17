@@ -1,5 +1,5 @@
 ---
 layout: subscribe
-title: Subscribe
+title: 구독
 permalink: /subscribe/
 ---

@@ -9,10 +9,10 @@
 
     <div class="site-header__cluster">
       <nav class="site-nav" id="site-nav" aria-label="Primary" data-open="false">
-        <a href="/"{% if current_url == "/" %} class="is-active" aria-current="page"{% endif %}>Home</a>
-        <a href="/blog/"{% if current_url == "/blog/" or current_url contains "/blog/" and current_url != "/" and current_url != "/blog/page/1/" %} class="is-active" aria-current="page"{% endif %}>Blog</a>
+        <a href="/"{% if current_url == "/" %} class="is-active" aria-current="page"{% endif %}>홈</a>
+        <a href="/blog/"{% if current_url == "/blog/" or current_url contains "/blog/" and current_url != "/" and current_url != "/blog/page/1/" %} class="is-active" aria-current="page"{% endif %}>블로그</a>
         <a href="/feed.xml">RSS</a>
-        <a class="subscribe-link subscribe-link--nav{% if is_subscribe %} is-active{% endif %}" href="/subscribe/"{% if is_subscribe %} aria-current="page"{% endif %}>Subscribe</a>
+        <a class="subscribe-link subscribe-link--nav{% if is_subscribe %} is-active{% endif %}" href="/subscribe/"{% if is_subscribe %} aria-current="page"{% endif %}>구독</a>
       </nav>
 
       <div class="site-header__actions">
@@ -28,7 +28,7 @@
         >
           <span class="menu-toggle__icon" aria-hidden="true"></span>
         </button>
-        <a class="subscribe-link{% if is_subscribe %} is-active{% endif %}" href="/subscribe/"{% if is_subscribe %} aria-current="page"{% endif %}>Subscribe</a>
+        <a class="subscribe-link{% if is_subscribe %} is-active{% endif %}" href="/subscribe/"{% if is_subscribe %} aria-current="page"{% endif %}>구독</a>
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 ---
 layout: blog_index
-title: Blog
+title: 블로그
 permalink: /blog/
 pagination:
   enabled: true

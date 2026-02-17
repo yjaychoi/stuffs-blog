@@ -1,0 +1,2 @@
+{%- assign date_value = include.value | default: include.date -%}
+{{- date_value | date: "%Y. %-m. %-d." -}}

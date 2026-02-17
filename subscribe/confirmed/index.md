@@ -1,9 +1,9 @@
 ---
 layout: default
-title: Subscription Confirmed
+title: 구독 완료
 permalink: /subscribe/confirmed/
 ---
 <section class="route-header">
-  <h1>Subscription confirmed</h1>
-  <p>You are all set. New posts will land in your inbox when they are published.</p>
+  <h1>구독 완료</h1>
+  <p>등록이 완료되었습니다. 새로운 포스팅을 올릴 때마다 메일을 발송해드려요.</p>
 </section>

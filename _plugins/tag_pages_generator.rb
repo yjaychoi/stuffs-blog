@@ -15,7 +15,7 @@ module StuffOfThoughts
         [-post.date.to_i, post.data.fetch("post_uid", "").to_s]
       end
 
-      data["title"] = "Tag: #{tag_name}"
+      data["title"] = "태그: #{tag_name}"
       data["tag_name"] = tag_name
       data["tag_slug"] = tag_slug
       data["posts"] = ordered_posts

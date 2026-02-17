@@ -6,14 +6,14 @@
 {% assign instance_id = include.id | default: page.url | append: "-subscribe" | slugify %}
 <section class="subscribe-block{% if is_compact %} subscribe-block--compact{% endif %}">
   {% if is_compact %}
-    <h3>Subscribe</h3>
+    <h3>구독하기</h3>
   {% else %}
-    <h2>Email Updates</h2>
+    <h2>이메일로 소식 받기</h2>
   {% endif %}
   {% if is_compact %}
-    <p class="subscribe-block__lede">Get new posts in your inbox.</p>
+    <p class="subscribe-block__lede">새로운 포스팅 소식을 이메일로 보내드려요.</p>
   {% else %}
-    <p class="subscribe-block__lede">Practical notes on delivery and architecture, sent when new posts are published.</p>
+    <p class="subscribe-block__lede">쉴 새 없이 변하는 AI 활용법, "유명 테크 블로그 번역본"으로 최신 소식을 메일로 받아보세요.</p>
   {% endif %}
   <form
     action="{{ form.form_action }}"
@@ -26,7 +26,7 @@
     data-version="5"
   >
     <div class="subscribe-form__field">
-      <label class="subscribe-form__label" for="{{ instance_id }}-email">Email address</label>
+      <label class="subscribe-form__label" for="{{ instance_id }}-email">이메일 주소</label>
       <input
         id="{{ instance_id }}-email"
         name="email_address"
@@ -39,9 +39,9 @@
       >
     </div>
 
-    <button type="submit">Subscribe</button>
+    <button type="submit">구독</button>
   </form>
   <p class="subscribe-block__privacy" id="{{ instance_id }}-privacy">
-    No spam. Unsubscribe anytime.
+    언제든지 구독 해지 가능
   </p>
 </section>
