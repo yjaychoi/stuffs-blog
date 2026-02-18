@@ -11,13 +11,12 @@ layout: default
 
 <section class="route-section">
   <h2>Latest Posts</h2>
-  {% assign build_date = site.data.build_meta.SITE_BUILD_DATE_UTC | default: site.time %}
-  {% assign latest_posts = site.posts | published_before: build_date | deterministic_post_sort %}
+  {% assign latest_posts = site.posts | deterministic_post_sort %}
   {% if latest_posts.size == 0 %}
     <p class="empty-state">No posts published yet. Check back soon.</p>
   {% else %}
     <ul class="post-list">
-      {% for post in latest_posts limit: 5 %}
+      {% for post in latest_posts limit: 3 %}
         <li class="post-row">
           <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
           <a href="{{ post.url }}">{{ post.title }}</a>
