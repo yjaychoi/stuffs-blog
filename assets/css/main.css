@@ -728,6 +728,16 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   color: inherit;
 }
 
+.post-content .info-box {
+  margin: 1.25rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--border), transparent 8%);
+  border-left: 4px solid var(--accent-ink);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-subtle), var(--surface) 28%);
+  box-shadow: var(--shadow-subtle);
+}
+
 .code-panel {
   margin: 1.8rem 0;
   border: 1px solid color-mix(in srgb, var(--border), transparent 12%);
