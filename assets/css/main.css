@@ -1014,6 +1014,16 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   margin-inline: auto;
 }
 
+html[data-theme="dark"] .mermaid-diagram .edgeLabel .labelBkg {
+  fill: #4f4f4f !important;
+}
+
+html[data-theme="dark"] .mermaid-diagram .edgeLabel p,
+html[data-theme="dark"] .mermaid-diagram .edgeLabel text {
+  color: #f1f1f1 !important;
+  fill: #f1f1f1 !important;
+}
+
 .post-divider {
   border: 0;
   border-top: 1px solid color-mix(in srgb, var(--border), transparent 28%);
