@@ -7,8 +7,9 @@ test("core routes remain readable with js disabled", async ({ browser, baseURL }
   const routes = ["/", "/blog/", "/tags/", "/subscribe/", "/privacy/"];
   for (const route of routes) {
     await page.goto(new URL(route, baseURL).toString());
-    await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Blog", exact: true })).toBeVisible();
+    const primaryNav = page.locator("#site-nav");
+    await expect(primaryNav.locator('a[href="/"]')).toBeVisible();
+    await expect(primaryNav.locator('a[href="/blog/"]')).toBeVisible();
   }
 
   await context.close();

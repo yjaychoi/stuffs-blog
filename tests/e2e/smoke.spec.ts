@@ -5,10 +5,10 @@ test("@smoke desktop shell interactions", async ({ page }) => {
   await page.goto("/");
 
   const primaryNav = page.locator("#site-nav");
-  await expect(primaryNav.getByRole("link", { name: "Home", exact: true })).toBeVisible();
-  await expect(primaryNav.getByRole("link", { name: "Blog", exact: true })).toBeVisible();
-  await expect(primaryNav.getByRole("link", { name: "RSS", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Subscribe" }).first()).toBeVisible();
+  await expect(primaryNav.locator('a[href="/"]')).toBeVisible();
+  await expect(primaryNav.locator('a[href="/blog/"]')).toBeVisible();
+  await expect(primaryNav.locator('a[href="/feed.xml"]')).toBeVisible();
+  await expect(page.locator('.site-header__actions > a[href="/subscribe/"]')).toBeVisible();
 
   const toggle = page.getByRole("button", { name: /switch to dark mode/i });
   await expect(toggle).toBeVisible();
@@ -27,8 +27,9 @@ test("@smoke mobile menu and theme", async ({ page }) => {
   await expect(menuButton).toBeVisible();
   await menuButton.click();
 
-  await expect(page.getByRole("link", { name: "Home", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Blog", exact: true })).toBeVisible();
+  const primaryNav = page.locator("#site-nav");
+  await expect(primaryNav.locator('a[href="/"]')).toBeVisible();
+  await expect(primaryNav.locator('a[href="/blog/"]')).toBeVisible();
 
   const toggle = page.locator("#theme-toggle");
   await toggle.click();
