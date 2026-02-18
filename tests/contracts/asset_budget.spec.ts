@@ -34,7 +34,8 @@ describe("asset budgets", () => {
     ensureBuiltSite();
 
     const mermaidGzip = gzipBytes(path.join(ROOT, "_site/assets/js/vendor/mermaid.min.js"));
-    expect(mermaidGzip / 1024).toBeLessThanOrEqual(350);
+    // Official Mermaid runtime is lazy-loaded and significantly larger than the previous shim.
+    expect(mermaidGzip / 1024).toBeLessThanOrEqual(800);
   });
 
   it("keeps home/blog non-font image transfer budgets", () => {
