@@ -19,6 +19,7 @@
     var NEAR_FIT_SCALE = 0.95;
     var BOUNDS_PADDING = 12;
     var NAV_MIN_OVERFLOW_PX = 32;
+    var DEFAULT_ACTUAL_OVERFLOW_PX = 6;
     var svg = container.querySelector("svg");
     if (!svg || !svg.viewBox || !svg.viewBox.baseVal) {
       return;
@@ -129,14 +130,13 @@
     }
 
     function updateNavigationVisibility() {
+      var scaledWidth = baseWidth * state.scale;
+      var overflowX = scaledWidth - viewport.clientWidth;
       var atDefaultScale = Math.abs(state.scale - state.defaultScale) <= 0.01;
-      if (atDefaultScale && state.defaultScale >= 0.999) {
+      if (atDefaultScale && state.defaultScale >= 0.999 && overflowX <= DEFAULT_ACTUAL_OVERFLOW_PX) {
         toolbar.hidden = true;
         return;
       }
-
-      var scaledWidth = baseWidth * state.scale;
-      var overflowX = scaledWidth - viewport.clientWidth;
       var userAdjustedScale = Math.abs(state.scale - state.defaultScale) > 0.01;
       var needsNavigation = state.defaultScale < NEAR_FIT_SCALE || overflowX > NAV_MIN_OVERFLOW_PX || userAdjustedScale;
       toolbar.hidden = !needsNavigation;
@@ -144,7 +144,9 @@
 
     function applyFit() {
       state.fitScale = fitScale();
-      var targetScale = state.fitScale >= NEAR_FIT_SCALE ? 1 : state.fitScale;
+      var overflowAtActual = baseWidth - viewport.clientWidth;
+      var canStartAtActual = state.fitScale >= NEAR_FIT_SCALE && overflowAtActual <= DEFAULT_ACTUAL_OVERFLOW_PX;
+      var targetScale = canStartAtActual ? 1 : state.fitScale;
       state.defaultScale = targetScale;
       applyScale(targetScale, false);
       lockViewportHeight();
