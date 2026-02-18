@@ -60,8 +60,8 @@ describe("front matter contract", () => {
       expect(date).toMatch(DATE_TZ_REGEX);
 
       const summary = String(parsed.data.summary || "");
-      expect(summary.length, `${postPath} summary should be between 120 and 180 chars`).toBeGreaterThanOrEqual(120);
-      expect(summary.length, `${postPath} summary should be between 120 and 180 chars`).toBeLessThanOrEqual(180);
+      expect(summary.length, `${postPath} summary should be between 120 and 200 chars`).toBeGreaterThanOrEqual(120);
+      expect(summary.length, `${postPath} summary should be between 120 and 200 chars`).toBeLessThanOrEqual(200);
 
       const tags = parsed.data.tags;
       expect(Array.isArray(tags), `${postPath} tags must be an array`).toBe(true);

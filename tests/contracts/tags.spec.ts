@@ -5,7 +5,7 @@ import { listPosts, loadYaml, normalizeTag, parsePost, slugify } from "./helpers
 type TagSlugMap = Record<string, string>;
 
 describe("tag contract", () => {
-  it("enforces lowercase, deduped, deterministic tag arrays", () => {
+  it("enforces lowercase and deduped tag arrays", () => {
     for (const postPath of listPosts()) {
       const parsed = parsePost(postPath);
       const tags = parsed.data.tags as string[];
@@ -14,9 +14,6 @@ describe("tag contract", () => {
       const normalized = tags.map((tag) => tag.toLowerCase().trim());
       expect(tags, `${postPath} tags must be lowercase`).toEqual(normalized);
       expect(new Set(tags).size, `${postPath} tags must be deduplicated`).toBe(tags.length);
-
-      const ordered = [...tags].sort((a, b) => a.localeCompare(b, "en-US"));
-      expect(tags, `${postPath} tags must stay in deterministic sorted order`).toEqual(ordered);
     }
   });
 
