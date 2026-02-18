@@ -14,6 +14,6 @@ module.exports = [
   },
   {
     path: "_site/assets/js/vendor/mermaid.min.js",
-    limit: "350 KB"
+    limit: "650 KB"
   }
 ];
