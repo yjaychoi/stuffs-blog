@@ -945,16 +945,73 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   border: 1px solid color-mix(in srgb, var(--border), transparent 15%);
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--surface), var(--bg) 45%);
-  overflow-x: auto;
   padding: 0.72rem;
 }
 
-.mermaid-diagram svg {
-  display: block;
-  width: max-content;
-  min-width: 100%;
-  height: auto;
+.mermaid-diagram__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.58rem;
+}
+
+.mermaid-diagram__toolbar[hidden] {
+  display: none !important;
+}
+
+.mermaid-diagram__toolbar button {
+  border: 1px solid color-mix(in srgb, var(--border), transparent 10%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-subtle), transparent 30%);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 0.34rem 0.62rem;
+  cursor: pointer;
+}
+
+.mermaid-diagram__toolbar button:hover,
+.mermaid-diagram__toolbar button:focus-visible {
+  border-color: color-mix(in srgb, var(--accent), var(--border) 45%);
+  outline: none;
+}
+
+.mermaid-diagram__zoom-value {
+  margin-left: 0.14rem;
+  color: var(--muted-text);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.mermaid-diagram__viewport {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
   background: transparent;
+  cursor: grab;
+  touch-action: pan-y pinch-zoom;
+}
+
+.mermaid-diagram__viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.mermaid-diagram__viewport.is-dragging * {
+  user-select: none;
+}
+
+.mermaid-diagram__viewport svg {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  max-width: none;
+  background: transparent;
+  margin-inline: auto;
 }
 
 .post-divider {
