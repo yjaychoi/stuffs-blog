@@ -699,6 +699,32 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   margin-top: 0.45rem;
 }
 
+.post-content blockquote {
+  margin: 0;
+  padding: 0.45rem 1rem 0.45rem 1rem;
+  border-left: 3px solid color-mix(in srgb, var(--accent-ink), var(--border) 45%);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: color-mix(in srgb, var(--surface-subtle), transparent 24%);
+  color: color-mix(in srgb, var(--text), var(--muted-text) 36%);
+}
+
+.post-content blockquote > :first-child {
+  margin-top: 0;
+}
+
+.post-content blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.post-content blockquote p + p {
+  margin-top: 0.8rem;
+}
+
+.post-content :is(p, ul, ol, pre, figure, blockquote) + blockquote,
+.post-content blockquote + :is(p, ul, ol, pre, figure) {
+  margin-top: 1.15rem;
+}
+
 .post-content a {
   color: var(--text);
   text-decoration-color: var(--accent-alt);
