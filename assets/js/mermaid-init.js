@@ -14,6 +14,12 @@
     return button;
   }
 
+  function touchDistance(touchA, touchB) {
+    var dx = touchA.clientX - touchB.clientX;
+    var dy = touchA.clientY - touchB.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   function enhanceDiagramViewport(container) {
     var FIT_HORIZONTAL_PADDING = 2;
     var NEAR_FIT_SCALE = 0.95;
@@ -185,6 +191,8 @@
     );
 
     var dragState = null;
+    var touchDragState = null;
+    var pinchState = null;
 
     viewport.addEventListener("mousedown", function (event) {
       if (event.button !== 0) {
@@ -215,6 +223,109 @@
       dragState = null;
       viewport.classList.remove("is-dragging");
     });
+
+    viewport.addEventListener(
+      "touchstart",
+      function (event) {
+        if (event.touches.length >= 2) {
+          var first = event.touches[0];
+          var second = event.touches[1];
+          pinchState = {
+            distance: Math.max(1, touchDistance(first, second)),
+            scale: state.scale
+          };
+          touchDragState = null;
+          viewport.classList.add("is-dragging");
+          event.preventDefault();
+          return;
+        }
+
+        if (event.touches.length === 1) {
+          var touch = event.touches[0];
+          touchDragState = {
+            x: touch.clientX,
+            y: touch.clientY,
+            left: viewport.scrollLeft,
+            top: viewport.scrollTop
+          };
+          viewport.classList.add("is-dragging");
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    viewport.addEventListener(
+      "touchmove",
+      function (event) {
+        if (event.touches.length >= 2 && pinchState) {
+          var first = event.touches[0];
+          var second = event.touches[1];
+          var distance = Math.max(1, touchDistance(first, second));
+          applyScale(pinchState.scale * (distance / pinchState.distance), true);
+          event.preventDefault();
+          return;
+        }
+
+        if (event.touches.length === 1 && touchDragState) {
+          var touch = event.touches[0];
+          viewport.scrollLeft = touchDragState.left - (touch.clientX - touchDragState.x);
+          viewport.scrollTop = touchDragState.top - (touch.clientY - touchDragState.y);
+          event.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    viewport.addEventListener(
+      "touchend",
+      function (event) {
+        if (event.touches.length < 2) {
+          pinchState = null;
+        }
+
+        if (event.touches.length === 1) {
+          var touch = event.touches[0];
+          touchDragState = {
+            x: touch.clientX,
+            y: touch.clientY,
+            left: viewport.scrollLeft,
+            top: viewport.scrollTop
+          };
+          return;
+        }
+
+        touchDragState = null;
+        viewport.classList.remove("is-dragging");
+      },
+      { passive: true }
+    );
+
+    viewport.addEventListener(
+      "touchcancel",
+      function () {
+        pinchState = null;
+        touchDragState = null;
+        viewport.classList.remove("is-dragging");
+      },
+      { passive: true }
+    );
+
+    viewport.addEventListener(
+      "gesturestart",
+      function (event) {
+        event.preventDefault();
+      },
+      { passive: false }
+    );
+
+    viewport.addEventListener(
+      "gesturechange",
+      function (event) {
+        event.preventDefault();
+      },
+      { passive: false }
+    );
 
     window.addEventListener("resize", function () {
       updateNavigationVisibility();
