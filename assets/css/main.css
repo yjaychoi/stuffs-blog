@@ -988,7 +988,7 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   border-radius: 0;
   background: transparent;
   cursor: grab;
-  touch-action: pan-y pinch-zoom;
+  touch-action: none;
 }
 
 .mermaid-diagram__viewport.is-dragging {
