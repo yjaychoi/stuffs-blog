@@ -655,8 +655,6 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
 }
 
 .post-content p + p,
-.post-content p + h2,
-.post-content p + h3,
 .post-content h2 + p,
 .post-content h3 + p,
 .post-content ul + p,
@@ -666,6 +664,10 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
 .post-content figure + p,
 .post-content p + figure {
   margin-top: 1.15rem;
+}
+
+.post-content :is(p, ul, ol, blockquote, pre, figure) + :is(h2, h3, h4) {
+  margin-top: 2.2rem;
 }
 
 .post-content h2,
