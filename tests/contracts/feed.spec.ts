@@ -10,6 +10,6 @@ describe("rss feed", () => {
     expect(feed.startsWith("<?xml")).toBe(true);
     expect(feed).toMatch(/<feed[^>]*xmlns="http:\/\/www\.w3\.org\/2005\/Atom"/);
     expect(feed).toMatch(/<entry>/);
-    expect(feed).toMatch(/https:\/\/stuffs\.blog\/blog\//);
+    expect(feed).toMatch(/https:\/\/stuffs\.blog\/posts\//);
   });
 });

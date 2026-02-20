@@ -5,14 +5,14 @@ sitemap: false
 ---
 # Allow reference/citation crawling on public content paths.
 User-agent: OAI-SearchBot
-Allow: /blog/
+Allow: /posts/
 Allow: /tags/
 Allow: /feed.xml
 Allow: /sitemap.xml
 Disallow: /
 
 User-agent: ChatGPT-User
-Allow: /blog/
+Allow: /posts/
 Allow: /tags/
 Allow: /feed.xml
 Allow: /sitemap.xml
@@ -39,7 +39,7 @@ Disallow: /
 
 # Perplexity reference crawler: allow content paths only.
 User-agent: PerplexityBot
-Allow: /blog/
+Allow: /posts/
 Allow: /tags/
 Allow: /feed.xml
 Allow: /sitemap.xml

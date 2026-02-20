@@ -1,7 +1,7 @@
 ---
 layout: blog_index
 title: Blog
-permalink: /blog/
+permalink: /posts/
 pagination:
   enabled: true
 ---

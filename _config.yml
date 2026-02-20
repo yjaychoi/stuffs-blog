@@ -19,7 +19,7 @@ kramdown:
       line_numbers: true
       start_line: 1
 
-permalink: /blog/:slug/
+permalink: /posts/:slug/
 
 plugins:
   - jekyll-feed
@@ -31,7 +31,7 @@ pagination:
   enabled: true
   collection: posts
   per_page: 30
-  permalink: /blog/page/:num/
+  permalink: /posts/page/:num/
   sort_reverse: true
 
 feed:
@@ -49,7 +49,7 @@ defaults:
       type: posts
     values:
       layout: post
-      permalink: /blog/:slug/
+      permalink: /posts/:slug/
 
 kit:
   form:

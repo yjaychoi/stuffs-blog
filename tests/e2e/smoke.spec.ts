@@ -6,7 +6,7 @@ test("@smoke desktop shell interactions", async ({ page }) => {
 
   const primaryNav = page.locator("#site-nav");
   await expect(primaryNav.locator('a[href="/"]')).toBeVisible();
-  await expect(primaryNav.locator('a[href="/blog/"]')).toBeVisible();
+  await expect(primaryNav.locator('a[href="/posts/"]')).toBeVisible();
   await expect(primaryNav.locator('a[href="/feed.xml"]')).toBeVisible();
   await expect(page.locator('.site-header__actions > a[href="/subscribe/"]')).toBeVisible();
 
@@ -21,7 +21,7 @@ test("@smoke desktop shell interactions", async ({ page }) => {
 
 test("@smoke mobile menu and theme", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/blog/");
+  await page.goto("/posts/");
 
   const menuButton = page.getByRole("button", { name: /open navigation menu/i });
   await expect(menuButton).toBeVisible();
@@ -29,7 +29,7 @@ test("@smoke mobile menu and theme", async ({ page }) => {
 
   const primaryNav = page.locator("#site-nav");
   await expect(primaryNav.locator('a[href="/"]')).toBeVisible();
-  await expect(primaryNav.locator('a[href="/blog/"]')).toBeVisible();
+  await expect(primaryNav.locator('a[href="/posts/"]')).toBeVisible();
 
   const toggle = page.locator("#theme-toggle");
   await toggle.click();

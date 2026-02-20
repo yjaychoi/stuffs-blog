@@ -13,7 +13,7 @@ function mermaidPostRoute(): string {
     throw new Error(`${postPath} is missing slug front matter`);
   }
 
-  return `/blog/${slug}/`;
+  return `/posts/${slug}/`;
 }
 
 test("renders mermaid diagram as svg", async ({ page }) => {
