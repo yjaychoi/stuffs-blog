@@ -20,7 +20,7 @@
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  function enhanceDiagramViewport(container) {
+  function enhanceDiagramViewport(container, diagramLabel) {
     var FIT_HORIZONTAL_PADDING = 2;
     var NEAR_FIT_SCALE = 0.95;
     var BOUNDS_PADDING = 12;
@@ -83,7 +83,7 @@
     var viewport = document.createElement("div");
     viewport.className = "mermaid-diagram__viewport";
     viewport.setAttribute("role", "region");
-    viewport.setAttribute("aria-label", "Mermaid pan and zoom viewport");
+    viewport.setAttribute("aria-label", diagramLabel + " pan and zoom viewport");
 
     container.innerHTML = "";
     container.appendChild(toolbar);
@@ -396,19 +396,20 @@
 
           pre.dataset.processed = "true";
           var source = (codeNode.textContent || "").trim();
+          var diagramLabel = "Scrollable Mermaid diagram " + (index + 1);
 
           var container = document.createElement("div");
           container.className = "mermaid-diagram";
           container.tabIndex = 0;
           container.setAttribute("role", "region");
-          container.setAttribute("aria-label", "Scrollable Mermaid diagram");
+          container.setAttribute("aria-label", diagramLabel);
           pre.parentNode.insertBefore(container, pre);
 
           mermaid
             .render("mermaid-diagram-" + index + "-" + Date.now(), source)
             .then(function (result) {
               container.innerHTML = result.svg;
-              enhanceDiagramViewport(container);
+              enhanceDiagramViewport(container, diagramLabel);
               pre.hidden = true;
             })
             .catch(function () {
