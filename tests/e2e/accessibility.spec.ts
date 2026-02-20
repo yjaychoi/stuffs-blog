@@ -14,10 +14,10 @@ function firstPostRoute(): string {
     throw new Error(`${postPath} is missing slug front matter`);
   }
 
-  return `/blog/${slug}/`;
+  return `/posts/${slug}/`;
 }
 
-const routes = ["/", "/blog/", "/tags/", firstPostRoute(), "/subscribe/", "/privacy/"];
+const routes = ["/", "/posts/", "/tags/", firstPostRoute(), "/subscribe/", "/privacy/"];
 
 test("accessibility smoke on key routes", async ({ page }) => {
   for (const theme of ["light", "dark"] as const) {

@@ -9,7 +9,7 @@ import { ensureBuiltSite, existsInRepo, listPosts, loadYaml, parsePost, readBuil
 describe("seo and metadata contracts", () => {
   const requiredRoutes = [
     "index.html",
-    "blog/index.html",
+    "posts/index.html",
     "tags/index.html",
     "subscribe/index.html",
     "subscribe/success/index.html",
@@ -37,18 +37,18 @@ describe("seo and metadata contracts", () => {
     ensureBuiltSite();
 
     const home = load(readBuilt("index.html"));
-    const blog = load(readBuilt("blog/index.html"));
+    const posts = load(readBuilt("posts/index.html"));
 
     expect(home("link[rel='canonical']").attr("href")).toBe("https://stuffs.blog/");
-    expect(blog("link[rel='canonical']").attr("href")).toBe("https://stuffs.blog/blog/");
+    expect(posts("link[rel='canonical']").attr("href")).toBe("https://stuffs.blog/posts/");
   });
 
-  it("normalizes blog page 1 route with noindex and canonical", () => {
+  it("normalizes posts page 1 route with noindex and canonical", () => {
     ensureBuiltSite();
 
-    const pageOne = load(readBuilt("blog/page/1/index.html"));
+    const pageOne = load(readBuilt("posts/page/1/index.html"));
     expect(pageOne("meta[name='robots']").attr("content") || "").toContain("noindex");
-    expect(pageOne("link[rel='canonical']").attr("href")).toBe("/blog/");
+    expect(pageOne("link[rel='canonical']").attr("href")).toBe("/posts/");
   });
 
   it("includes deterministic metadata mapping on post pages", () => {
@@ -65,7 +65,7 @@ describe("seo and metadata contracts", () => {
       throw new Error(`${firstPostPath} is missing slug front matter`);
     }
 
-    const post = load(readBuilt(`blog/${slug}/index.html`));
+    const post = load(readBuilt(`posts/${slug}/index.html`));
     const title = post("meta[property='og:title']").attr("content") || "";
     const description = post("meta[name='description']").attr("content") || "";
 

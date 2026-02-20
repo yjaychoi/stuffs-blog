@@ -30,7 +30,7 @@ describe("mermaid contract", () => {
       throw new Error(`${mermaidPostPath} is missing slug front matter`);
     }
 
-    const html = readBuilt(`blog/${slug}/index.html`);
+    const html = readBuilt(`posts/${slug}/index.html`);
     expect(html).toMatch(/language-mermaid|mermaid/);
   });
 });
