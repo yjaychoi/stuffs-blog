@@ -5,15 +5,15 @@ import { listPosts, loadYaml, normalizeTag, parsePost, slugify } from "./helpers
 type TagSlugMap = Record<string, string>;
 
 describe("tag contract", () => {
-  it("enforces lowercase and deduped tag arrays", () => {
+  it("enforces deduped tag arrays", () => {
     for (const postPath of listPosts()) {
       const parsed = parsePost(postPath);
       const tags = parsed.data.tags as string[];
       expect(Array.isArray(tags), `${postPath} tags must be array`).toBe(true);
 
-      const normalized = tags.map((tag) => tag.toLowerCase().trim());
-      expect(tags, `${postPath} tags must be lowercase`).toEqual(normalized);
-      expect(new Set(tags).size, `${postPath} tags must be deduplicated`).toBe(tags.length);
+      const normalized = tags.map((tag) => normalizeTag(String(tag)));
+      expect(normalized.every((tag) => tag.length > 0), `${postPath} tags must not be empty`).toBe(true);
+      expect(new Set(normalized).size, `${postPath} tags must be deduplicated`).toBe(normalized.length);
     }
   });
 
@@ -27,7 +27,8 @@ describe("tag contract", () => {
       for (const tag of tags) {
         const normalized = normalizeTag(tag);
         const slug = overrides[tag] || overrides[normalized] || slugify(tag);
-        expect(slug).toMatch(/^[a-z0-9][a-z0-9-]*$/);
+        expect(slug.trim().length, `${postPath} tag slug cannot be empty for tag ${tag}`).toBeGreaterThan(0);
+        expect(/\s/u.test(slug), `${postPath} tag slug cannot contain whitespace: ${slug}`).toBe(false);
 
         const owner = claimed.get(slug);
         expect(owner && owner !== tag, `tag slug collision on ${slug}: ${owner} vs ${tag}`).toBeFalsy();

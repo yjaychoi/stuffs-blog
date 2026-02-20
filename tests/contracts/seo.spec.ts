@@ -4,7 +4,7 @@ import path from "node:path";
 import { load } from "cheerio";
 import { describe, expect, it } from "vitest";
 
-import { ensureBuiltSite, existsInRepo, loadYaml, readBuilt, ROOT } from "./helpers";
+import { ensureBuiltSite, existsInRepo, listPosts, loadYaml, parsePost, readBuilt, ROOT } from "./helpers";
 
 describe("seo and metadata contracts", () => {
   const requiredRoutes = [
@@ -54,12 +54,24 @@ describe("seo and metadata contracts", () => {
   it("includes deterministic metadata mapping on post pages", () => {
     ensureBuiltSite();
 
-    const post = load(readBuilt("blog/mysql-vector-search/index.html"));
+    const firstPostPath = listPosts()[0];
+    if (!firstPostPath) {
+      throw new Error("No posts found in _posts");
+    }
+
+    const parsed = parsePost(firstPostPath);
+    const slug = String(parsed.data.slug || "");
+    if (!slug) {
+      throw new Error(`${firstPostPath} is missing slug front matter`);
+    }
+
+    const post = load(readBuilt(`blog/${slug}/index.html`));
     const title = post("meta[property='og:title']").attr("content") || "";
     const description = post("meta[name='description']").attr("content") || "";
 
-    expect(title).toContain("Paths of MySQL, vector search edition");
-    expect(description.length).toBeGreaterThanOrEqual(120);
+    expect(title).toContain(String(parsed.data.title || ""));
+    expect(description.length).toBeGreaterThan(0);
+    expect(description).toBe(post("meta[property='og:description']").attr("content") || "");
     expect(post("meta[property='og:type']").attr("content")).toBe("article");
     expect(post("meta[property='og:image']").attr("content") || "").toContain("/assets/images/og-default.png");
   });

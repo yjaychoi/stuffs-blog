@@ -47,12 +47,16 @@ export function listBuiltFiles(glob: string): string[] {
 }
 
 export function normalizeTag(tag: string): string {
-  return tag.normalize("NFKC").toLowerCase().trim().replace(/\s+/g, "-");
+  try {
+    return tag.normalize("NFKC").toLowerCase().trim().replace(/\s+/g, " ");
+  } catch {
+    return tag.toLowerCase().trim().replace(/\s+/g, " ");
+  }
 }
 
 export function slugify(text: string): string {
   return normalizeTag(text)
-    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[^\p{Letter}\p{Number}\p{Mark}\s-]/gu, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
