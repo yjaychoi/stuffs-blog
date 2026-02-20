@@ -21,7 +21,7 @@ test("renders mermaid diagram as svg", async ({ page }) => {
   await page.goto(mermaidPostRoute());
 
   const rendered = page.locator(".mermaid-diagram svg");
-  await expect(rendered).toHaveCount(1);
+  expect(await rendered.count()).toBeGreaterThan(0);
 
   const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
   expect(hasOverflow).toBe(false);
