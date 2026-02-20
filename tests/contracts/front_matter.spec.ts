@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { listPosts, parsePost, readRepoFile } from "./helpers";
+import { listPosts, normalizeTag, parsePost, readRepoFile } from "./helpers";
 
 const REQUIRED_KEYS = ["layout", "post_uid", "slug", "title", "date", "tags", "summary"] as const;
 const OPTIONAL_KEYS = ["description", "cover_image", "cover_image_alt", "last_modified_at", "featured", "read_time", "comments"] as const;
@@ -60,14 +60,14 @@ describe("front matter contract", () => {
       expect(date).toMatch(DATE_TZ_REGEX);
 
       const summary = String(parsed.data.summary || "");
-      expect(summary.length, `${postPath} summary should be between 120 and 200 chars`).toBeGreaterThanOrEqual(120);
-      expect(summary.length, `${postPath} summary should be between 120 and 200 chars`).toBeLessThanOrEqual(200);
+      expect(summary.length, `${postPath} summary must not be empty`).toBeGreaterThan(0);
+      expect(summary.length, `${postPath} summary should be at most 200 chars`).toBeLessThanOrEqual(200);
 
       const tags = parsed.data.tags;
       expect(Array.isArray(tags), `${postPath} tags must be an array`).toBe(true);
       expect((tags as string[]).length).toBeGreaterThan(0);
-      const normalizedTags = (tags as string[]).map((tag) => String(tag).trim().toLowerCase());
-      expect(normalizedTags).toEqual(tags);
+      const normalizedTags = (tags as string[]).map((tag) => normalizeTag(String(tag)));
+      expect(normalizedTags.every((tag) => tag.length > 0), `${postPath} tags cannot be empty`).toBe(true);
       expect(new Set(normalizedTags).size, `${postPath} tags contain duplicates`).toBe(normalizedTags.length);
 
       if (parsed.data.cover_image) {

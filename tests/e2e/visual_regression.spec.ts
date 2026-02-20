@@ -1,9 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+import { listPosts, parsePost } from "../contracts/helpers";
+
+function firstPostRoute(): string {
+  const postPath = listPosts()[0];
+  if (!postPath) {
+    throw new Error("No posts found in _posts");
+  }
+
+  const slug = String(parsePost(postPath).data.slug || "");
+  if (!slug) {
+    throw new Error(`${postPath} is missing slug front matter`);
+  }
+
+  return `/blog/${slug}/`;
+}
+
 test.describe("visual regression", () => {
   test.skip(!process.env.ENABLE_VISUAL_REGRESSION, "ENABLE_VISUAL_REGRESSION is not set");
 
-  const route = "/blog/mysql-vector-search/";
+  const route = firstPostRoute();
 
   async function disableVisualNoise(page: import("@playwright/test").Page) {
     await page.addStyleTag({
