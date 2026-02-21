@@ -28,7 +28,34 @@
 
   if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
     var lastTouchEndMs = 0;
+    var lastTouchX = 0;
+    var lastTouchY = 0;
     var doubleTapWindowMs = 300;
+    var doubleTapDistancePx = 24;
+
+    function getInteractiveTapTarget(target) {
+      if (!target || typeof target.closest !== "function") {
+        return null;
+      }
+
+      return target.closest(
+        "a, button, input, select, textarea, label, summary, [role='button'], [role='link'], [contenteditable='true'], [tabindex]:not([tabindex='-1'])"
+      );
+    }
+
+    function replayTapOnInteractiveTarget(target) {
+      var interactiveTarget = getInteractiveTapTarget(target);
+      if (!interactiveTarget) {
+        return;
+      }
+
+      if (typeof interactiveTarget.click === "function") {
+        interactiveTarget.click();
+        return;
+      }
+
+      interactiveTarget.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
+    }
 
     // Prevent iOS/Android double-tap page zoom while keeping normal taps/scrolling.
     document.addEventListener(
@@ -38,15 +65,23 @@
           return;
         }
 
+        var touch = event.changedTouches[0];
         var currentTouchEndMs = event.timeStamp;
-        if (currentTouchEndMs - lastTouchEndMs <= doubleTapWindowMs) {
+        var isRapidTap = lastTouchEndMs > 0 && currentTouchEndMs - lastTouchEndMs <= doubleTapWindowMs;
+        var isNearbyTap =
+          Math.abs(touch.clientX - lastTouchX) <= doubleTapDistancePx &&
+          Math.abs(touch.clientY - lastTouchY) <= doubleTapDistancePx;
+
+        if (isRapidTap && isNearbyTap) {
           event.preventDefault();
+          replayTapOnInteractiveTarget(event.target);
         }
 
         lastTouchEndMs = currentTouchEndMs;
+        lastTouchX = touch.clientX;
+        lastTouchY = touch.clientY;
       },
       { passive: false }
     );
-
   }
 })();
