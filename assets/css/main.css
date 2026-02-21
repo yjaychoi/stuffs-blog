@@ -70,6 +70,8 @@ html {
   scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  touch-action: manipulation;
+  background-color: var(--bg);
 }
 
 html[data-theme="dark"] {
@@ -1651,5 +1653,12 @@ html[data-theme="dark"] .mermaid-diagram .edgeLabel text {
     animation: none !important;
     transition-duration: 0ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
