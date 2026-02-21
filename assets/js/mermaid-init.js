@@ -240,6 +240,61 @@
     var dragState = null;
     var touchDragState = null;
     var pinchState = null;
+    var touchIntentThresholdPx = 6;
+    var touchEdgeTolerancePx = 1;
+
+    function verticalPageScrollPolicy() {
+      var maxScrollTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
+      var atTop = viewport.scrollTop <= touchEdgeTolerancePx;
+      var atBottom = viewport.scrollTop >= maxScrollTop - touchEdgeTolerancePx;
+
+      if (atTop && atBottom) {
+        return "both";
+      }
+      if (atTop) {
+        return "up";
+      }
+      if (atBottom) {
+        return "down";
+      }
+      return "none";
+    }
+
+    function shouldAllowPageScroll(policy, deltaX, deltaY) {
+      if (policy === "none") {
+        return false;
+      }
+
+      if (policy === "both") {
+        return true;
+      }
+
+      var verticalIntent = Math.abs(deltaY) >= Math.abs(deltaX);
+      if (!verticalIntent) {
+        return false;
+      }
+
+      if (policy === "up") {
+        return deltaY > 0;
+      }
+
+      if (policy === "down") {
+        return deltaY < 0;
+      }
+
+      return false;
+    }
+
+    function createTouchDragState(touch) {
+      return {
+        x: touch.clientX,
+        y: touch.clientY,
+        left: viewport.scrollLeft,
+        top: viewport.scrollTop,
+        mode: "pending",
+        pageScrollPolicy: verticalPageScrollPolicy()
+      };
+    }
 
     viewport.addEventListener("mousedown", function (event) {
       if (event.button !== 0) {
@@ -289,14 +344,8 @@
 
         if (event.touches.length === 1) {
           var touch = event.touches[0];
-          touchDragState = {
-            x: touch.clientX,
-            y: touch.clientY,
-            left: viewport.scrollLeft,
-            top: viewport.scrollTop
-          };
-          viewport.classList.add("is-dragging");
-          event.preventDefault();
+          touchDragState = createTouchDragState(touch);
+          viewport.classList.remove("is-dragging");
         }
       },
       { passive: false }
@@ -316,8 +365,31 @@
 
         if (event.touches.length === 1 && touchDragState) {
           var touch = event.touches[0];
-          viewport.scrollLeft = touchDragState.left - (touch.clientX - touchDragState.x);
-          viewport.scrollTop = touchDragState.top - (touch.clientY - touchDragState.y);
+          var deltaX = touch.clientX - touchDragState.x;
+          var deltaY = touch.clientY - touchDragState.y;
+          var movedEnough = Math.abs(deltaX) >= touchIntentThresholdPx || Math.abs(deltaY) >= touchIntentThresholdPx;
+
+          if (touchDragState.mode === "pending") {
+            if (!movedEnough) {
+              return;
+            }
+
+            if (shouldAllowPageScroll(touchDragState.pageScrollPolicy, deltaX, deltaY)) {
+              touchDragState.mode = "page";
+              viewport.classList.remove("is-dragging");
+              return;
+            }
+
+            touchDragState.mode = "pan";
+            viewport.classList.add("is-dragging");
+          }
+
+          if (touchDragState.mode === "page") {
+            return;
+          }
+
+          viewport.scrollLeft = touchDragState.left - deltaX;
+          viewport.scrollTop = touchDragState.top - deltaY;
           event.preventDefault();
         }
       },
@@ -333,12 +405,8 @@
 
         if (event.touches.length === 1) {
           var touch = event.touches[0];
-          touchDragState = {
-            x: touch.clientX,
-            y: touch.clientY,
-            left: viewport.scrollLeft,
-            top: viewport.scrollTop
-          };
+          touchDragState = createTouchDragState(touch);
+          viewport.classList.remove("is-dragging");
           return;
         }
 
