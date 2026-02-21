@@ -1093,7 +1093,7 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   border-radius: 0;
   background: transparent;
   cursor: grab;
-  touch-action: none;
+  touch-action: manipulation;
 }
 
 .mermaid-diagram__viewport.is-dragging {
