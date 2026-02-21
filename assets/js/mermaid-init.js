@@ -26,6 +26,8 @@
     var BOUNDS_PADDING = 12;
     var NAV_MIN_OVERFLOW_PX = 32;
     var DEFAULT_ACTUAL_OVERFLOW_PX = 6;
+    var HEIGHT_LIMIT_RATIO = 0.8;
+    var WIDTH_FIT_TARGET_SCALE = 0.8;
     var svg = container.querySelector("svg");
     if (!svg || !svg.viewBox || !svg.viewBox.baseVal) {
       return;
@@ -99,11 +101,56 @@
       scale: 1,
       fitScale: 1,
       defaultScale: 1,
-      lockedViewportHeight: 0
+      lockedViewportHeight: 0,
+      widthFitAdjusted: false,
+      heightCap: 0,
+      strictHeightCap: false
     };
 
     function updateZoomLabel() {
       zoomValue.textContent = Math.round(state.scale * 100) + "%";
+    }
+
+    function viewportHeightLimit() {
+      var viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      return Math.max(1, Math.floor(viewportHeight * HEIGHT_LIMIT_RATIO));
+    }
+
+    function refreshHeightPolicy() {
+      var viewportCap = viewportHeightLimit();
+      var fitAtEightyPercentHeight = Math.max(1, Math.ceil(baseHeight * WIDTH_FIT_TARGET_SCALE));
+      state.heightCap = viewportCap;
+      state.strictHeightCap = false;
+
+      if (state.widthFitAdjusted && fitAtEightyPercentHeight > viewportCap) {
+        state.heightCap = fitAtEightyPercentHeight;
+        state.strictHeightCap = true;
+      }
+    }
+
+    function lockViewportHeight() {
+      var scaledHeight = Math.max(1, Math.ceil(baseHeight * state.scale));
+      var limit = Math.max(1, Math.ceil(state.heightCap || viewportHeightLimit()));
+      var targetHeight = Math.min(scaledHeight, limit);
+
+      viewport.style.height = targetHeight + "px";
+
+      var scaledWidth = baseWidth * state.scale;
+      var hasHorizontalOverflow = scaledWidth > viewport.clientWidth + 0.5;
+      var showsFullDiagramHeight = targetHeight >= scaledHeight;
+      if (hasHorizontalOverflow && showsFullDiagramHeight) {
+        var horizontalScrollbarHeight = Math.max(0, viewport.offsetHeight - viewport.clientHeight);
+        if (horizontalScrollbarHeight > 0) {
+          var adjustedHeight = targetHeight + horizontalScrollbarHeight;
+          if (state.strictHeightCap) {
+            adjustedHeight = Math.min(adjustedHeight, limit);
+          }
+          targetHeight = adjustedHeight;
+          viewport.style.height = adjustedHeight + "px";
+        }
+      }
+
+      state.lockedViewportHeight = targetHeight;
     }
 
     function applyScale(nextScale, preserveCenter) {
@@ -115,6 +162,7 @@
       svg.style.width = (baseWidth * state.scale).toFixed(2) + "px";
       svg.style.height = (baseHeight * state.scale).toFixed(2) + "px";
       svg.style.margin = "0 auto";
+      lockViewportHeight();
       updateZoomLabel();
       updateNavigationVisibility();
 
@@ -123,11 +171,6 @@
         viewport.scrollLeft = centerX * ratio - viewport.clientWidth / 2;
         viewport.scrollTop = centerY * ratio - viewport.clientHeight / 2;
       }
-    }
-
-    function lockViewportHeight() {
-      state.lockedViewportHeight = Math.max(1, Math.ceil(baseHeight * state.scale));
-      viewport.style.height = state.lockedViewportHeight + "px";
     }
 
     function fitScale() {
@@ -151,11 +194,15 @@
     function applyFit() {
       state.fitScale = fitScale();
       var overflowAtActual = baseWidth - viewport.clientWidth;
-      var canStartAtActual = state.fitScale >= NEAR_FIT_SCALE && overflowAtActual <= DEFAULT_ACTUAL_OVERFLOW_PX;
-      var targetScale = canStartAtActual ? 1 : state.fitScale;
+      var fitsWidthAtActual = state.fitScale >= NEAR_FIT_SCALE && overflowAtActual <= DEFAULT_ACTUAL_OVERFLOW_PX;
+      var actualHeightAtScaleOne = Math.max(1, Math.ceil(baseHeight));
+      var exceedsViewportCapAtActual = actualHeightAtScaleOne > viewportHeightLimit();
+      var useEightyPercentWidthFit = fitsWidthAtActual && exceedsViewportCapAtActual;
+      var targetScale = fitsWidthAtActual ? (useEightyPercentWidthFit ? WIDTH_FIT_TARGET_SCALE : 1) : state.fitScale;
+      state.widthFitAdjusted = useEightyPercentWidthFit;
       state.defaultScale = targetScale;
+      refreshHeightPolicy();
       applyScale(targetScale, false);
-      lockViewportHeight();
       viewport.scrollLeft = 0;
       viewport.scrollTop = 0;
     }
@@ -328,6 +375,8 @@
     );
 
     window.addEventListener("resize", function () {
+      refreshHeightPolicy();
+      lockViewportHeight();
       updateNavigationVisibility();
     });
 
