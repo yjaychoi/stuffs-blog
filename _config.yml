@@ -43,7 +43,9 @@ defaults:
       path: ""
     values:
       layout: default
-      image: /assets/images/og-default.png
+      # OG/Twitter images are opt-in.
+      # Add `image: /assets/images/your-image.png` in page/post front matter
+      # (or `image.path` object form) to emit og:image and twitter:image tags.
   - scope:
       path: "_posts"
       type: posts

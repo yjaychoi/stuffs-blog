@@ -1,5 +1,5 @@
 ---
 layout: home
-title: 홈
+title: Stuff of Thoughts
 permalink: /
 ---

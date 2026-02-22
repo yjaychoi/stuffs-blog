@@ -43,6 +43,59 @@ describe("seo and metadata contracts", () => {
     expect(posts("link[rel='canonical']").attr("href")).toBe("https://stuffs.blog/posts/");
   });
 
+  it("uses site branding for homepage social titles", () => {
+    ensureBuiltSite();
+
+    const home = load(readBuilt("index.html"));
+    expect(home("meta[property='og:title']").attr("content")).toBe("Stuff of Thoughts");
+    expect(home("meta[property='twitter:title']").attr("content")).toBe("Stuff of Thoughts");
+  });
+
+  it("does not emit social image tags unless a page opts in with image metadata", () => {
+    ensureBuiltSite();
+
+    const routesWithoutDefaultImages = [
+      "index.html",
+      "posts/index.html",
+      "tags/index.html",
+      "subscribe/index.html",
+      "subscribe/success/index.html",
+      "privacy/index.html",
+      "404.html"
+    ];
+
+    for (const route of routesWithoutDefaultImages) {
+      const page = load(readBuilt(route));
+      expect(page("meta[property='og:image']").length, `${route} unexpectedly emits og:image`).toBe(0);
+      expect(page("meta[property='twitter:image']").length, `${route} unexpectedly emits twitter:image`).toBe(0);
+    }
+  });
+
+  it("appends site name to social titles on key non-home routes", () => {
+    ensureBuiltSite();
+
+    const routes = [
+      "posts/index.html",
+      "tags/index.html",
+      "subscribe/index.html",
+      "subscribe/success/index.html",
+      "privacy/index.html",
+      "404.html"
+    ];
+
+    for (const route of routes) {
+      const page = load(readBuilt(route));
+      const ogTitle = page("meta[property='og:title']").attr("content") || "";
+      const twitterTitle = page("meta[property='twitter:title']").attr("content") || "";
+
+      expect(ogTitle.endsWith(" | Stuff of Thoughts"), `${route} should append site name in og:title`).toBe(true);
+      expect(
+        twitterTitle.endsWith(" | Stuff of Thoughts"),
+        `${route} should append site name in twitter:title`
+      ).toBe(true);
+    }
+  });
+
   it("normalizes posts page 1 route with noindex and canonical", () => {
     ensureBuiltSite();
 
@@ -70,9 +123,30 @@ describe("seo and metadata contracts", () => {
     const description = post("meta[name='description']").attr("content") || "";
 
     expect(title).toContain(String(parsed.data.title || ""));
+    expect(title.endsWith(" | Stuff of Thoughts")).toBe(true);
     expect(description.length).toBeGreaterThan(0);
     expect(description).toBe(post("meta[property='og:description']").attr("content") || "");
     expect(post("meta[property='og:type']").attr("content")).toBe("article");
-    expect(post("meta[property='og:image']").attr("content") || "").toContain("/assets/images/og-default.png");
+    const imageData = parsed.data.image as
+      | string
+      | false
+      | null
+      | undefined
+      | { path?: string; facebook?: string; twitter?: string };
+    const hasImage =
+      typeof imageData === "string"
+        ? imageData.length > 0
+        : !!imageData &&
+          (typeof imageData.path === "string" ||
+            typeof imageData.facebook === "string" ||
+            typeof imageData.twitter === "string");
+
+    if (hasImage) {
+      expect(post("meta[property='og:image']").length).toBe(1);
+      expect(post("meta[property='twitter:image']").length).toBe(1);
+    } else {
+      expect(post("meta[property='og:image']").length).toBe(0);
+      expect(post("meta[property='twitter:image']").length).toBe(0);
+    }
   });
 });
