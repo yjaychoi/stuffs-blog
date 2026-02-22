@@ -1,5 +1,5 @@
 ---
 layout: home
-title: Stuff of Thoughts | 테크 블로그 큐레이션 + 번역
+title: Stuff of Thoughts 블로그
 permalink: /
 ---
