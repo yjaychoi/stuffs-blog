@@ -1,8 +1,8 @@
 title: Stuff of Thoughts
-description: Stuff of Thoughts is a minimalist engineering blog focused on practical software craftsmanship.
+description: 해외 테크 블로그 큐레이션 & 번역
 url: https://stuffs.blog
 baseurl: ""
-lang: en
+lang: ko
 timezone: UTC
 markdown: kramdown
 future: false
