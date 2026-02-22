@@ -24,7 +24,10 @@ describe("seo and metadata contracts", () => {
   const homeFrontMatter = parsePost("index.md");
   const homeTitle = String(homeFrontMatter.data.title || siteTitle);
   const homeDescription = String(homeFrontMatter.data.description || siteDescription);
-  const normalizeTypography = (value: string): string => value.replace(/[’]/g, "'");
+  const normalizeTypography = (value: string): string =>
+    value
+      .replace(/[‘’]/g, "'")
+      .replace(/[“”]/g, '"');
   const normalizeLoose = (value: string): string =>
     value
       .normalize("NFKC")
