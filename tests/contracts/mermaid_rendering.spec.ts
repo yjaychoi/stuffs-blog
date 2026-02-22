@@ -10,6 +10,7 @@ describe("mermaid contract", () => {
     expect(initScript).toContain("hasMermaidBlocks");
     expect(initScript).toContain("pre.dataset.processed");
     expect(initScript).toContain("/assets/js/vendor/mermaid.min.js");
+    expect(initScript).not.toContain("location.reload(");
   });
 
   it("contains at least one mermaid fence in source content", () => {
