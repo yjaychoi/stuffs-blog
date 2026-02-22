@@ -739,13 +739,20 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
 .post-content p + p,
 .post-content h2 + p,
 .post-content h3 + p,
-.post-content ul + p,
-.post-content p + ul,
 .post-content pre + p,
 .post-content p + pre,
 .post-content figure + p,
 .post-content p + figure {
   margin-top: 1.15rem;
+}
+
+.post-content :is(p, blockquote, pre, figure, h2, h3, h4) + :is(ul, ol),
+.post-content :is(ul, ol) + :is(p, blockquote, pre, figure) {
+  margin-top: 1.45rem;
+}
+
+.post-content :is(ul, ol) + :is(ul, ol) {
+  margin-top: 1rem;
 }
 
 .post-content :is(p, ul, ol, blockquote, pre, figure) + :is(h2, h3, h4) {
@@ -778,7 +785,7 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
 }
 
 .post-content li + li {
-  margin-top: 0.45rem;
+  margin-top: 0.62rem;
 }
 
 .post-content blockquote {
