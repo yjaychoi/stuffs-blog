@@ -40,6 +40,9 @@
     {% if page.noindex %}
       <meta name="robots" content="noindex,follow">
     {% endif %}
+    {% if site.naver_site_verification %}
+      <meta name="naver-site-verification" content="{{ site.naver_site_verification }}">
+    {% endif %}
     {% if page.url == "/" %}
       <title>{{ page.title | default: site.title }}</title>
       {% seo title=false %}

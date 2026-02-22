@@ -58,11 +58,16 @@ jobs:
           CLOUDFLARE_WEB_ANALYTICS_TOKEN: ${{ vars.CLOUDFLARE_WEB_ANALYTICS_TOKEN || secrets.CLOUDFLARE_WEB_ANALYTICS_TOKEN }}
         run: node scripts/generate-cloudflare-config.mjs
 
+      - name: Generate Naver verification config override
+        env:
+          NAVER_SITE_VERIFICATION: ${{ vars.NAVER_SITE_VERIFICATION || secrets.NAVER_SITE_VERIFICATION }}
+        run: node scripts/generate-naver-config.mjs
+
       - name: Generate build metadata
         run: npm run build:meta
 
       - name: Build static site
-        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml,_config.cloudflare.generated.yml
+        run: bundle exec jekyll build --config _config.yml,_config.kit.generated.yml,_config.cloudflare.generated.yml,_config.naver.generated.yml
 
       - name: Contract tests
         run: npx vitest run tests/contracts

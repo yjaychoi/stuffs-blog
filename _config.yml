@@ -1,5 +1,5 @@
 title: Stuff of Thoughts
-description: 해외 테크 블로그 큐레이션 & 번역
+description: AI 기술 위주의 해외 최신 테크 블로그 큐레이션 및 번역
 url: https://stuffs.blog
 baseurl: ""
 lang: ko
@@ -64,6 +64,9 @@ cloudflare:
   analytics:
     # Inject concrete value in CI/deploy via `_config.cloudflare.generated.yml`.
     token: ""
+
+# Inject concrete value in CI/deploy via `_config.naver.generated.yml`.
+naver_site_verification: null
 
 comments:
   provider: giscus
