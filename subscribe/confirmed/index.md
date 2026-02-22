@@ -2,6 +2,8 @@
 layout: default
 title: Subscription Confirmed
 permalink: /subscribe/confirmed/
+noindex: true
+sitemap: false
 ---
 <section class="route-header">
   <h1>Subscription confirmed</h1>
