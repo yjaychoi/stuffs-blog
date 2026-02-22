@@ -175,46 +175,6 @@ iframe {
   transition: transform 180ms ease;
 }
 
-.js .site-header[data-menu-open="true"] {
-  border-bottom-color: transparent;
-}
-
-.js .site-header::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: calc(var(--mobile-menu-panel-height, 0px) + 0.42rem + 1.45rem);
-  background: var(--bg);
-  pointer-events: none;
-  z-index: 155;
-  opacity: 0;
-  transform: translateY(-0.42rem);
-  transition: opacity 180ms ease, transform 220ms ease;
-}
-
-.js .site-header[data-menu-open="true"]::after {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.js .site-header::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + var(--mobile-menu-panel-height, 0px) + 0.42rem + 1.45rem - 1px);
-  border-bottom: 1px solid color-mix(in srgb, var(--border), transparent 18%);
-  pointer-events: none;
-  z-index: 156;
-  opacity: 0;
-}
-
-.js .site-header[data-menu-open="true"]::before {
-  opacity: 1;
-}
-
 .js .site-header.site-header--hidden {
   transform: translateY(calc(-100% - 1px));
 }
@@ -1058,6 +1018,11 @@ html[data-theme="dark"] .theme-toggle .theme-toggle__icon--sun {
   font-size: 0.88rem;
 }
 
+html.mermaid-pending pre code.language-mermaid,
+html.mermaid-pending pre code[data-lang='mermaid'] {
+  opacity: 0;
+}
+
 .mermaid-diagram {
   margin: 1.3rem 0;
   border: 1px solid color-mix(in srgb, var(--border), transparent 15%);
@@ -1449,6 +1414,46 @@ html[data-theme="dark"] .mermaid-diagram .edgeLabel text {
 }
 
 @media (max-width: 639px) {
+  .js .site-header[data-menu-open="true"] {
+    border-bottom-color: transparent;
+  }
+
+  .js .site-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: calc(var(--mobile-menu-panel-height, 0px) + 0.42rem + 1.45rem);
+    background: var(--bg);
+    pointer-events: none;
+    z-index: 155;
+    opacity: 0;
+    transform: translateY(-0.42rem);
+    transition: opacity 180ms ease, transform 220ms ease;
+  }
+
+  .js .site-header[data-menu-open="true"]::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .js .site-header::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + var(--mobile-menu-panel-height, 0px) + 0.42rem + 1.45rem - 1px);
+    border-bottom: 1px solid color-mix(in srgb, var(--border), transparent 18%);
+    pointer-events: none;
+    z-index: 156;
+    opacity: 0;
+  }
+
+  .js .site-header[data-menu-open="true"]::before {
+    opacity: 1;
+  }
+
   .js .site-header__inner {
     position: relative;
   }

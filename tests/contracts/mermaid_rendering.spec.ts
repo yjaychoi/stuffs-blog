@@ -6,6 +6,9 @@ describe("mermaid contract", () => {
   it("ships a self-hosted runtime and init script", () => {
     expect(readRepoFile("assets/js/vendor/mermaid.min.js").length).toBeGreaterThan(0);
 
+    const bootScript = readRepoFile("assets/js/boot.js");
+    expect(bootScript).toContain("mermaid-pending");
+
     const initScript = readRepoFile("assets/js/mermaid-init.js");
     expect(initScript).toContain("hasMermaidBlocks");
     expect(initScript).toContain("pre.dataset.processed");

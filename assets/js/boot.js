@@ -4,6 +4,7 @@
   var theme = null;
 
   root.classList.add("js");
+  root.classList.add("mermaid-pending");
 
   try {
     var stored = localStorage.getItem(storageKey);

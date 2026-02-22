@@ -1,8 +1,10 @@
 (function () {
+  var root = document.documentElement;
   var mermaidPromise;
   var mermaidRenderCounter = 0;
   var mermaidRenderVersion = 0;
   var mermaidBlockSelector = "pre code.language-mermaid, pre code[data-lang='mermaid']";
+  var mermaidPendingClass = "mermaid-pending";
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -516,6 +518,10 @@
     return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "default";
   }
 
+  function clearPendingMermaidSource() {
+    root.classList.remove(mermaidPendingClass);
+  }
+
   function cleanUpDiagramContainer(container) {
     if (!container) {
       return;
@@ -545,13 +551,14 @@
     var force = Boolean(options && options.force === true);
     var blocks = document.querySelectorAll(mermaidBlockSelector);
     if (blocks.length === 0) {
-      return;
+      return Promise.resolve();
     }
 
     var renderVersion = ++mermaidRenderVersion;
-
-    ensureMermaidRuntime()
+    return ensureMermaidRuntime()
       .then(function (mermaid) {
+        var renderTasks = [];
+
         mermaid.initialize({
           startOnLoad: false,
           securityLevel: "strict",
@@ -595,7 +602,7 @@
             pre.parentNode.insertBefore(container, pre);
           }
 
-          mermaid
+          var renderTask = mermaid
             .render("mermaid-diagram-" + index + "-" + mermaidRenderCounter++, source)
             .then(function (result) {
               if (renderVersion !== mermaidRenderVersion) {
@@ -631,7 +638,10 @@
               container.remove();
               pre.hidden = false;
             });
+          renderTasks.push(renderTask);
         });
+
+        return Promise.allSettled(renderTasks);
       })
       .catch(function () {
         // Keep source blocks visible when runtime load fails.
@@ -640,9 +650,11 @@
 
   function initMermaid() {
     if (!hasMermaidBlocks()) {
+      clearPendingMermaidSource();
       return;
     }
-    renderMermaidBlocks();
+
+    renderMermaidBlocks().then(clearPendingMermaidSource, clearPendingMermaidSource);
   }
 
   document.addEventListener("stuffs:themechange", function () {
