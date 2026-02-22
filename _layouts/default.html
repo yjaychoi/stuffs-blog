@@ -40,7 +40,12 @@
     {% if page.noindex %}
       <meta name="robots" content="noindex,follow">
     {% endif %}
-    {% seo %}
+    {% if page.url == "/" %}
+      <title>{{ site.title }}</title>
+      {% seo title=false %}
+    {% else %}
+      {% seo %}
+    {% endif %}
     {% if page.canonical_override %}
       <link rel="canonical" href="https://stuffs.blog{{ page.canonical_override }}">
     {% endif %}
