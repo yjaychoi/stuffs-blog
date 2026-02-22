@@ -2,6 +2,8 @@
 layout: default
 title: 구독 완료
 permalink: /subscribe/confirmed/
+noindex: true
+sitemap: false
 ---
 <section class="route-header">
   <h1>이메일 구독 완료</h1>

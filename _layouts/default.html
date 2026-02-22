@@ -41,7 +41,7 @@
       <meta name="robots" content="noindex,follow">
     {% endif %}
     {% if page.url == "/" %}
-      <title>{{ site.title }}</title>
+      <title>{{ page.title | default: site.title }}</title>
       {% seo title=false %}
     {% else %}
       {% seo %}

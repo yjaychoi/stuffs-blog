@@ -2,6 +2,8 @@
 layout: default
 title: 이메일 확인
 permalink: /subscribe/success/
+noindex: true
+sitemap: false
 ---
 <section class="route-header">
   <h1>이메일 발송 완료</h1>
