@@ -12,8 +12,8 @@ comments: true
 
 <div class="info-box">
   <ul>
-    <li>원글: <a href="https://www.heavybit.com/library/article/write-only-code">https://www.heavybit.com/library/article/write-only-code</a></li>
-    <li>원작자 Joseph Ruscio는 Heavybit의 제너럴 파트너로, 학계, 스타트업, 엔터프라이즈 소프트웨어 분야에서 20년 이상 경험을 쌓았다. 이전에는 Librato를 공동 설립하고 CTO로 회사를 이끌었으며, 인수 이후 SolarWinds에서 클라우드 제품 리더십을 맡았다가 2018년에 Heavybit에 합류했다.</li>
+    <li>원글: <a href="https://www.heavybit.com/library/article/write-only-code">Write-Only Code</a></li>
+    <li>Joseph Ruscio는 Heavybit의 제너럴 파트너로, 학계, 스타트업, 엔터프라이즈 소프트웨어 분야에서 20년 이상 경험을 쌓았다. 이전에는 Librato를 공동 설립하고 CTO로 회사를 이끌었으며, 인수 이후 SolarWinds에서 클라우드 제품 리더십을 맡았다가 2018년에 Heavybit에 합류했다.</li>
     <li>옮긴이: 검수가 전혀 안된 AI 코드를 던져줘서 당황스러웠던 적이 벌써 여러번이다. 본업에 AI 코딩을 활용한지 얼마 되지도 않았다. 오픈소스에서도 논란이 되고 있는 문제인 만큼, 시니어의 입장에서 생각해볼 계기를 주는 글이다.</li>
   </ul>
 </div>
