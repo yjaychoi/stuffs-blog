@@ -14,7 +14,7 @@ comments: true
   <ul>
     <li>원글: <a href="https://boristane.com/blog/how-i-use-claude-code/">How I Use Claude Code</a></li>
     <li>Boris Tane은 Cloudflare에서 Workers Observability 팀을 이끌고 있는 소프트웨어 개발자다. 이전에는 Sequoia의 투자를 받은 옵저버빌리티 스타트업 Baselime을 창업했으며, 이후 Cloudflare에 인수되었다.</li>
-    <li>옮긴이: Cursor, Antigravity, GSD 등 아래와 같은 워크플로우가 자체적으로 구현되어 있는 경우도 있다. 그러나 변덕스러운 쿼타 정책이나 신규 모델 출시에 따라 앱을 주기적으로 갈아타면서, 자체적으로 운용 가능하도록 배경 원리를 이해하기로 했다. 시행착오를 거듭했던 본인의 워크플로우와 비슷한 점이 많아 인상 깊었다. 모든 앱이 Claude Code처럼 세밀한 컨텍스트 제어가 가능한 건 아니기에 하기 "단일 채팅 세션"에 대해서는 회의적이다.</li>
+    <li>옮긴이: 이미 일부 IDE들이 내재화 시도 중인 워크플로우를 소개한다. 하지만 변덕스러운 쿼타 정책이나 신규 모델 출시에 따라 앱을 주기적으로 갈아타면서, 자체적으로 운용 가능하도록 배경 원리를 살펴볼 가치가 있다. 시행착오를 거듭했던 본인의 워크플로우와 비슷한 점이 많아 인상 깊었다.</li>
   </ul>
 </div>
 
